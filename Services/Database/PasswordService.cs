@@ -1,0 +1,237 @@
+﻿using PasswordVault.Models;
+using PasswordVault.Services.Crypto;
+using PasswordVault.Services.Database;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace PasswordVault.Services;
+
+public class PasswordService
+{
+    private readonly DatabaseService _databaseService;
+    private readonly ICryptoService _cryptoService;
+    private readonly string _collectionName = "passwords";
+
+    public PasswordService(DatabaseService databaseService, ICryptoService cryptoService)
+    {
+        _databaseService = databaseService;
+        _cryptoService = cryptoService;
+    }
+
+    public async Task<IEnumerable<Password>> GetAllPasswordsAsync()
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+            return collection.Query()
+                .Where(x => !x.IsDeleted)
+                .OrderByDescending(x => x.IsFavorite)
+                .ToList();
+        });
+    }
+
+    public async Task<Password> GetPasswordByIdAsync(Guid id)
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+            return collection.Query()
+                .Where(x => x.Id == id && !x.IsDeleted)
+                .FirstOrDefault();
+        });
+    }
+
+    public async Task<IEnumerable<Password>> SearchPasswordsAsync(string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return await GetAllPasswordsAsync();
+
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+
+            var searchLower = searchTerm.ToLowerInvariant();
+
+            return collection.Query()
+                .Where(x => !x.IsDeleted && (
+                    x.Title.ToLower().Contains(searchLower) ||
+                    (x.Username != null && x.Username.ToLower().Contains(searchLower)) ||
+                    (x.Url != null && x.Url.ToLower().Contains(searchLower)) ||
+                    x.Category.ToLower().Contains(searchLower) ||
+                    (x.Notes != null && x.Notes.ToLower().Contains(searchLower)) ||
+                    x.Tags.Any(tag => tag.ToLower().Contains(searchLower))
+                ))
+                .OrderByDescending(x => x.IsFavorite)
+                .ToList();
+        });
+    }
+
+    public async Task<IEnumerable<Password>> GetPasswordsByCategoryAsync(string category)
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+            return collection.Query()
+                .Where(x => !x.IsDeleted && x.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(x => x.IsFavorite)
+                .ToList();
+        });
+    }
+
+    public async Task<IEnumerable<Password>> GetFavoritePasswordsAsync()
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+            return collection.Query()
+                .Where(x => !x.IsDeleted && x.IsFavorite)
+                .OrderByDescending(x => x.LastUsed)
+                .ToList();
+        });
+    }
+
+    public async Task<Password> AddPasswordAsync(Password password)
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+
+            password.Id = Guid.NewGuid();
+            password.CreatedAt = DateTime.UtcNow;
+            password.UpdatedAt = DateTime.UtcNow;
+            password.LastUsed = DateTime.UtcNow;
+            password.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            collection.Insert(password);
+            return password;
+        });
+    }
+
+    public async Task<Password> UpdatePasswordAsync(Password password)
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+
+            var existing = collection.FindById(password.Id);
+            if (existing == null || existing.IsDeleted)
+                throw new InvalidOperationException("Password not found");
+
+            password.UpdatedAt = DateTime.UtcNow;
+            password.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            collection.Update(password);
+            return password;
+        });
+    }
+
+    public async Task<bool> DeletePasswordAsync(Guid id)
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+
+            var password = collection.FindById(id);
+            if (password == null || password.IsDeleted)
+                return false;
+
+            // Soft delete
+            password.IsDeleted = true;
+            password.UpdatedAt = DateTime.UtcNow;
+            password.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            collection.Update(password);
+            return true;
+        });
+    }
+
+    public async Task<string> GetDecryptedPasswordAsync(Guid passwordId)
+    {
+        var password = await GetPasswordByIdAsync(passwordId);
+        if (password == null)
+            throw new InvalidOperationException("Password not found");
+
+        return _cryptoService.DecryptPassword(password.EncryptedPassword);
+    }
+
+    public async Task<bool> UpdateLastUsedAsync(Guid passwordId)
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+
+            var password = collection.FindById(passwordId);
+            if (password == null || password.IsDeleted)
+                return false;
+
+            password.LastUsed = DateTime.UtcNow;
+            password.UpdatedAt = DateTime.UtcNow;
+            password.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            collection.Update(password);
+            return true;
+        });
+    }
+
+    public async Task<IEnumerable<Password>> GetRecentPasswordsAsync(int count = 10)
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+            return collection.Query()
+                .Where(x => !x.IsDeleted)
+                .OrderByDescending(x => x.LastUsed)
+                .Limit(count)
+                .ToList();
+        });
+    }
+
+    public async Task<IEnumerable<Password>> GetPasswordsModifiedSinceAsync(DateTime since)
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+            return collection.Query()
+                .Where(x => x.UpdatedAt > since)
+                .OrderByDescending(x => x.UpdatedAt)
+                .ToList();
+        });
+    }
+
+    public async Task<int> GetPasswordCountAsync()
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+            return collection.Query()
+                .Where(x => !x.IsDeleted)
+                .Count();
+        });
+    }
+
+    public async Task<int> GetPasswordCountByCategoryAsync(string category)
+    {
+        return await Task.Run(() =>
+        {
+            using var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+            return collection.Query()
+                .Where(x => !x.IsDeleted && x.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
+                .Count();
+        });
+    }
+}

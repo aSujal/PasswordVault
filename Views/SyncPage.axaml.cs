@@ -1,16 +1,15 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using PasswordVault.ViewModels;
 
 namespace PasswordVault.Views;
 
-public partial class MainWindow : ShadUI.Controls.Window
+public partial class SyncPage : UserControl
 {
-    public MainWindow()
+    public SyncPage()
     {
         InitializeComponent();
     }
-
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);

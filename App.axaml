@@ -1,17 +1,22 @@
-<Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:themes="clr-namespace:ShadUI.Themes;assembly=ShadUI"
-             x:Class="PasswordVault.App"
-             xmlns:local="using:PasswordVault"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-    <Application.DataTemplates>
-        <local:ViewLocator/>
-    </Application.DataTemplates>
-	
-    <Application.Styles>
-			<themes:ShadTheme />
-			<!-- other styles -->
-        <!--<FluentTheme />-->
-    </Application.Styles>
+<Application
+	RequestedThemeVariant="Default"
+    x:Class="PasswordVault.App"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:themes="clr-namespace:ShadUI.Themes;assembly=ShadUI">
+
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.ThemeDictionaries>
+				<ResourceInclude Source="Themes/Light.axaml" x:Key="Light" />
+				<ResourceInclude Source="Themes/Dark.axaml" x:Key="Dark" />
+			</ResourceDictionary.ThemeDictionaries>
+		</ResourceDictionary>
+		<x:Double x:Key="ControlContentThemeFontSize">12</x:Double>
+	</Application.Resources>
+
+	<Application.Styles>
+		<themes:ShadTheme/>
+		<!--<FluentTheme/>-->
+	</Application.Styles>
 </Application>

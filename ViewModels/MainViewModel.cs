@@ -7,6 +7,7 @@ using PasswordVault.Services.Auth;
 using PasswordVault.Services.Database;
 using PasswordVault.Services.Sync;
 using PasswordVault.Validators;
+using ShadUI.Dialogs;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
@@ -26,9 +27,9 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _username = string.Empty;
     [ObservableProperty] private bool _isCreatingNewVault;
     [ObservableProperty] private string _actionButtonText = "Login";
-
+    [ObservableProperty] private DialogManager _dialogManager;
     private string _confirmMasterPassword = string.Empty;
-    private string _masterPassword = string.Empty;
+    private string _masterPassword = "12345678";
     [Required]
     [MinLength(8, ErrorMessage = "Password must be at least 8 characters long")]
     public string MasterPassword
@@ -39,7 +40,7 @@ public partial class MainViewModel : ViewModelBase
 
     [Required]
     [MinLength(8, ErrorMessage = "Password must be at least 8 characters long")]
-    [IsMatchWith(nameof(Password), ErrorMessage = "Passwords do not match")]
+    [IsMatchWith(nameof(MasterPassword), ErrorMessage = "Passwords do not match")]
     public string ConfirmMasterPassword
     {
         get => _confirmMasterPassword;
@@ -65,18 +66,18 @@ public partial class MainViewModel : ViewModelBase
     private readonly SyncService _syncService;
     private readonly DatabaseService _databaseService;
     
-    public MainViewModel(AuthService authService, SyncService syncService, DatabaseService databaseService)
+    public MainViewModel(AuthService authService, SyncService syncService, DatabaseService databaseService, IServiceProvider provider, DialogManager dialogManager)
     {
         _authService = authService ?? throw new ArgumentNullException(nameof(authService));
         _syncService = syncService ?? throw new ArgumentNullException(nameof(syncService));
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
+        _dialogManager = dialogManager ?? throw new ArgumentNullException(nameof(dialogManager));
 
         PasswordListVM = provider.GetRequiredService<PasswordListViewModel>();
         CategoryVM = provider.GetRequiredService<CategoryViewModel>();
         SettingsVM = provider.GetRequiredService<SettingsViewModel>();
         SyncVM = provider.GetRequiredService<SyncViewModel>();
 
-        CurrentViewModel = PasswordListVM;
         Title = "Password Vault";
 
         NavigateToPasswordsCommand = new RelayCommand(() => NavigateTo(PasswordListVM));
@@ -86,6 +87,8 @@ public partial class MainViewModel : ViewModelBase
 
         LockCommand = new AsyncRelayCommand(LockApplicationAsync);
         LoginCommand = new AsyncRelayCommand(HandleLoginAsync);
+
+        CurrentViewModel = this;
 
         _authService.Authenticated += OnAuthenticated;
         _authService.Locked += OnLocked;

@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Storage;
 
 namespace PasswordVault.Services.Database;
 public interface IDatabaseService
@@ -25,6 +24,8 @@ public class DatabaseService : IDatabaseService
     private readonly string _databaseFile; // *.db location for LiteDB
     private readonly string _userDataFile; // encrypted JSON settings
     private readonly ICryptoService _cryptoService;
+
+    public event EventHandler? DatabaseInitialized;
 
     private byte[]? _encryptionKey;
     private User? _cachedUser;
@@ -93,6 +94,7 @@ public class DatabaseService : IDatabaseService
             }
         }
         await SaveUserDataAsync(user);
+        DatabaseInitialized?.Invoke(this, EventArgs.Empty);
         _cachedUser = user;
     }
     private void CreateDefaultCategories(LiteDatabase db)

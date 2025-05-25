@@ -1,16 +1,15 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using PasswordVault.ViewModels;
 
-namespace PasswordVault.Views;
+namespace PasswordVault;
 
-public partial class MainWindow : ShadUI.Controls.Window
+public partial class AddPasswordDialog : UserControl
 {
-    public MainWindow()
+    public AddPasswordDialog()
     {
         InitializeComponent();
     }
-
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
