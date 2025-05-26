@@ -56,6 +56,12 @@ public class DatabaseService : IDatabaseService
         });
     }
 
+    public async Task SetEncryptionKeyAsync(byte[] encryptionKey)
+    {
+        _encryptionKey = encryptionKey;
+        await Task.CompletedTask;
+    }
+
     public async Task InitializeDatabaseAsync(string masterPassword)
     {
         if (await IsDatabaseInitializedAsync())

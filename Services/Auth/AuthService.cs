@@ -50,6 +50,8 @@ public partial class AuthService
             _isAuthenticated = true;
             _currentUsername = user.Username;
             _currentKeyBase64 = hash;
+            byte[] derivedKey = Convert.FromBase64String(user.PasswordHash);
+            await _databaseService.SetEncryptionKeyAsync(derivedKey);
             Authenticated?.Invoke(this, EventArgs.Empty);
         }
 
