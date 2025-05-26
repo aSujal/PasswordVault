@@ -4,6 +4,7 @@ using PasswordVault.Services.Database;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PasswordVault.Services;
@@ -13,6 +14,7 @@ public class PasswordService
     private readonly DatabaseService _databaseService;
     private readonly ICryptoService _cryptoService;
     private readonly string _collectionName = "passwords";
+    private static readonly SemaphoreSlim _databaseAccessSemaphore = new SemaphoreSlim(1, 1);
 
     public PasswordService(DatabaseService databaseService, ICryptoService cryptoService)
     {
@@ -22,6 +24,7 @@ public class PasswordService
 
     public async Task<IEnumerable<Password>> GetAllPasswordsAsync()
     {
+        await _databaseAccessSemaphore.WaitAsync();
         return await Task.Run(() =>
         {
             using var db = _databaseService.OpenDatabase();

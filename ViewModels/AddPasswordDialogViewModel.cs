@@ -59,29 +59,30 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     private readonly ICryptoService _cryptoService;
     private readonly PasswordGenerator _passwordGenerator;
     private readonly CreateCategoryViewModel _createCategoryViewModel;
-    private readonly DatabaseService _databaseService;
-
+    private readonly AuthService _authService;
     public AddPasswordDialogViewModel(
         DialogManager dialogManager,
         CategoryService categoryService,
         ICryptoService cryptoService,
         PasswordService passwordService,
         DatabaseService databaseService,
-        PasswordGenerator passwordGenerator)
+        PasswordGenerator passwordGenerator,
+        AuthService authService)
     {
         _dialogManager = dialogManager;
         _categoryService = categoryService;
         _cryptoService = cryptoService;
         _passwordService = passwordService;
-        _databaseService = databaseService;
         _passwordGenerator = passwordGenerator;
+        _authService = authService;
         _createCategoryViewModel = new CreateCategoryViewModel(dialogManager);
-        _databaseService.DatabaseInitialized += OnDatabaseInitialized;
+        _authService.Authenticated += onAuthenticated;
 
         EvaluatePasswordStrength();
+        _authService = authService;
     }
 
-    private void OnDatabaseInitialized(object? sender, EventArgs e)
+    private void onAuthenticated(object? sender, EventArgs e)
     {
         LoadCategories();
     }

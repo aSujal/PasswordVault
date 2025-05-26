@@ -24,6 +24,8 @@ public class DatabaseService : IDatabaseService
     private readonly string _databaseFile; // *.db location for LiteDB
     private readonly string _userDataFile; // encrypted JSON settings
     private readonly ICryptoService _cryptoService;
+    private LiteDatabase? _databaseInstance;
+    private readonly object _dbLock = new();
 
     public event EventHandler? DatabaseInitialized;
 
@@ -48,12 +50,18 @@ public class DatabaseService : IDatabaseService
     {
         if (_encryptionKey == null)
             throw new InvalidOperationException("Database not unlocked – call Initialize or supply master password.");
-
-        return new LiteDatabase(new ConnectionString
+        lock (_dbLock)
         {
-            Filename = _databaseFile,
-            Password = Convert.ToBase64String(_encryptionKey)
-        });
+            if (_databaseInstance == null)
+            {
+                _databaseInstance = new LiteDatabase(new ConnectionString
+                {
+                    Filename = _databaseFile,
+                    Password = Convert.ToBase64String(_encryptionKey)
+                });
+            }
+            return _databaseInstance;
+        }
     }
 
     public async Task SetEncryptionKeyAsync(byte[] encryptionKey)
