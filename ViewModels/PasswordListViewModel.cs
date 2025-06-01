@@ -3,12 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using PasswordVault.Models;
 using PasswordVault.Services;
 using PasswordVault.Services.Auth;
-using PasswordVault.Services.Database;
 using ShadUI.Dialogs;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace PasswordVault.ViewModels;
 
@@ -18,8 +18,17 @@ public partial class PasswordListViewModel : ViewModelBase
     private readonly AddPasswordDialogViewModel _addPasswordViewModel;
     private readonly PasswordService _passwordService;
     private readonly AuthService _authService;
+
     [ObservableProperty]
     private ObservableCollection<Password> _passwords = new();
+
+    [ObservableProperty]
+    private string? _searchText;
+
+    [ObservableProperty]
+    private bool _isSearching;
+
+    private CancellationTokenSource? _debounceTimerCts;
 
     public PasswordListViewModel(
         DialogManager dialogManager,
@@ -37,18 +46,78 @@ public partial class PasswordListViewModel : ViewModelBase
 
     public void OnAuthenticated(object? sender, EventArgs e)
     {
-        LoadPasswords();
+        LoadInitialPasswordsAsync();
     }
 
-    private async void LoadPasswords()
+    private async void LoadInitialPasswordsAsync()
     {
-        var allPasswords = await _passwordService.GetAllPasswordsAsync();
-        Passwords = new ObservableCollection<Password>(allPasswords);
+        IsSearching = true;
+        try
+        {
+            var allPasswords = await _passwordService.GetAllPasswordsAsync();
+            Passwords = new ObservableCollection<Password>(allPasswords);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading passwords: {ex.Message}");
+            Passwords = new ObservableCollection<Password>();
+        }
+        finally
+        {
+            IsSearching = false;
+        }
     }
 
+    private async Task ExecuteSearchAsync()
+    {
+        try
+        {
+            var searchTerm = SearchText;
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var allPasswords = await _passwordService.GetAllPasswordsAsync();
+                Passwords = new ObservableCollection<Password>(allPasswords);
+            }
+            else
+            {
+                var result = await _passwordService.SearchPasswordsAsync(searchTerm);
+                Passwords = new ObservableCollection<Password>(result);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error searching passwords: {ex.Message}");
+            Passwords = new ObservableCollection<Password>();
+        }
+        finally
+        {
+            IsSearching = false;
+        }
+    }
 
     [RelayCommand]
-    public void ShowAddPasswordDialogCommand()
+    private async Task RefreshAsync()
+    {
+        IsSearching = true;
+        SearchText = string.Empty;
+        try
+        {
+            var allPasswords = await _passwordService.GetAllPasswordsAsync();
+            Passwords = new ObservableCollection<Password>(allPasswords);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error refreshing passwords: {ex.Message}");
+            Passwords = new ObservableCollection<Password>();
+        }
+        finally
+        {
+            IsSearching = false;
+        }
+    }
+
+    [RelayCommand]
+    public void ShowAddPasswordDialog()
     {
         _dialogManager.CreateDialog(_addPasswordViewModel)
             .WithMinWidth(500)
@@ -60,5 +129,58 @@ public partial class PasswordListViewModel : ViewModelBase
             })
             .Dismissible()
             .Show();
+    }
+
+
+    [RelayCommand]
+    private void CopyUsernameAsync(string? username)
+    {
+        if (!string.IsNullOrEmpty(username))
+        {
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(username);
+            Clipboard.SetContent(dataPackage);
+            Clipboard.Flush();
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleFavoriteAsync(Password? password)
+    {
+        if (password == null) return;
+        password.IsFavorite = !password.IsFavorite;
+        try
+        {
+            await _passwordService.UpdatePasswordAsync(password);
+            var index = Passwords.IndexOf(password);
+            if (index != -1)
+            {
+                Passwords[index] = Passwords[index];
+            }
+        }
+        catch (Exception ex)
+        {
+            password.IsFavorite = !password.IsFavorite;
+            Console.WriteLine($"Error updating favorite status: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task CopyPasswordAsync(Password? password)
+    {
+        if (password == null) return;
+
+        try
+        {
+            var decryptedPassword = await _passwordService.GetDecryptedPasswordAsync(password.Id);
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(decryptedPassword);
+            Clipboard.SetContent(dataPackage);
+            Clipboard.Flush();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error decrypting/copying password: {ex.Message}");
+        }
     }
 }
