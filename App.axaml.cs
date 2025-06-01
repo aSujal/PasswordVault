@@ -23,10 +23,8 @@ namespace PasswordVault;
 public partial class App : Application
 {
     private IServiceProvider _serviceProvider = null!;
-    public override void Initialize()
-    {
-        AvaloniaXamlLoader.Load(this); 
-    }
+    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+
     public override void OnFrameworkInitializationCompleted()
     {
         ConfigureServices();
@@ -47,7 +45,6 @@ public partial class App : Application
 
         base.OnFrameworkInitializationCompleted();
     }
-
   
     private void ConfigureServices()
     {
@@ -70,7 +67,14 @@ public partial class App : Application
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<SyncViewModel>();
         services.AddSingleton<DialogManager>();
-        
+
+        services.AddSingleton<MainWindow>();
+        services.AddSingleton<PasswordsPage>();
+        services.AddSingleton<AddPasswordDialog>();
+        services.AddSingleton<DashboardPage>();
+        services.AddSingleton<SettingsPage>();
+        services.AddSingleton<SyncPage>();
+
         _serviceProvider = services.BuildServiceProvider(validateScopes: true)
                                     .RegisterDialogs();
     }

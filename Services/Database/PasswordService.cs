@@ -24,10 +24,10 @@ public class PasswordService
 
     public async Task<IEnumerable<Password>> GetAllPasswordsAsync()
     {
-        await _databaseAccessSemaphore.WaitAsync();
+
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
                 .Where(x => !x.IsDeleted)
@@ -40,7 +40,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
                 .Where(x => x.Id == id && !x.IsDeleted)
@@ -55,7 +55,7 @@ public class PasswordService
 
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
 
             var searchLower = searchTerm.ToLowerInvariant();
@@ -78,7 +78,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
                 .Where(x => !x.IsDeleted && x.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
@@ -91,7 +91,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
                 .Where(x => !x.IsDeleted && x.IsFavorite)
@@ -104,7 +104,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
 
             password.Id = Guid.NewGuid();
@@ -122,7 +122,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
 
             var existing = collection.FindById(password.Id);
@@ -141,7 +141,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
 
             var password = collection.FindById(id);
@@ -171,7 +171,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
 
             var password = collection.FindById(passwordId);
@@ -191,7 +191,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
                 .Where(x => !x.IsDeleted)
@@ -205,7 +205,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
                 .Where(x => x.UpdatedAt > since)
@@ -218,7 +218,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
                 .Where(x => !x.IsDeleted)
@@ -230,7 +230,7 @@ public class PasswordService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
                 .Where(x => !x.IsDeleted && x.Category.Equals(category, StringComparison.OrdinalIgnoreCase))

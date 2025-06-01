@@ -60,6 +60,9 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     private readonly PasswordGenerator _passwordGenerator;
     private readonly CreateCategoryViewModel _createCategoryViewModel;
     private readonly AuthService _authService;
+
+    public event EventHandler? PasswordAddedSuccessfully;
+
     public AddPasswordDialogViewModel(
         DialogManager dialogManager,
         CategoryService categoryService,
@@ -172,6 +175,8 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
             };
 
             await _passwordService.AddPasswordAsync(password);
+
+            PasswordAddedSuccessfully?.Invoke(this, EventArgs.Empty);
 
             _dialogManager.Close(this, new CloseDialogOptions { Success = true });
         }

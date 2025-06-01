@@ -31,7 +31,6 @@ public class DatabaseService : IDatabaseService
 
     private byte[]? _encryptionKey;
     private User? _cachedUser;
-    private bool _isInitialized = false;
     public DatabaseService(ICryptoService cryptoService)
     {
         _cryptoService = cryptoService ?? throw new ArgumentNullException(nameof(cryptoService));
@@ -88,24 +87,22 @@ public class DatabaseService : IDatabaseService
             PasswordSalt = salt,
             BiometricUnlockEnabled = false,
         };
-        using (var db = OpenDatabase())
+        var db = OpenDatabase();
+        // Create collections
+        var passwords = db.GetCollection<Password>("passwords");
+        var categories = db.GetCollection<Category>("categories");
+        var syncDevices = db.GetCollection<SyncDevice>("syncDevices");
+        var users = db.GetCollection<User>("users");
+
+        // Create indexes for optimization
+        passwords.EnsureIndex(x => x.Category);
+        passwords.EnsureIndex(x => x.Tags);
+        passwords.EnsureIndex(x => x.SyncVersion);
+
+        // Create default categories
+        if (categories.Count() == 0)
         {
-            // Create collections
-            var passwords = db.GetCollection<Password>("passwords");
-            var categories = db.GetCollection<Category>("categories");
-            var syncDevices = db.GetCollection<SyncDevice>("syncDevices");
-            var users = db.GetCollection<User>("users");
-
-            // Create indexes for optimization
-            passwords.EnsureIndex(x => x.Category);
-            passwords.EnsureIndex(x => x.Tags);
-            passwords.EnsureIndex(x => x.SyncVersion);
-
-            // Create default categories
-            if (categories.Count() == 0)
-            {
-                CreateDefaultCategories(db);
-            }
+            CreateDefaultCategories(db);
         }
         await SaveUserDataAsync(user);
         DatabaseInitialized?.Invoke(this, EventArgs.Empty);
@@ -177,7 +174,7 @@ public class DatabaseService : IDatabaseService
         var encrypted = await File.ReadAllBytesAsync(userBlob);
         var json = _cryptoService.Decrypt(encrypted);
         var user = System.Text.Json.JsonSerializer.Deserialize<User>(json)!;
-        
+
         byte[] salt = user.PasswordSalt;
         string hash = _cryptoService.DeriveKeyFromPassword(masterPassword, salt);
 

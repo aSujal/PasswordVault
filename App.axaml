@@ -3,6 +3,7 @@
     x:Class="PasswordVault.App"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:converters="clr-namespace:PasswordVault.Converters"
     xmlns:themes="clr-namespace:ShadUI.Themes;assembly=ShadUI">
 
 	<Application.Resources>
@@ -12,6 +13,7 @@
 				<ResourceInclude Source="Themes/Dark.axaml" x:Key="Dark" />
 			</ResourceDictionary.ThemeDictionaries>
 		</ResourceDictionary>
+		<converters:JoinConverter x:Key="JoinConverter" Separator=", " />
 		<x:Double x:Key="ControlContentThemeFontSize">12</x:Double>
 	</Application.Resources>
 

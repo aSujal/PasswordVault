@@ -20,7 +20,7 @@ public class CategoryService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Category>(_collectionName);
             return collection.Query()
                 .Where(x => !x.IsDeleted)
@@ -33,7 +33,7 @@ public class CategoryService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Category>(_collectionName);
             return collection.Query()
                 .Where(x => x.Id == id && !x.IsDeleted)
@@ -45,7 +45,7 @@ public class CategoryService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Category>(_collectionName);
             return collection.Query()
                 .Where(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted)
@@ -57,7 +57,7 @@ public class CategoryService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Category>(_collectionName);
 
             // Check if category with same name already exists
@@ -82,7 +82,7 @@ public class CategoryService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Category>(_collectionName);
 
             var existing = collection.FindById(category.Id);
@@ -110,7 +110,7 @@ public class CategoryService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Category>(_collectionName);
 
             var category = collection.FindById(id);
@@ -146,7 +146,7 @@ public class CategoryService
     {
         return await Task.Run(() =>
         {
-            using var db = _databaseService.OpenDatabase();
+            var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Category>(_collectionName);
             return collection.Query()
                 .Where(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted)

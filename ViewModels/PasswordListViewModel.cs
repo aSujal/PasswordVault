@@ -42,6 +42,7 @@ public partial class PasswordListViewModel : ViewModelBase
         _passwordService = passwordService;
         _authService = authService;
         _authService.Authenticated += OnAuthenticated;
+        _addPasswordViewModel.PasswordAddedSuccessfully += async (s, e) => await RefreshAsync();
     }
 
     public void OnAuthenticated(object? sender, EventArgs e)
@@ -109,6 +110,7 @@ public partial class PasswordListViewModel : ViewModelBase
         {
             Console.WriteLine($"Error refreshing passwords: {ex.Message}");
             Passwords = new ObservableCollection<Password>();
+            IsSearching = false;
         }
         finally
         {
