@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿
+using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PasswordVault.Models;
 using PasswordVault.Services;
@@ -133,7 +135,6 @@ public partial class PasswordListViewModel : ViewModelBase
             .Show();
     }
 
-
     [RelayCommand]
     private void CopyUsernameAsync(string? username)
     {
@@ -167,22 +168,18 @@ public partial class PasswordListViewModel : ViewModelBase
         }
     }
 
-    [RelayCommand]
-    private async Task CopyPasswordAsync(Password? password)
+    public async Task<string?> GetPasswordAsync(Guid? passwordId)
     {
-        if (password == null) return;
-
+        if (passwordId == null) return null;
         try
         {
-            var decryptedPassword = await _passwordService.GetDecryptedPasswordAsync(password.Id);
-            var dataPackage = new DataPackage();
-            dataPackage.SetText(decryptedPassword);
-            Clipboard.SetContent(dataPackage);
-            Clipboard.Flush();
+            // Fix: Use the Value property of the nullable Guid to pass a non-nullable Guid
+            return await _passwordService.GetDecryptedPasswordAsync(passwordId.Value);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error decrypting/copying password: {ex.Message}");
+            throw new InvalidOperationException("Failed to retrieve password", ex);
         }
     }
 }
