@@ -49,7 +49,7 @@ public class DatabaseService : IDatabaseService
     public LiteDatabase OpenDatabase()
     {
         if (_encryptionKey == null)
-            throw new InvalidOperationException("Database not unlocked – call Initialize or supply master password.");
+            throw new InvalidOperationException("Database not unlocked – call Initialize or supply master password. test");
         lock (_dbLock)
         {
             if (_databaseInstance == null)
