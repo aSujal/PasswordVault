@@ -15,7 +15,6 @@ public class PasswordService
     private readonly ICryptoService _cryptoService;
     private readonly string _collectionName = "passwords";
     private static readonly SemaphoreSlim _databaseAccessSemaphore = new SemaphoreSlim(1, 1);
-
     public PasswordService(DatabaseService databaseService, ICryptoService cryptoService)
     {
         _databaseService = databaseService;
@@ -30,6 +29,7 @@ public class PasswordService
             var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
+                .Include(x => x.Category)
                 .Where(x => !x.IsDeleted)
                 .OrderByDescending(x => x.IsFavorite)
                 .ToList();
@@ -43,6 +43,7 @@ public class PasswordService
             var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
+                .Include(x => x.Category)
                 .Where(x => x.Id == id && !x.IsDeleted)
                 .FirstOrDefault();
         });
@@ -61,11 +62,12 @@ public class PasswordService
             var searchLower = searchTerm.ToLowerInvariant();
 
             return collection.Query()
+                .Include(x => x.Category)
                 .Where(x => !x.IsDeleted && (
                     x.Title.ToLower().Contains(searchLower) ||
                     (x.Username != null && x.Username.ToLower().Contains(searchLower)) ||
                     (x.Url != null && x.Url.ToLower().Contains(searchLower)) ||
-                    x.Category.ToLower().Contains(searchLower) ||
+                    (x.Category != null && x.Category.Name.ToLower().Contains(searchLower)) ||
                     (x.Notes != null && x.Notes.ToLower().Contains(searchLower)) ||
                     x.Tags.Any(tag => tag.ToLower().Contains(searchLower))
                 ))
@@ -74,14 +76,15 @@ public class PasswordService
         });
     }
 
-    public async Task<IEnumerable<Password>> GetPasswordsByCategoryAsync(string category)
+    public async Task<IEnumerable<Password>> GetPasswordsByCategoryAsync(string categoryName)
     {
         return await Task.Run(() =>
         {
             var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
-                .Where(x => !x.IsDeleted && x.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
+                .Include(x => x.Category)
+                .Where(x => !x.IsDeleted && x.Category != null && x.Category.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(x => x.IsFavorite)
                 .ToList();
         });
@@ -94,6 +97,7 @@ public class PasswordService
             var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
+                .Include(x => x.Category)
                 .Where(x => !x.IsDeleted && x.IsFavorite)
                 .OrderByDescending(x => x.LastUsed)
                 .ToList();
@@ -102,6 +106,10 @@ public class PasswordService
 
     public async Task<Password> AddPasswordAsync(Password password)
     {
+        if (password.Category == null)
+        {
+            throw new ArgumentNullException(nameof(password.Category), "Password must have a category assigned.");
+        }
         return await Task.Run(() =>
         {
             var db = _databaseService.OpenDatabase();
@@ -127,10 +135,11 @@ public class PasswordService
 
             var existing = collection.FindById(password.Id);
             if (existing == null || existing.IsDeleted)
-                throw new InvalidOperationException("Password not found");
+                throw new InvalidOperationException("Password not found or has been deleted.");
 
             password.UpdatedAt = DateTime.UtcNow;
             password.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            password.CreatedAt = existing.CreatedAt;
 
             collection.Update(password);
             return password;
@@ -194,6 +203,7 @@ public class PasswordService
             var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
+                .Include(x => x.Category)
                 .Where(x => !x.IsDeleted)
                 .OrderByDescending(x => x.LastUsed)
                 .Limit(count)
@@ -208,6 +218,7 @@ public class PasswordService
             var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
+                .Include(x => x.Category)
                 .Where(x => x.UpdatedAt > since)
                 .OrderByDescending(x => x.UpdatedAt)
                 .ToList();
@@ -226,15 +237,16 @@ public class PasswordService
         });
     }
 
-    public async Task<int> GetPasswordCountByCategoryAsync(string category)
+    public async Task<int> GetPasswordCountByCategoryAsync(string categoryName)
     {
         return await Task.Run(() =>
         {
             var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return collection.Query()
-                .Where(x => !x.IsDeleted && x.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
-                .Count();
+             .Include(x => x.Category)
+             .Where(x => !x.IsDeleted && x.Category != null && x.Category.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase))
+             .Count();
         });
     }
 }

@@ -8,6 +8,7 @@ using PasswordVault.Services.Database;
 using PasswordVault.Services.Sync;
 using PasswordVault.Validators;
 using ShadUI.Dialogs;
+using ShadUI.Toasts;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
@@ -27,6 +28,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _username = string.Empty;
     [ObservableProperty] private bool _isCreatingNewVault;
     [ObservableProperty] private string _actionButtonText = "Login";
+    [ObservableProperty] private ToastManager _toastManager;
     [ObservableProperty] private DialogManager _dialogManager;
     private string _confirmMasterPassword = string.Empty;
     private string _masterPassword = "12345678";
@@ -66,12 +68,13 @@ public partial class MainViewModel : ViewModelBase
     private readonly SyncService _syncService;
     private readonly DatabaseService _databaseService;
     
-    public MainViewModel(AuthService authService, SyncService syncService, DatabaseService databaseService, IServiceProvider provider, DialogManager dialogManager)
+    public MainViewModel(AuthService authService, SyncService syncService, DatabaseService databaseService, IServiceProvider provider, DialogManager dialogManager, ToastManager toastManager)
     {
         _authService = authService ?? throw new ArgumentNullException(nameof(authService));
         _syncService = syncService ?? throw new ArgumentNullException(nameof(syncService));
         _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
         _dialogManager = dialogManager ?? throw new ArgumentNullException(nameof(dialogManager));
+        _toastManager = toastManager ?? throw new ArgumentNullException(nameof(toastManager));
 
         PasswordListVM = provider.GetRequiredService<PasswordListViewModel>();
         CategoryVM = provider.GetRequiredService<CategoryViewModel>();

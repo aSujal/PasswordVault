@@ -12,6 +12,7 @@
         xmlns:vm="using:PasswordVault.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:toasts="clr-namespace:ShadUI.Toasts;assembly=ShadUI"
         x:Class="PasswordVault.Views.MainWindow"
         x:DataType="vm:MainViewModel"
 		xmlns:dialogs="clr-namespace:ShadUI.Dialogs;assembly=ShadUI"
@@ -26,7 +27,7 @@
 		<dialogs:DialogHost Manager="{Binding DialogManager}"
 							Owner="{Binding RelativeSource={RelativeSource AncestorType=controls:Window}}" />
 	</controls:Window.Hosts>
-	
+
 	<Panel>
 		<controls:Card Width="350"  VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding !IsAuthenticated}">
 			<controls:Card.Header>
@@ -97,5 +98,6 @@
 				</controls:SidebarMenuItem>
 			</controls:SidebarMenu.Items>
 		</controls:SidebarMenu>
+		<toasts:ToastHost Manager="{Binding ToastManager}" />
 	</Panel>
 </controls:Window>

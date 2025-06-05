@@ -1,10 +1,12 @@
-﻿using PasswordVault.Extensions;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
+using PasswordVault.Extensions;
+using PasswordVault.Helper;
+using PasswordVault.Services;
 using PasswordVault.Services.Auth;
 using PasswordVault.Services.Crypto;
 using PasswordVault.Services.Database;
@@ -13,10 +15,9 @@ using PasswordVault.ViewModels;
 using PasswordVault.Views;
 using ShadUI.Dialogs;
 using ShadUI.Themes;
+using ShadUI.Toasts;
 using System;
 using System.Linq;
-using PasswordVault.Services;
-using PasswordVault.Helper;
 
 namespace PasswordVault;
 
@@ -52,6 +53,8 @@ public partial class App : Application
         services.AddSingleton<ICryptoService>(_ =>
             new CryptoService(new byte[32]));
         services.AddSingleton<ThemeWatcher>(_ => new ThemeWatcher(Application.Current!));
+        services.AddSingleton<ToastManager>();
+
         services.AddSingleton<DatabaseService>();
         services.AddSingleton<SyncService>();
         services.AddSingleton<AuthService>();

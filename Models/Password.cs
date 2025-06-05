@@ -18,7 +18,10 @@ public class Password
     public string? Url { get; set; }
     public string? Notes { get; set; }
 
-    public string Category { get; set; } = "Uncategorized";
+
+    [BsonRef("categories")]
+    public Category? Category { get; set; }
+
     public List<string> Tags { get; set; } = new List<string>();
     public bool IsFavorite { get; set; } = false;
 

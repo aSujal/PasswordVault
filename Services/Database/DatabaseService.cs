@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Projektanker.Icons.Avalonia.FontAwesome;
 
 namespace PasswordVault.Services.Database;
 public interface IDatabaseService
@@ -95,7 +96,8 @@ public class DatabaseService : IDatabaseService
         var users = db.GetCollection<User>("users");
 
         // Create indexes for optimization
-        passwords.EnsureIndex(x => x.Category);
+        //passwords.EnsureIndex(x => x.Category);
+        passwords.EnsureIndex("Category.$id");
         passwords.EnsureIndex(x => x.Tags);
         passwords.EnsureIndex(x => x.SyncVersion);
 
@@ -114,11 +116,12 @@ public class DatabaseService : IDatabaseService
 
         var defaultCategories = new[]
         {
-            new Category { Name = "Social Media", Color = "#E53935", Icon = "Social" },
-            new Category { Name = "Banking", Color = "#43A047", Icon = "Bank" },
-            new Category { Name = "Email", Color = "#1E88E5", Icon = "Email" },
-            new Category { Name = "Shopping", Color = "#FB8C00", Icon = "Cart" },
-            new Category { Name = "Work", Color = "#8E24AA", Icon = "Work" }
+            new Category { Name = "Uncategorized", Color = "#9E9E9E", Icon = "fa-solid fa-tag" },
+            new Category { Name = "Social Media", Color = "#E53935", Icon = "fa-brands fa-instagram" },
+            new Category { Name = "Banking", Color = "#43A047", Icon = "fa-solid fa-building-columns" },
+            new Category { Name = "Email", Color = "#1E88E5", Icon = "fa-solid fa-envelope" },
+            new Category { Name = "Shopping", Color = "#FB8C00", Icon = "fa-solid fa-shopping-cart" },
+            new Category { Name = "Work", Color = "#8E24AA", Icon = "fa-solid fa-briefcase" }
         };
 
         categories.InsertBulk(defaultCategories);

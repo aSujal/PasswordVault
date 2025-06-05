@@ -14,6 +14,7 @@
 			</ResourceDictionary.ThemeDictionaries>
 		</ResourceDictionary>
 		<converters:JoinConverter x:Key="JoinConverter" Separator=", " />
+		<converters:StringToLucideIconConverter x:Key="StringToLucideIconConverter" />
 		<x:Double x:Key="ControlContentThemeFontSize">12</x:Double>
 	</Application.Resources>
 

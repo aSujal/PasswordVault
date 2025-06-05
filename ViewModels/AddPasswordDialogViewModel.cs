@@ -170,7 +170,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
                 EncryptedPassword = _cryptoService.EncryptPassword(Password),
                 Url = Url,
                 Notes = Notes,
-                Category = SelectedCategory?.Name ?? "Uncategorized",
+                Category = SelectedCategory,
                 IsFavorite = IsFavorite
             };
 

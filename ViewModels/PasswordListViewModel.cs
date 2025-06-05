@@ -6,6 +6,7 @@ using PasswordVault.Models;
 using PasswordVault.Services;
 using PasswordVault.Services.Auth;
 using ShadUI.Dialogs;
+using ShadUI.Toasts;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -20,6 +21,7 @@ public partial class PasswordListViewModel : ViewModelBase
     private readonly AddPasswordDialogViewModel _addPasswordViewModel;
     private readonly PasswordService _passwordService;
     private readonly AuthService _authService;
+    public readonly ToastManager _toastManager;
 
     [ObservableProperty]
     private ObservableCollection<Password> _passwords = new();
@@ -36,13 +38,15 @@ public partial class PasswordListViewModel : ViewModelBase
         DialogManager dialogManager,
         AddPasswordDialogViewModel addPasswordViewModel,
         PasswordService passwordService,
-        AuthService authService
+        AuthService authService,
+        ToastManager toastManager
         )
     {
         _dialogManager = dialogManager;
         _addPasswordViewModel = addPasswordViewModel;
         _passwordService = passwordService;
         _authService = authService;
+        _toastManager = toastManager;
         _authService.Authenticated += OnAuthenticated;
         _addPasswordViewModel.PasswordAddedSuccessfully += async (s, e) => await RefreshAsync();
     }

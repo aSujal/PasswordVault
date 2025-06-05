@@ -3,9 +3,11 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using HotAvalonia;
 using PasswordVault.ViewModels;
 using ShadUI.Contents;
+using ShadUI.Toasts;
 using System;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -40,17 +42,26 @@ public partial class PasswordsPage : UserControl
                 var topLevel = TopLevel.GetTopLevel(this);
                 var clipboard = topLevel?.Clipboard;
                 if (clipboard == null) return;
-
-                await clipboard.SetTextAsync(text);
-                //ShowCopyNotification();
-                //_clipboardIcon.Data = Icons.Check;
-                //_timer.Stop();
-                //_timer.Start();
+                if (DataContext is PasswordListViewModel viewModel)
+                {
+                    await clipboard.SetTextAsync(text);
+                    viewModel._toastManager.CreateToast("Copied to clipboard!")
+                                        .WithContent("The selected text has been copied.")
+                                        .WithDelay(1)
+                                        .Show();
+                }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            //ignore
+            System.Diagnostics.Debug.WriteLine($"Error copying password: {ex.Message}");
+            if (DataContext is PasswordListViewModel viewModel)
+            {
+                viewModel._toastManager.CreateToast("Copy Failed")
+                                  .WithContent("An unexpected error occurred while trying to copy the text.")
+                                  .WithDelay(1)
+                                  .ShowError();
+            }
         }
 
     }
@@ -64,24 +75,38 @@ public partial class PasswordsPage : UserControl
                 var topLevel = TopLevel.GetTopLevel(this);
                 var clipboard = topLevel?.Clipboard;
                 if (clipboard == null) return;
+
                 if (DataContext is PasswordListViewModel viewModel)
                 {
                     var password = await viewModel.GetPasswordAsync(passwordId);
                     if (password != null)
                     {
                         await clipboard.SetTextAsync(password);
-                        //ShowCopyNotification();
-                        //_clipboardIcon.Data = Icons.Check;
-                        //_timer.Stop();
-                        //_timer.Start();
+                        viewModel._toastManager.CreateToast("Password copied!")
+                          .WithContent("The password has been securely copied to the clipboard.")
+                          .WithDelay(1)
+                          .Show();
+                    }
+                    else
+                    {
+                        viewModel._toastManager.CreateToast("Password Not Found")
+                                         .WithContent("Could not retrieve the password. It might be missing or corrupted.")
+                                         .WithDelay(1)
+                                         .Show();
                     }
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            //ignore
+            System.Diagnostics.Debug.WriteLine($"Error copying password: {ex.Message}");
+            if (DataContext is PasswordListViewModel viewModel)
+            {
+                viewModel._toastManager.CreateToast("Copy Failed")
+                                      .WithContent("An unexpected error occurred while trying to copy the password.")
+                                      .WithDelay(1)
+                                      .ShowError();
+            }
         }
-
     }
 }

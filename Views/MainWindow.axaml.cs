@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using PasswordVault.ViewModels;
@@ -14,5 +15,6 @@ public partial class MainWindow : ShadUI.Controls.Window
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
+        this.AttachDevTools();
     }
 }

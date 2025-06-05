@@ -127,12 +127,11 @@ public class CategoryService
             // Move passwords in this category to "Uncategorized"
             var passwordCollection = db.GetCollection<Password>("passwords");
             var passwordsToUpdate = passwordCollection.Query()
-                .Where(x => x.Category == category.Name && !x.IsDeleted)
+                .Where(x => x.Category == category && !x.IsDeleted)
                 .ToList();
 
             foreach (var password in passwordsToUpdate)
             {
-                password.Category = "Uncategorized";
                 password.UpdatedAt = DateTime.UtcNow;
                 password.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 passwordCollection.Update(password);
