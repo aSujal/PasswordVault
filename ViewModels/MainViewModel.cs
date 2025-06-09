@@ -113,20 +113,6 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
-    private async Task CheckDatabaseInitializationAsync()
-    {
-        try
-        {
-            bool isInitialized = await _databaseService.IsDatabaseInitializedAsync();
-            IsCreatingNewVault = !isInitialized;
-            ActionButtonText = !isInitialized ? "Create Vault" : "Login";
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Error checking database: {ex.Message}";
-        }
-    }
-
     private void NavigateTo(ViewModelBase target)
     {
         if (CurrentViewModel == target) return;

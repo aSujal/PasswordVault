@@ -5,12 +5,14 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using HotAvalonia;
+using PasswordVault.Models;
 using PasswordVault.ViewModels;
 using ShadUI.Contents;
 using ShadUI.Toasts;
 using System;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.UI.Xaml;
 
 namespace PasswordVault.Views;
 
@@ -33,7 +35,7 @@ public partial class PasswordsPage : UserControl
     }
 
 
-    private async void CopyTextButton_Click(object? sender, RoutedEventArgs e)
+    private async void CopyTextButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         try
         {
@@ -59,14 +61,14 @@ public partial class PasswordsPage : UserControl
             {
                 viewModel._toastManager.CreateToast("Copy Failed")
                                   .WithContent("An unexpected error occurred while trying to copy the text.")
-                                  .WithDelay(1)
+                                  .WithDelay(2)
                                   .ShowError();
             }
         }
 
     }
 
-    private async void CopyPasswordButton_Click(object? sender, RoutedEventArgs e)
+    private async void CopyPasswordButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         try
         {
@@ -104,9 +106,35 @@ public partial class PasswordsPage : UserControl
             {
                 viewModel._toastManager.CreateToast("Copy Failed")
                                       .WithContent("An unexpected error occurred while trying to copy the password.")
-                                      .WithDelay(1)
+                                      .WithDelay(2)
                                       .ShowError();
             }
+        }
+    }
+
+    private async void PasswordSearch_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        try
+        {
+            if (DataContext is PasswordListViewModel viewModel)
+            {
+                await viewModel.ExecuteSearchAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Searching Password error : {ex.Message}");
+            if (DataContext is PasswordListViewModel viewModel)
+            {
+                viewModel._toastManager.CreateToast("Searching Failed")
+                                      .WithContent("An unexpected error occurred while trying to search.")
+                                      .WithDelay(2)
+                                      .ShowError();
+            }
+        }
+        finally
+        {
+
         }
     }
 }

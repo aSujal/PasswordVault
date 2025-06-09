@@ -1,5 +1,6 @@
 ﻿
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PasswordVault.Models;
@@ -31,8 +32,6 @@ public partial class PasswordListViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _isSearching;
-
-    private CancellationTokenSource? _debounceTimerCts;
 
     public PasswordListViewModel(
         DialogManager dialogManager,
@@ -75,7 +74,7 @@ public partial class PasswordListViewModel : ViewModelBase
         }
     }
 
-    private async Task ExecuteSearchAsync()
+    public async Task ExecuteSearchAsync()
     {
         try
         {

@@ -61,18 +61,18 @@ public class PasswordService
 
             var searchLower = searchTerm.ToLowerInvariant();
 
-            return collection.Query()
+            var dbFiltered = collection.Query()
                 .Include(x => x.Category)
                 .Where(x => !x.IsDeleted && (
                     x.Title.ToLower().Contains(searchLower) ||
                     (x.Username != null && x.Username.ToLower().Contains(searchLower)) ||
                     (x.Url != null && x.Url.ToLower().Contains(searchLower)) ||
-                    (x.Category != null && x.Category.Name.ToLower().Contains(searchLower)) ||
                     (x.Notes != null && x.Notes.ToLower().Contains(searchLower)) ||
-                    x.Tags.Any(tag => tag.ToLower().Contains(searchLower))
+                    (x.Category != null && x.Category.Name.ToLower().Contains(searchLower))
                 ))
                 .OrderByDescending(x => x.IsFavorite)
                 .ToList();
+            return dbFiltered;
         });
     }
 
