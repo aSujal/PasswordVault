@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace PasswordVault.ViewModels;
 
-internal partial class CreateCategoryViewModel : ViewModelBase
+public partial class CreateCategoryViewModel : ViewModelBase
 {
     private readonly DialogManager _dialogManager;
     [ObservableProperty]

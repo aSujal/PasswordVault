@@ -78,6 +78,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     public AddPasswordDialogViewModel(
         DialogManager dialogManager,
         CategoryService categoryService,
+        CreateCategoryViewModel createCategoryViewModel,
         ICryptoService cryptoService,
         PasswordService passwordService,
         DatabaseService databaseService,
@@ -90,12 +91,11 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         _passwordService = passwordService;
         _passwordGenerator = passwordGenerator;
         _authService = authService;
-        _createCategoryViewModel = new CreateCategoryViewModel(dialogManager);
+        _createCategoryViewModel = createCategoryViewModel;
         _authService.Authenticated += onAuthenticated;
 
         EvaluatePasswordStrength();
         _authService = authService;
-
     }
 
     public void ResetForAdd()
@@ -200,7 +200,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task CreateCategory()
+    public void CreateCategory()
     {
         _dialogManager.CreateDialog(_createCategoryViewModel)
             .WithMinWidth(400)
