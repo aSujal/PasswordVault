@@ -151,6 +151,53 @@ public partial class PasswordListViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task EditPasswordAsync(Password? passwordToEdit)
+    {
+        if (passwordToEdit == null) return;
+
+        _addPasswordViewModel.SetPasswordToEdit(passwordToEdit);
+
+        _dialogManager.CreateDialog(_addPasswordViewModel)
+            .WithMinWidth(500)
+            .WithSuccessCallback(async () =>
+            {
+                await RefreshAsync();
+            })
+            .WithCancelCallback(() =>
+            {
+            })
+            .Dismissible()
+            .Show();
+    }
+
+    [RelayCommand]
+    private void ConfirmDeletePasswordAsync(Password? passwordToDelete)
+    {
+        if (passwordToDelete == null || passwordToDelete.Id == Guid.Empty) return;
+
+        _dialogManager.CreateDialog("Confirm Deletion", $"Are you sure you want to delete the password entry for '{passwordToDelete.Title}'?")
+            .WithPrimaryButton("Continue", async () => await DeletePasswordAsync(passwordToDelete), DialogButtonStyle.Destructive)
+            .WithCancelButton("Cancel")
+            .Dismissible()
+            .Show();
+    }
+
+    private async Task DeletePasswordAsync(Password? passwordToDelete)
+    {
+        try
+        {
+            await _passwordService.DeletePasswordAsync(passwordToDelete.Id);
+            await RefreshAsync();
+            _toastManager.CreateToast("Deleted").WithContent($"Password '{passwordToDelete.Title}' has been deleted.").ShowSuccess();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting password: {ex.Message}");
+            _toastManager.CreateToast("Error").WithContent("Failed to delete password. Please try again").ShowError();
+        }
+    }
+
+    [RelayCommand]
     private async Task ToggleFavoriteAsync(Password? password)
     {
         if (password == null) return;

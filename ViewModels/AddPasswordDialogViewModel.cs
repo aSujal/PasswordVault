@@ -52,6 +52,17 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _passwordStrengthColor = "Red";
+    // Properties for Edit Mode
+    [ObservableProperty]
+    private bool _isEditMode;
+
+    private Password? _passwordToEdit;
+
+    [ObservableProperty]
+    private string _submitButtonText = "Add"; // Default to "Add"
+
+    [ObservableProperty]
+    private string _dialogTitle = "Add New Password";
 
     private readonly DialogManager _dialogManager;
     private readonly CategoryService _categoryService;
@@ -62,6 +73,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     private readonly AuthService _authService;
 
     public event EventHandler? PasswordAddedSuccessfully;
+    public event EventHandler? PasswordUpdatedSuccessfully;
 
     public AddPasswordDialogViewModel(
         DialogManager dialogManager,
@@ -83,14 +95,69 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
 
         EvaluatePasswordStrength();
         _authService = authService;
+
+    }
+
+    public void ResetForAdd()
+    {
+        IsEditMode = false;
+        _passwordToEdit = null;
+        Title = string.Empty;
+        Username = string.Empty;
+        Password = string.Empty;
+        Url = string.Empty;
+        Notes = string.Empty;
+        IsFavorite = false;
+        SelectedCategory = Categories.FirstOrDefault(c => c.Name == "Uncategorized") ?? Categories.FirstOrDefault();
+        SubmitButtonText = "Add";
+        DialogTitle = "Add New Password";
+        if (!Categories.Any())
+        {
+            LoadCategories();
+        }
+    }
+
+    public async void SetPasswordToEdit(Password password)
+    {
+        _passwordToEdit = password;
+        IsEditMode = true;
+        SubmitButtonText = "Save Changes";
+        DialogTitle = "Edit Password";
+
+        // Ensure categories are loaded so we can match the category
+        if (!Categories.Any())
+        {
+            await LoadCategoriesAsync(); // Make sure this is awaitable and loads categories
+        }
+
+        Title = password.Title;
+        Username = password.Username;
+        Password = _cryptoService.DecryptPassword(password.EncryptedPassword ?? string.Empty); // Decrypt password
+        Url = password.Url;
+        Notes = password.Notes;
+        IsFavorite = password.IsFavorite;
+
+        if (password.Category != null)
+        {
+            SelectedCategory = Categories.FirstOrDefault(c => c.Id == password.Category.Id);
+        }
+        else
+        {
+            SelectedCategory = Categories.FirstOrDefault(c => c.Name == "Uncategorized") ?? Categories.FirstOrDefault();
+        }
     }
 
     private void onAuthenticated(object? sender, EventArgs e)
     {
         LoadCategories();
+        ResetForAdd();
+    }
+    private void LoadCategories()
+    {
+        _ = LoadCategoriesAsync();
     }
 
-    private async void LoadCategories()
+    private async Task LoadCategoriesAsync()
     {
 
         var categories = await _categoryService.GetAllCategoriesAsync();
@@ -111,7 +178,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
             "Weak" => "DarkOrange",
             "Moderate" => "Orange",
             "Strong" => "LightGreen",
-            "Very Strong" => "Green", 
+            "Very Strong" => "Green",
             _ => "White"
         };
     }
@@ -135,27 +202,18 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     [RelayCommand]
     private async Task CreateCategory()
     {
-        //await _dialogManager.CreateDialog(_createCategoryViewModel)
-        //    .WithMinWidth(400)
-        //    .WithSuccessCallback(async () =>
-        //    {
-        //        // Create the new category
-        //        var newCategory = new Category
-        //        {
-        //            Name = _createCategoryViewModel.Name,
-        //            Color = _createCategoryViewModel.SelectedColor,
-        //            Icon = _createCategoryViewModel.SelectedIcon
-        //        };
+        _dialogManager.CreateDialog(_createCategoryViewModel)
+            .WithMinWidth(400)
+            .WithSuccessCallback(async () =>
+            {
+                await LoadCategoriesAsync();
+            })
+            .WithCancelCallback(() =>
+            {
+            })
+            .Dismissible()
+            .Show();
 
-        //        await _categoryService.AddCategoryAsync(newCategory);
-
-        //        await Task.Delay(100);
-        //        LoadCategories();
-
-        //        SelectedCategory = Categories.FirstOrDefault(c => c.Id == newCategory.Id)
-        //                          ?? throw new InvalidOperationException("New category not found in the list.");
-        //    })
-        //    .Dismissible
     }
 
     [RelayCommand]
@@ -163,20 +221,34 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     {
         try
         {
-            var password = new Password
+            if (IsEditMode && _passwordToEdit != null)
             {
-                Title = Title,
-                Username = Username,
-                EncryptedPassword = _cryptoService.EncryptPassword(Password),
-                Url = Url,
-                Notes = Notes,
-                Category = SelectedCategory,
-                IsFavorite = IsFavorite
-            };
+                _passwordToEdit.Title = Title;
+                _passwordToEdit.Username = Username;
+                _passwordToEdit.EncryptedPassword = _cryptoService.EncryptPassword(Password);
+                _passwordToEdit.Url = Url;
+                _passwordToEdit.Notes = Notes;
+                _passwordToEdit.Category = SelectedCategory;
+                _passwordToEdit.IsFavorite = IsFavorite;
 
-            await _passwordService.AddPasswordAsync(password);
-
-            PasswordAddedSuccessfully?.Invoke(this, EventArgs.Empty);
+                await _passwordService.UpdatePasswordAsync(_passwordToEdit);
+                PasswordUpdatedSuccessfully?.Invoke(this, EventArgs.Empty);
+            }
+            else
+            {
+                var newPassword = new Password
+                {
+                    Title = Title,
+                    Username = Username,
+                    EncryptedPassword = _cryptoService.EncryptPassword(Password),
+                    Url = Url,
+                    Notes = Notes,
+                    Category = SelectedCategory,
+                    IsFavorite = IsFavorite
+                };
+                await _passwordService.AddPasswordAsync(newPassword);
+                PasswordAddedSuccessfully?.Invoke(this, EventArgs.Empty);
+            }
 
             _dialogManager.Close(this, new CloseDialogOptions { Success = true });
         }
@@ -184,6 +256,10 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         {
             // Show error notification
             //await _dialogManager.("Failed to save password", ex.Message);
+        }
+        finally
+        {
+            ResetForAdd();
         }
     }
 

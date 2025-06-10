@@ -20,6 +20,7 @@ public static class DialogRegistrationExtensions
         dialogService.Register<MainWindow, MainViewModel>();
         dialogService.Register<PasswordsPage, PasswordListViewModel>();
         dialogService.Register<AddPasswordDialog, AddPasswordDialogViewModel>();
+        dialogService.Register<CreateCategoryDialog, CreateCategoryViewModel>();
 
         return service;
     }
