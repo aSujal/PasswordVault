@@ -20,6 +20,7 @@
 
 	<Application.Styles>
 		<themes:ShadTheme/>
+		<StyleInclude Source="avares://ThemeEditor.Controls.ColorPicker/ColorPicker.axaml" />
 		<!--<FluentTheme/>-->
 	</Application.Styles>
 </Application>

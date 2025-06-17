@@ -17,7 +17,7 @@ public partial class CreateCategoryViewModel : ViewModelBase
     private string _name = string.Empty;
 
     [ObservableProperty]
-    private string _selectedColor = string.Empty;
+    private string _selectedColor = "#00A638";
 
     [ObservableProperty]
     private string _selectedIcon = string.Empty;
