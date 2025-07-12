@@ -14,4 +14,13 @@ public partial class CreateCategoryDialog : UserControl
     {
         AvaloniaXamlLoader.Load(this);
     }
+
+    private void SelectIcon(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (sender is Button button && button.DataContext is string iconClass)
+        {
+            var viewModel = DataContext as ViewModels.CreateCategoryViewModel;
+            viewModel?.SelectIcon(iconClass);
+        }
+    }
 }

@@ -2,24 +2,66 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:i="https://github.com/projektanker/icons.avalonia"
 			 xmlns:vm="using:PasswordVault.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="PasswordVault.CreateCategoryDialog"
-			 xmlns:cp="clr-namespace:ThemeEditor.Controls.ColorPicker;assembly=ThemeEditor.Controls.ColorPicker"
 			 x:DataType="vm:CreateCategoryViewModel">
 	<StackPanel Spacing="10" Margin="20">
 		<TextBlock Text="New Category" FontSize="18" FontWeight="Bold"/>
 		<TextBox Watermark="Name" Text="{Binding Name}" />
-		
-		<TextBlock Text="Color2" Margin="0,0,0,5"/>
+
+		<TextBlock Text="Color" Margin="0,0,0,5"/>
 		<Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Padding="10" MinHeight="40">
-			<cp:ColorPicker Color="{Binding SelectedColor}" />
+			<StackPanel>
+				<StackPanel Orientation="Horizontal" Spacing="5">
+					<Button Width="30" Height="30" Background="#DC143C" Command="{Binding SelectColorCommand}" CommandParameter="#DC143C" />
+					<Button Width="30" Height="30" Background="#3498DB" Command="{Binding SelectColorCommand}" CommandParameter="#3498DB" />
+					<Button Width="30" Height="30" Background="#1ABC9C" Command="{Binding SelectColorCommand}" CommandParameter="#1ABC9C" />
+					<Button Width="30" Height="30" Background="#F1C40F" Command="{Binding SelectColorCommand}" CommandParameter="#F1C40F" />
+					<Button Width="30" Height="30" Background="#8E44AD" Command="{Binding SelectColorCommand}" CommandParameter="#8E44AD" />
+					<Button Width="30" Height="30" Background="#E67E22" Command="{Binding SelectColorCommand}" CommandParameter="#E67E22" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal" Spacing="5" Margin="0,10,0,0" VerticalAlignment="Center">
+					<TextBox Width="100" Watermark="#RRGGBB" Text="{Binding SelectedColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+					<Border Width="30" Height="30" Background="{Binding SelectedColor}" BorderBrush="Black" BorderThickness="1" Margin="10,0,0,0"/>
+					<TextBlock Text="{Binding SelectedColor}" VerticalAlignment="Center" Margin="5,0,0,0"/>
+				</StackPanel>
+			</StackPanel>
 		</Border>
 		<Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Padding="10" MinHeight="40">
-			<TextBlock Text="Icon Picker Placeholder" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+			<StackPanel Spacing="8">
+				<TextBlock Text="Select Icon" FontWeight="Bold"/>
+				<ScrollViewer Height="100">
+					<ItemsControl ItemsSource="{Binding AvailableIcons}" >
+						<ItemsControl.ItemsPanel>
+							<ItemsPanelTemplate>
+								<WrapPanel MaxWidth="400"/>
+							</ItemsPanelTemplate>
+						</ItemsControl.ItemsPanel>
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Button Classes="Icon" HorizontalAlignment="Right" ToolTip.Tip="{Binding .}"
+										Click="SelectIcon"
+											>
+									<!--Command="{Binding SelectIconCommand}"
+										CommandParameter="{Binding .}"-->
+									<i:Icon Value="{Binding .}" Foreground="{DynamicResource ForegroundColor}"/>
+								</Button>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</ScrollViewer>
+			</StackPanel>
+
 		</Border>
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
-			<Button Content="Create" Command="{Binding CreateCommand}" IsDefault="True" Classes="Primary"/>
+			<Button Command="{Binding CreateCommand}" IsDefault="True" Classes="Primary">
+				<StackPanel Orientation="Horizontal" Spacing="5">
+					<i:Icon Value="{Binding SelectedIcon}" Foreground="{Binding SelectedColor,FallbackValue=White}" FontSize="15" />
+					<TextBlock>Create</TextBlock>
+				</StackPanel>
+			</Button>
 		</StackPanel>
 	</StackPanel>
 </UserControl>
