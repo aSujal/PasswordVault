@@ -5,4 +5,7 @@
 	<DataTemplate DataType="{x:Type viewModels:PasswordListViewModel}">
 		<pages:PasswordsPage/>
 	</DataTemplate>
+	<DataTemplate DataType="{x:Type viewModels:DashboardViewModel}">
+		<pages:DashboardPage/>
+	</DataTemplate>
 </DataTemplates>

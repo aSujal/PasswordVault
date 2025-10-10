@@ -65,6 +65,7 @@ public partial class App : Application
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<PasswordListViewModel>();
         services.AddSingleton<CreateCategoryViewModel>();
+        services.AddSingleton<DashboardViewModel>();
         services.AddSingleton<AddPasswordDialogViewModel>();
         services.AddSingleton<CategoryViewModel>();
         services.AddSingleton<SettingsViewModel>();

@@ -53,12 +53,12 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _passwordsMatch = true;
 
     public PasswordListViewModel PasswordListVM { get; }
-    public CategoryViewModel CategoryVM { get; }
+    public DashboardViewModel DashboardVM { get; }
     public SettingsViewModel SettingsVM { get; }
     public SyncViewModel SyncVM { get; }
 
     public ICommand NavigateToPasswordsCommand { get; }
-    public ICommand NavigateToCategoriesCommand { get; }
+    public ICommand NavigateToDashboardCommand { get; }
     public ICommand NavigateToSettingsCommand { get; }
     public ICommand NavigateToSyncCommand { get; }
     public ICommand LockCommand { get; }
@@ -77,21 +77,21 @@ public partial class MainViewModel : ViewModelBase
         _toastManager = toastManager ?? throw new ArgumentNullException(nameof(toastManager));
 
         PasswordListVM = provider.GetRequiredService<PasswordListViewModel>();
-        CategoryVM = provider.GetRequiredService<CategoryViewModel>();
+        DashboardVM = provider.GetRequiredService<DashboardViewModel>();
         SettingsVM = provider.GetRequiredService<SettingsViewModel>();
         SyncVM = provider.GetRequiredService<SyncViewModel>();
 
         Title = "Password Vault";
 
         NavigateToPasswordsCommand = new RelayCommand(() => NavigateTo(PasswordListVM));
-        NavigateToCategoriesCommand = new RelayCommand(() => NavigateTo(CategoryVM));
+        NavigateToDashboardCommand = new RelayCommand(() => NavigateTo(DashboardVM));
         NavigateToSettingsCommand = new RelayCommand(() => NavigateTo(SettingsVM));
         NavigateToSyncCommand = new RelayCommand(() => NavigateTo(SyncVM));
 
         LockCommand = new AsyncRelayCommand(LockApplicationAsync);
         LoginCommand = new AsyncRelayCommand(HandleLoginAsync);
 
-        CurrentViewModel = this;
+        CurrentViewModel = DashboardVM;
 
         _authService.Authenticated += OnAuthenticated;
         _authService.Locked += OnLocked;

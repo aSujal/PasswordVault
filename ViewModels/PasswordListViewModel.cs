@@ -171,6 +171,31 @@ public partial class PasswordListViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task DeletePassword(Password password)
+    {
+        if (password == null) return;
+
+        // You might want to add a confirmation dialog here
+        try
+        {
+            await _passwordService.DeletePasswordAsync(password.Id);
+            Passwords.Remove(password);
+
+            _toastManager.CreateToast("Password Deleted")
+                .WithContent($"{password.Title} has been deleted.")
+                .WithDelay(2)
+                .Show();
+        }
+        catch (Exception ex)
+        {
+            _toastManager.CreateToast("Delete Failed")
+                .WithContent($"Failed to delete password: {ex.Message}")
+                .WithDelay(2)
+                .ShowError();
+        }
+    }
+
+    [RelayCommand]
     private void ConfirmDeletePasswordAsync(Password? passwordToDelete)
     {
         if (passwordToDelete == null || passwordToDelete.Id == Guid.Empty) return;

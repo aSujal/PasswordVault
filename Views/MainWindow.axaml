@@ -68,7 +68,7 @@
 			</controls:SidebarMenu.BodyContent>
 			<controls:SidebarMenu.Items>
 				<controls:SidebarMenuItem Header="Dashboard"
-                                          Command="{Binding NavigateToCategoriesCommand}"
+                                          Command="{Binding NavigateToDashboardCommand}"
                                           Classes="Compact">
 					<controls:SidebarMenuItem.Icon>
 						<icons:Lucide Icon="LayoutDashboard" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}" />
