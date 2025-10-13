@@ -1,13 +1,10 @@
-﻿
-using Avalonia.Controls;
-using Avalonia.Threading;
+﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PasswordVault.Models;
 using PasswordVault.Services;
 using PasswordVault.Services.Auth;
-using ShadUI.Dialogs;
-using ShadUI.Toasts;
+using ShadUI;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -196,7 +193,7 @@ public partial class PasswordListViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ConfirmDeletePasswordAsync(Password? passwordToDelete)
+    public async Task ConfirmDeletePasswordAsync(Password? passwordToDelete)
     {
         if (passwordToDelete == null || passwordToDelete.Id == Guid.Empty) return;
 

@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ShadUI.Themes;
+using ShadUI;
 
 namespace PasswordVault.ViewModels;
 

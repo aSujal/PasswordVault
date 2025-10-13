@@ -4,7 +4,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:converters="clr-namespace:PasswordVault.Converters"
-    xmlns:themes="clr-namespace:ShadUI.Themes;assembly=ShadUI">
+	xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI">
 
 	<Application.Resources>
 		<ResourceDictionary>
@@ -15,12 +15,13 @@
 		</ResourceDictionary>
 		<converters:JoinConverter x:Key="JoinConverter" Separator=", " />
 		<converters:StringToLucideIconConverter x:Key="StringToLucideIconConverter" />
+		<!--<converters:BooleonConverters x:Key="BooleonConverters" />-->
 		<x:Double x:Key="ControlContentThemeFontSize">12</x:Double>
 	</Application.Resources>
 
 	<Application.Styles>
-		<themes:ShadTheme/>
-		<StyleInclude Source="avares://ThemeEditor.Controls.ColorPicker/ColorPicker.axaml" />
+		<shadui:ShadTheme/>
+		<!--<StyleInclude Source="avares://ThemeEditor.Controls.ColorPicker/ColorPicker.axaml" />-->
 		<!--<FluentTheme/>-->
 	</Application.Styles>
 </Application>

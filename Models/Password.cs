@@ -1,6 +1,7 @@
 ﻿using LiteDB;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,6 @@ public class Password
 {
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();
-
     public string Title { get; set; } = string.Empty;
     public string EncryptedPassword { get; set; } = string.Empty;
     public string? Username { get; set; }

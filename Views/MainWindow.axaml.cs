@@ -1,11 +1,11 @@
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using PasswordVault.ViewModels;
+using ShadUI;
 
 namespace PasswordVault.Views;
 
-public partial class MainWindow : ShadUI.Controls.Window
+public partial class MainWindow : Window
 {
     public MainWindow()
     {

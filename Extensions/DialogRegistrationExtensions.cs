@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PasswordVault.ViewModels;
 using PasswordVault.Views;
-using ShadUI.Dialogs;
+using ShadUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 
 namespace PasswordVault.Extensions;
 

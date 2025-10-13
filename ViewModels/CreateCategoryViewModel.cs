@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PasswordVault.Services.Database;
-using ShadUI.Dialogs;
+using ShadUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

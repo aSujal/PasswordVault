@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:PasswordVault.ViewModels"
-			 xmlns:controls="clr-namespace:ShadUI.Controls;assembly=ShadUI"
+			 xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
 			 xmlns:icons="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
 			 xmlns:i="https://github.com/projektanker/icons.avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -17,46 +17,46 @@
 				<!-- Stats Cards -->
 				<Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="16">
 					<!-- Total Passwords -->
-					<controls:Card Grid.Column="0" Padding="20">
+					<shadui:Card Grid.Column="0" Padding="20">
 						<StackPanel Spacing="8">
 							<icons:Lucide Icon="Key" StrokeBrush="{DynamicResource PrimaryColor}" Height="24" Width="24"/>
 							<TextBlock Text="{Binding TotalPasswords}" Classes="h1"/>
 							<TextBlock Text="Total Passwords" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>
-					</controls:Card>
+					</shadui:Card>
 
 					<!-- Favorites -->
-					<controls:Card Grid.Column="1" Padding="20">
+					<shadui:Card Grid.Column="1" Padding="20">
 						<StackPanel Spacing="8">
 							<i:Icon Value="fa-solid fa-star" Foreground="Gold" FontSize="24"/>
 							<TextBlock Text="{Binding FavoritePasswords}" Classes="h1"/>
 							<TextBlock Text="Favorites" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>
-					</controls:Card>
+					</shadui:Card>
 
 					<!-- Weak Passwords -->
-					<controls:Card Grid.Column="2" Padding="20">
+					<shadui:Card Grid.Column="2" Padding="20">
 						<StackPanel Spacing="8">
 							<icons:Lucide Icon="TriangleAlert" StrokeBrush="Orange" Height="24" Width="24"/>
 							<TextBlock Text="{Binding WeakPasswords}" Classes="h1"/>
 							<TextBlock Text="Weak Passwords" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>
-					</controls:Card>
+					</shadui:Card>
 
 					<!-- Categories -->
-					<controls:Card Grid.Column="3" Padding="20">
+					<shadui:Card Grid.Column="3" Padding="20">
 						<StackPanel Spacing="8">
 							<icons:Lucide Icon="FolderOpen" StrokeBrush="{DynamicResource PrimaryColor}" Height="24" Width="24"/>
 							<TextBlock Text="{Binding TotalCategories}" Classes="h1"/>
 							<TextBlock Text="Categories" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>
-					</controls:Card>
+					</shadui:Card>
 				</Grid>
 
 				<!-- Recent Passwords and Category Stats -->
 				<Grid ColumnDefinitions="2*,*" ColumnSpacing="16">
 					<!-- Recent Passwords -->
-					<controls:Card Grid.Column="0" Padding="20">
+					<shadui:Card Grid.Column="0" Padding="20">
 						<StackPanel Spacing="16">
 							<TextBlock Text="Recent Passwords" Classes="h3"/>
 							<ItemsControl ItemsSource="{Binding RecentPasswords}">
@@ -88,10 +88,10 @@
 								</ItemsControl.ItemTemplate>
 							</ItemsControl>
 						</StackPanel>
-					</controls:Card>
+					</shadui:Card>
 
 					<!-- Category Distribution -->
-					<controls:Card Grid.Column="1" Padding="20">
+					<shadui:Card Grid.Column="1" Padding="20">
 						<StackPanel Spacing="16">
 							<TextBlock Text="Categories" Classes="h3"/>
 							<ItemsControl ItemsSource="{Binding CategoryStats}">
@@ -121,7 +121,7 @@
 								</ItemsControl.ItemTemplate>
 							</ItemsControl>
 						</StackPanel>
-					</controls:Card>
+					</shadui:Card>
 				</Grid>
 			</StackPanel>
 		</ScrollViewer>

@@ -5,7 +5,6 @@ using PasswordVault.Services;
 using PasswordVault.Services.Auth;
 using PasswordVault.Services.Crypto;
 using PasswordVault.Services.Database;
-using ShadUI.Controls;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;

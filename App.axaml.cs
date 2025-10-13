@@ -13,9 +13,7 @@ using PasswordVault.Services.Database;
 using PasswordVault.Services.Sync;
 using PasswordVault.ViewModels;
 using PasswordVault.Views;
-using ShadUI.Dialogs;
-using ShadUI.Themes;
-using ShadUI.Toasts;
+using ShadUI;
 using System;
 using System.Linq;
 
@@ -53,7 +51,7 @@ public partial class App : Application
         services.AddSingleton<ICryptoService>(_ =>
             new CryptoService(new byte[32]));
         services.AddSingleton<ThemeWatcher>(_ => new ThemeWatcher(Application.Current!));
-        services.AddSingleton<ToastManager>();
+        services.AddSingleton<ShadUI.ToastManager>();
 
         services.AddSingleton<DatabaseService>();
         services.AddSingleton<SyncService>();

@@ -7,7 +7,7 @@ using PasswordVault.Services.Auth;
 using PasswordVault.Services.Crypto;
 using PasswordVault.Services.Database;
 using PasswordVault.Services.Sync;
-using ShadUI.Dialogs;
+using ShadUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,6 +15,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 
 namespace PasswordVault.ViewModels;
 
@@ -219,6 +220,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     [RelayCommand]
     private async Task Submit()
     {
+        ValidateAllProperties();
         try
         {
             if (IsEditMode && _passwordToEdit != null)

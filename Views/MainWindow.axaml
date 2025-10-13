@@ -1,49 +1,49 @@
-<controls:Window
+<shadui:Window
 		Height="768"
 		Title="PasswordVault"
 		Width="1024"
         mc:Ignorable="d" d:DesignWidth="800"
 		xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-		xmlns:ui="clr-namespace:ShadUI;assembly=ShadUI"
-		xmlns:controls="clr-namespace:ShadUI.Controls;assembly=ShadUI"
-		xmlns:extensions="clr-namespace:ShadUI.Extensions;assembly=ShadUI"
+		xmlns:converters="clr-namespace:PasswordVault.Converters"
+		xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
 		xmlns:icons="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
         xmlns:vm="using:PasswordVault.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:toasts="clr-namespace:ShadUI.Toasts;assembly=ShadUI"
+		x:Name="Window"
         x:Class="PasswordVault.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-		xmlns:dialogs="clr-namespace:ShadUI.Dialogs;assembly=ShadUI"
+		WindowStartupLocation="CenterScreen"
         Icon="/Assets/avalonia-logo.ico"
         >
 
-	<controls:Window.DataTemplates>
-		<ui:DataTemplateInclude Source="avares://PasswordVault/Views/PageDataTemplates.axaml" />
-	</controls:Window.DataTemplates>
-	
-	<controls:Window.Hosts>
-		<dialogs:DialogHost Manager="{Binding DialogManager}"
-							Owner="{Binding RelativeSource={RelativeSource AncestorType=controls:Window}}" />
-	</controls:Window.Hosts>
+	<shadui:Window.DataTemplates>
+		<shadui:DataTemplateInclude Source="avares://PasswordVault/Views/PageDataTemplates.axaml" />
+	</shadui:Window.DataTemplates>
+
+	<shadui:Window.Hosts>
+		<shadui:DialogHost Manager="{Binding DialogManager}"
+							Owner="{Binding RelativeSource={RelativeSource AncestorType=shadui:Window}}" />
+	</shadui:Window.Hosts>
 
 	<Panel>
-		<controls:Card Width="350"  VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding !IsAuthenticated}">
-			<controls:Card.Header>
+		<shadui:Card Width="350"  VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding !IsAuthenticated}">
+			<shadui:Card.Header>
 				<StackPanel Spacing="4">
-					<controls:CardTitle FontSize="18">Password Vault</controls:CardTitle>
-					<controls:CardDescription>Enter your master password</controls:CardDescription>
+					<shadui:CardTitle FontSize="18">Password Vault</shadui:CardTitle>
+					<shadui:CardDescription>Enter your master password</shadui:CardDescription>
 				</StackPanel>
-			</controls:Card.Header>
+			</shadui:Card.Header>
 
 			<StackPanel Spacing="16">
-				<TextBox extensions:ControlAssist.Label="Master password"
+				<TextBox shadui:ControlAssist.Label="Master password"
 						 PasswordChar="•"
 						 Classes="PasswordReveal"
 						 Text="{Binding MasterPassword, Mode=TwoWay}"/>
 
-				<TextBox extensions:ControlAssist.Label="Confirm master password"
+				<TextBox shadui:ControlAssist.Label="Confirm master password"
 						 IsVisible="{Binding IsCreatingNewVault}"
 						 PasswordChar="•"
 						 Classes="PasswordReveal"
@@ -61,43 +61,67 @@
 					<TextBlock Text="{Binding StatusMessage}"/>
 				</StackPanel>
 			</StackPanel>
-		</controls:Card>
-		<controls:SidebarMenu IsVisible="{Binding IsAuthenticated}" x:Name="AppSidebar">
-			<controls:SidebarMenu.BodyContent>
-				<TransitioningContentControl Content="{Binding CurrentViewModel}"/>
-			</controls:SidebarMenu.BodyContent>
-			<controls:SidebarMenu.Items>
-				<controls:SidebarMenuItem Header="Dashboard"
-                                          Command="{Binding NavigateToDashboardCommand}"
-                                          Classes="Compact">
-					<controls:SidebarMenuItem.Icon>
-						<icons:Lucide Icon="LayoutDashboard" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}" />
-					</controls:SidebarMenuItem.Icon>
-				</controls:SidebarMenuItem>
-				<controls:SidebarMenuItem Header="Passwords"
-                                          Command="{Binding NavigateToPasswordsCommand}"
-                                          Classes="Compact">
-					<controls:SidebarMenuItem.Icon>
-						<icons:Lucide Icon="KeyRound" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}"/>
-					</controls:SidebarMenuItem.Icon>
-				</controls:SidebarMenuItem>
-				<controls:SidebarMenuItem Header="Sync"
-                                          Command="{Binding NavigateToSyncCommand}"
-                                          Classes="Compact">
-					<controls:SidebarMenuItem.Icon>
-						<icons:Lucide Icon="Folder" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}"/>
-					</controls:SidebarMenuItem.Icon>
-				</controls:SidebarMenuItem>
-				<Separator/>
-				<controls:SidebarMenuItem Header="Settings"
-                                          Command="{Binding NavigateToSettingsCommand}"
-                                          Classes="Compact">
-					<controls:SidebarMenuItem.Icon>
-						<icons:Lucide Icon="Settings" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}"/>
-					</controls:SidebarMenuItem.Icon>
-				</controls:SidebarMenuItem>
-			</controls:SidebarMenu.Items>
-		</controls:SidebarMenu>
-		<toasts:ToastHost Manager="{Binding ToastManager}" />
+		</shadui:Card>
+		<Grid ColumnDefinitions="Auto *">
+			<shadui:Sidebar
+				   Grid.Column="0"
+				   Width="255"
+				   MinWidth="56"
+				   Padding="8"
+				   Background="{DynamicResource CardBackgroundColor}"
+				   BorderThickness="0,0,1,0"
+				   Expanded="{Binding #Toggler.IsChecked}"
+				   IsVisible="{Binding IsAuthenticated}"
+				   ItemIconContentSpacing="12">
+
+				<shadui:Sidebar.Header>
+					<StackPanel Spacing="8" Margin="8">
+						<ToggleButton
+						   Name="Toggler"
+						   Width="32"
+						   Height="32"
+						   Padding="8"
+						   HorizontalAlignment="{Binding #Toggler.IsChecked, Converter={x:Static converters:BooleanConverters.SidebarTogglerHorizontalAlignment}}"
+						   CornerRadius="{DynamicResource LgCornerRadius}"
+						   Theme="{DynamicResource SideTogglerTheme}">
+							<Viewbox>
+								<icons:Lucide Icon="PanelLeft" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}" />
+							</Viewbox>
+						</ToggleButton>
+						<TextBlock Text="PasswordVault" Classes="Caption" HorizontalAlignment="Center"/>
+					</StackPanel>
+				</shadui:Sidebar.Header>
+
+				<StackPanel Spacing="4">
+					<shadui:SidebarItem Content="Dashboard" Command="{Binding NavigateToDashboardCommand}">
+						<shadui:SidebarItem.Icon>
+							<icons:Lucide Icon="LayoutDashboard" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}" />
+						</shadui:SidebarItem.Icon>
+					</shadui:SidebarItem>
+
+					<shadui:SidebarItem Content="Passwords" Command="{Binding NavigateToPasswordsCommand}">
+						<shadui:SidebarItem.Icon>
+							<icons:Lucide Icon="KeyRound" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}" />
+						</shadui:SidebarItem.Icon>
+					</shadui:SidebarItem>
+
+					<shadui:SidebarItem Content="Sync" Command="{Binding NavigateToSyncCommand}">
+						<shadui:SidebarItem.Icon>
+							<icons:Lucide Icon="Folder" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}" />
+						</shadui:SidebarItem.Icon>
+					</shadui:SidebarItem>
+
+					<Separator />
+
+					<shadui:SidebarItem Content="Settings" Command="{Binding NavigateToSettingsCommand}">
+						<shadui:SidebarItem.Icon>
+							<icons:Lucide Icon="Settings" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}" />
+						</shadui:SidebarItem.Icon>
+					</shadui:SidebarItem>
+				</StackPanel>
+			</shadui:Sidebar>
+			<TransitioningContentControl Grid.Column="1" Content="{Binding CurrentViewModel}"/>
+			<shadui:ToastHost Manager="{Binding ToastManager}" />
+		</Grid>
 	</Panel>
-</controls:Window>
+</shadui:Window>
