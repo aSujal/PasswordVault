@@ -1,21 +1,21 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using PasswordVault.Services.Database;
-using ShadUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using PasswordVault.Services.Database;
+using ShadUI;
 
 namespace PasswordVault.ViewModels;
 
-public partial class CreateCategoryViewModel : ViewModelBase
+public partial class AddCategoryDialogViewModel : ViewModelBase
 {
     private readonly DialogManager _dialogManager;
-    private readonly CategoryService _categoryService;
+    private readonly ICategoryService _categoryService;
 
     [ObservableProperty]
     private string _name = string.Empty;
@@ -59,7 +59,7 @@ public partial class CreateCategoryViewModel : ViewModelBase
         "fa-solid fa-vault"
      ];
 
-    public CreateCategoryViewModel(DialogManager dialogManager, CategoryService categoryService)
+    public AddCategoryDialogViewModel(DialogManager dialogManager, ICategoryService categoryService)
     {
         _dialogManager = dialogManager;
         _categoryService = categoryService;
@@ -77,19 +77,19 @@ public partial class CreateCategoryViewModel : ViewModelBase
             return;
         }
 
-        if( Name.Length < 3 || Name.Length > 50)
+        if (Name.Length < 3 || Name.Length > 50)
         {
             AddError(nameof(Name), "Category name must be between 3 and 50 characters.");
             return;
         }
 
-        if(SelectedColor == null || SelectedColor.Length != 7 || !SelectedColor.StartsWith("#"))
+        if (SelectedColor == null || SelectedColor.Length != 7 || !SelectedColor.StartsWith("#"))
         {
             AddError(nameof(SelectedColor), "Invalid color format. Use a hex color code (e.g., #00A638).");
             return;
         }
 
-        if(SelectedIcon == null || SelectedIcon.Length == 0)
+        if (SelectedIcon == null || SelectedIcon.Length == 0)
         {
             AddError(nameof(SelectedIcon), "Please select an icon for the category.");
             return;

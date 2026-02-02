@@ -12,8 +12,8 @@ namespace PasswordVault.Helper;
 public class PasswordStrengthResult
 {
     public int Score { get; set; }
-    public string Level { get; set; }
-    public List<string> Suggestions { get; set; } = new();
+    public string Level { get; set; } = string.Empty;
+    public List<string> Suggestions { get; set; } = [];
     public bool IsCommonPassword { get; set; }
 }
 public class PasswordGenerator
@@ -24,19 +24,19 @@ public class PasswordGenerator
     private const string SpecialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
     private const string SimilarChars = "il1Lo0O";
 
-    public static readonly string[] CommonPasswords = {
+    public static readonly string[] CommonPasswords = [
         "password", "123456", "password123", "admin", "qwerty", "letmein", "welcome",
         "monkey", "1234567890", "abc123", "111111", "dragon", "master", "princess",
         "login", "solo", "qwertyuiop", "starwars", "654321", "sunshine"
-    };
+    ];
 
-    private static readonly string[] WordList = {
+    private static readonly string[] WordList = [
         "apple", "banana", "cherry", "dragon", "eagle", "forest", "guitar", "harbor",
         "island", "jungle", "knight", "lemon", "mountain", "ninja", "ocean", "palace",
         "queen", "river", "sunset", "tiger", "umbrella", "violet", "wizard", "xenon",
         "yellow", "zebra", "anchor", "bridge", "castle", "dolphin", "elephant", "falcon",
         "galaxy", "hammer", "igloo", "jacket", "kangaroo", "lighthouse", "magnet", "notebook"
-    };
+    ];
 
     private readonly Random _random;
 

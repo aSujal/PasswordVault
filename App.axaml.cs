@@ -1,4 +1,6 @@
-﻿using Avalonia;
+﻿using System;
+using System.Linq;
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
@@ -14,15 +16,16 @@ using PasswordVault.Services.Sync;
 using PasswordVault.ViewModels;
 using PasswordVault.Views;
 using ShadUI;
-using System;
-using System.Linq;
 
 namespace PasswordVault;
 
 public partial class App : Application
 {
     private IServiceProvider _serviceProvider = null!;
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -34,17 +37,20 @@ public partial class App : Application
 
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
-            DisableAvaloniaDataAnnotationValidation();
+            //DisableAvaloniaDataAnnotationValidation();
+            var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+            _ = mainViewModel.InitializeAsync();
+
             desktop.MainWindow = new MainWindow
             {
-                DataContext = _serviceProvider.GetRequiredService<MainViewModel>()
+                DataContext = mainViewModel
             };
             // desktop.Exit += OnExit;
         }
 
         base.OnFrameworkInitializationCompleted();
     }
-  
+
     private void ConfigureServices()
     {
         var services = new ServiceCollection();
@@ -55,14 +61,14 @@ public partial class App : Application
 
         services.AddSingleton<DatabaseService>();
         services.AddSingleton<SyncService>();
-        services.AddSingleton<AuthService>();
-        services.AddSingleton<PasswordService>();
+        services.AddSingleton<IAuthService, AuthService>();
+        services.AddSingleton<IPasswordService, PasswordService>();
         services.AddSingleton<PasswordGenerator>();
-        services.AddSingleton<CategoryService>();
+        services.AddSingleton<ICategoryService, CategoryService>();
 
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<PasswordListViewModel>();
-        services.AddSingleton<CreateCategoryViewModel>();
+        services.AddSingleton<AddCategoryDialogViewModel>();
         services.AddSingleton<DashboardViewModel>();
         services.AddSingleton<AddPasswordDialogViewModel>();
         services.AddSingleton<CategoryViewModel>();

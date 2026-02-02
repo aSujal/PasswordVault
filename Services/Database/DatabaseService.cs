@@ -1,19 +1,20 @@
-﻿using LiteDB;
-using PasswordVault.Models;
-using PasswordVault.Services.Crypto;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LiteDB;
+using PasswordVault.Models;
+using PasswordVault.Services.Crypto;
 using Projektanker.Icons.Avalonia.FontAwesome;
 
 namespace PasswordVault.Services.Database;
+
 public interface IDatabaseService
 {
     Task InitializeDatabaseAsync(string masterPassword);
-    Task<User> GetUserAsync();
+    Task<User?> GetUserAsync();
     Task UpdateUserAsync(User user);
     Task<bool> IsDatabaseInitializedAsync();
     Task BackupDatabaseAsync(string backupPath);
@@ -127,7 +128,7 @@ public class DatabaseService : IDatabaseService
         categories.InsertBulk(defaultCategories);
     }
 
-    public async Task<User> GetUserAsync()
+    public async Task<User?> GetUserAsync()
     {
         if (_cachedUser != null) return _cachedUser;
         if (!File.Exists(_userDataFile)) return null;

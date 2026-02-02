@@ -1,4 +1,9 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,11 +13,6 @@ using PasswordVault.Services.Database;
 using PasswordVault.Services.Sync;
 using PasswordVault.Validators;
 using ShadUI;
-using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace PasswordVault.ViewModels;
 
@@ -24,6 +24,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string _statusMessage = string.Empty;
     [ObservableProperty] private bool _isSyncing;
+    [ObservableProperty] private bool _isSidebarExpanded = false;
     [ObservableProperty] private string _username = string.Empty;
     [ObservableProperty] private bool _isCreatingNewVault;
     [ObservableProperty] private string _actionButtonText = "Login";
@@ -63,11 +64,11 @@ public partial class MainViewModel : ViewModelBase
     public ICommand LockCommand { get; }
     public ICommand LoginCommand { get; }
 
-    private readonly AuthService _authService;
+    private readonly IAuthService _authService;
     private readonly SyncService _syncService;
     private readonly DatabaseService _databaseService;
-    
-    public MainViewModel(AuthService authService, SyncService syncService, DatabaseService databaseService, IServiceProvider provider, DialogManager dialogManager, ToastManager toastManager)
+
+    public MainViewModel(IAuthService authService, SyncService syncService, DatabaseService databaseService, IServiceProvider provider, DialogManager dialogManager, ToastManager toastManager)
     {
         _authService = authService ?? throw new ArgumentNullException(nameof(authService));
         _syncService = syncService ?? throw new ArgumentNullException(nameof(syncService));
@@ -95,11 +96,12 @@ public partial class MainViewModel : ViewModelBase
         _authService.Authenticated += OnAuthenticated;
         _authService.Locked += OnLocked;
         //_syncService.Authenticated += OnSyncStateChanged;
-        CheckDatabaseInitializationAsync();
     }
 
-    private async Task CheckDatabaseInitializationAsync()
+    public async Task InitializeAsync()
     {
+        IsBusy = true;
+        StatusMessage = "Checking database status...";
         try
         {
             bool isInitialized = await _databaseService.IsDatabaseInitializedAsync();
@@ -110,15 +112,17 @@ public partial class MainViewModel : ViewModelBase
         {
             StatusMessage = $"Error checking database: {ex.Message}";
         }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     private void NavigateTo(ViewModelBase target)
     {
         if (CurrentViewModel == target) return;
 
-        CurrentViewModel.OnDeactivated();
         CurrentViewModel = target;
-        CurrentViewModel.OnActivated();
     }
     private async Task LockApplicationAsync()
     {

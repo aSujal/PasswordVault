@@ -1,14 +1,15 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PasswordVault.Models;
 using PasswordVault.Services;
 using PasswordVault.Services.Auth;
+using PasswordVault.Services.Database;
 using ShadUI;
-using System;
-using System.Collections.ObjectModel;
-using System.Threading;
-using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace PasswordVault.ViewModels;
@@ -17,8 +18,8 @@ public partial class PasswordListViewModel : ViewModelBase
 {
     private readonly DialogManager _dialogManager;
     private readonly AddPasswordDialogViewModel _addPasswordViewModel;
-    private readonly PasswordService _passwordService;
-    private readonly AuthService _authService;
+    private readonly IPasswordService _passwordService;
+    private readonly IAuthService _authService;
     public readonly ToastManager _toastManager;
 
     [ObservableProperty]
@@ -33,8 +34,8 @@ public partial class PasswordListViewModel : ViewModelBase
     public PasswordListViewModel(
         DialogManager dialogManager,
         AddPasswordDialogViewModel addPasswordViewModel,
-        PasswordService passwordService,
-        AuthService authService,
+        IPasswordService passwordService,
+        IAuthService authService,
         ToastManager toastManager
         )
     {
@@ -123,6 +124,7 @@ public partial class PasswordListViewModel : ViewModelBase
     [RelayCommand]
     public void ShowAddPasswordDialog()
     {
+        _addPasswordViewModel.Initialize();
         _dialogManager.CreateDialog(_addPasswordViewModel)
             .WithMinWidth(500)
             .WithSuccessCallback(() =>
@@ -136,7 +138,7 @@ public partial class PasswordListViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void CopyUsernameAsync(string? username)
+    private static void CopyUsernameAsync(string? username)
     {
         if (!string.IsNullOrEmpty(username))
         {
@@ -208,6 +210,7 @@ public partial class PasswordListViewModel : ViewModelBase
     {
         try
         {
+            if (passwordToDelete == null || passwordToDelete.Id == Guid.Empty) return;
             await _passwordService.DeletePasswordAsync(passwordToDelete.Id);
             await RefreshAsync();
             _toastManager.CreateToast("Deleted").WithContent($"Password '{passwordToDelete.Title}' has been deleted.").ShowSuccess();

@@ -1,12 +1,13 @@
-﻿using PasswordVault.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PasswordVault.Models;
 
 namespace PasswordVault.Services.Database;
-public class CategoryService
+
+public class CategoryService : ICategoryService
 {
     private readonly DatabaseService _databaseService;
     private readonly string _collectionName = "categories";

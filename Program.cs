@@ -2,7 +2,6 @@
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.FontAwesome;
 using System;
-using HotAvalonia;
 
 namespace PasswordVault;
 
@@ -25,7 +24,6 @@ sealed class Program
 
         return AppBuilder.Configure<App>()
                     .UsePlatformDetect()
-                    .WithInterFont()
                     .LogToTrace();
     }
 

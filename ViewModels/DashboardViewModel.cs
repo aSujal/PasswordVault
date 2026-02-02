@@ -1,22 +1,22 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PasswordVault.Models;
 using PasswordVault.Services;
 using PasswordVault.Services.Auth;
 using PasswordVault.Services.Crypto;
 using PasswordVault.Services.Database;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PasswordVault.ViewModels;
 
 public partial class DashboardViewModel : ViewModelBase
 {
-    private readonly PasswordService _passwordService;
-    private readonly CategoryService _categoryService;
-    private readonly AuthService _authService;
+    private readonly IPasswordService _passwordService;
+    private readonly ICategoryService _categoryService;
+    private readonly IAuthService _authService;
     private readonly ICryptoService _cryptoService;
 
     [ObservableProperty]
@@ -41,10 +41,10 @@ public partial class DashboardViewModel : ViewModelBase
     private bool _isLoading;
 
     public DashboardViewModel(
-        PasswordService passwordService,
+        IPasswordService passwordService,
         ICryptoService cryptoService,
-        CategoryService categoryService,
-        AuthService authService)
+        ICategoryService categoryService,
+        IAuthService authService)
     {
         _passwordService = passwordService ?? throw new ArgumentNullException(nameof(passwordService));
         _cryptoService = cryptoService ?? throw new ArgumentNullException(nameof(cryptoService));

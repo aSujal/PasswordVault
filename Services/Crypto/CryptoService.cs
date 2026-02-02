@@ -1,12 +1,11 @@
-﻿using Isopoh.Cryptography.Argon2;
-using Konscious.Security.Cryptography;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Konscious.Security.Cryptography;
 
 namespace PasswordVault.Services.Crypto;
 
@@ -43,16 +42,14 @@ public class CryptoService : ICryptoService
         if (salt is null || salt.Length == 0)
             throw new ArgumentException("Salt empty.", nameof(salt));
 
-        using (var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password)))
-        {
-            argon2.Salt = salt;
-            argon2.DegreeOfParallelism = 4;
-            argon2.Iterations = 3;
-            argon2.MemorySize = 65_536; // 64 MB
+        using var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password));
+        argon2.Salt = salt;
+        argon2.DegreeOfParallelism = 4;
+        argon2.Iterations = 3;
+        argon2.MemorySize = 65_536; // 64 MB
 
-            byte[] key = argon2.GetBytes(KEY_LEN);
-            return Convert.ToBase64String(key);
-        }
+        byte[] key = argon2.GetBytes(KEY_LEN);
+        return Convert.ToBase64String(key);
     }
 
     public string EncryptPassword(string plaintext) =>

@@ -1,10 +1,10 @@
-﻿using LiteDB;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LiteDB;
 
 namespace PasswordVault.Models;
 
@@ -22,7 +22,7 @@ public class Password
     [BsonRef("categories")]
     public Category? Category { get; set; }
 
-    public List<string> Tags { get; set; } = new List<string>();
+    public List<string> Tags { get; set; } = [];
     public bool IsFavorite { get; set; } = false;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

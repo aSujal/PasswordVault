@@ -1,15 +1,15 @@
-﻿using PasswordVault.Models;
-using PasswordVault.Services.Crypto;
-using PasswordVault.Services.Database;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PasswordVault.Models;
+using PasswordVault.Services.Crypto;
+using PasswordVault.Services.Database;
 
 namespace PasswordVault.Services;
 
-public class PasswordService
+public class PasswordService : IPasswordService
 {
     private readonly DatabaseService _databaseService;
     private readonly ICryptoService _cryptoService;

@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace PasswordVault;
 
-public partial class CreateCategoryDialog : UserControl
+public partial class AddCategoryDialog : UserControl
 {
-    public CreateCategoryDialog()
+    public AddCategoryDialog()
     {
         InitializeComponent();
     }
@@ -19,7 +19,7 @@ public partial class CreateCategoryDialog : UserControl
     {
         if (sender is Button button && button.DataContext is string iconClass)
         {
-            var viewModel = DataContext as ViewModels.CreateCategoryViewModel;
+            var viewModel = DataContext as ViewModels.AddCategoryDialogViewModel;
             viewModel?.SelectIcon(iconClass);
         }
     }

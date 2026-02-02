@@ -5,8 +5,8 @@
 			 xmlns:i="https://github.com/projektanker/icons.avalonia"
 			 xmlns:vm="using:PasswordVault.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="PasswordVault.CreateCategoryDialog"
-			 x:DataType="vm:CreateCategoryViewModel">
+             x:Class="PasswordVault.AddCategoryDialog"
+			 x:DataType="vm:AddCategoryDialogViewModel">
 	<StackPanel Spacing="10" Margin="20">
 		<TextBlock Text="New Category" FontSize="18" FontWeight="Bold"/>
 		<TextBox Watermark="Name" Text="{Binding Name}" />

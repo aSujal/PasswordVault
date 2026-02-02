@@ -4,7 +4,6 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using HotAvalonia;
 using PasswordVault.Models;
 using PasswordVault.ViewModels;
 using ShadUI;
@@ -22,7 +21,6 @@ public partial class PasswordsPage : UserControl
         InitializeComponent();
         Initialize();
     }
-    [AvaloniaHotReload]
     private void Initialize()
     {
         Console.WriteLine("PasswordsPage reloaded at " + DateTime.Now);

@@ -1,4 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PasswordVault.Helper;
 using PasswordVault.Models;
@@ -8,27 +16,38 @@ using PasswordVault.Services.Crypto;
 using PasswordVault.Services.Database;
 using PasswordVault.Services.Sync;
 using ShadUI;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Avalonia.Controls;
 
 namespace PasswordVault.ViewModels;
 
 public partial class AddPasswordDialogViewModel : ViewModelBase
 {
-    [ObservableProperty]
     private string _title = string.Empty;
+    [Required(ErrorMessage = "Title is required")]
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value, true);
+    }
 
-    [ObservableProperty]
     private string _username = string.Empty;
+    [Required(ErrorMessage = "Username is required")]
+    public string Username
+    {
+        get => _username;
+        set => SetProperty(ref _username, value, true);
+    }
 
-    [ObservableProperty]
     private string _password = string.Empty;
+    [Required(ErrorMessage = "Password is required")]
+    public string Password
+    {
+        get => _password;
+        set
+        {
+            SetProperty(ref _password, value, true);
+            OnPasswordChanged(value);
+        }
+    }
 
     [ObservableProperty]
     private string _url = string.Empty;
@@ -66,40 +85,43 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     private string _dialogTitle = "Add New Password";
 
     private readonly DialogManager _dialogManager;
-    private readonly CategoryService _categoryService;
-    private readonly PasswordService _passwordService;
+    private readonly ToastManager _toastManager;
+    private readonly ICategoryService _categoryService;
+    private readonly IPasswordService _passwordService;
     private readonly ICryptoService _cryptoService;
     private readonly PasswordGenerator _passwordGenerator;
-    private readonly CreateCategoryViewModel _createCategoryViewModel;
-    private readonly AuthService _authService;
+    private readonly AddCategoryDialogViewModel _addCategoryDialogViewModel;
+    private readonly IAuthService _authService;
 
     public event EventHandler? PasswordAddedSuccessfully;
     public event EventHandler? PasswordUpdatedSuccessfully;
 
     public AddPasswordDialogViewModel(
         DialogManager dialogManager,
-        CategoryService categoryService,
-        CreateCategoryViewModel createCategoryViewModel,
+        ToastManager toastManager,
+        ICategoryService categoryService,
+        AddCategoryDialogViewModel addCategoryDialogViewModel,
         ICryptoService cryptoService,
-        PasswordService passwordService,
+        IPasswordService passwordService,
         DatabaseService databaseService,
         PasswordGenerator passwordGenerator,
-        AuthService authService)
+        IAuthService authService)
     {
         _dialogManager = dialogManager;
+        _toastManager = toastManager;
         _categoryService = categoryService;
         _cryptoService = cryptoService;
         _passwordService = passwordService;
         _passwordGenerator = passwordGenerator;
         _authService = authService;
-        _createCategoryViewModel = createCategoryViewModel;
-        _authService.Authenticated += onAuthenticated;
+        _addCategoryDialogViewModel = addCategoryDialogViewModel;
+        _authService.Authenticated += OnAuthenticated;
 
         EvaluatePasswordStrength();
         _authService = authService;
     }
 
-    public void ResetForAdd()
+    public void Initialize()
     {
         IsEditMode = false;
         _passwordToEdit = null;
@@ -116,6 +138,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         {
             LoadCategories();
         }
+        ClearAllErrors();
     }
 
     public async void SetPasswordToEdit(Password password)
@@ -132,10 +155,10 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         }
 
         Title = password.Title;
-        Username = password.Username;
+        Username = password.Username ?? string.Empty;
         Password = _cryptoService.DecryptPassword(password.EncryptedPassword ?? string.Empty); // Decrypt password
-        Url = password.Url;
-        Notes = password.Notes;
+        Url = password.Url ?? string.Empty;
+        Notes = password.Notes ?? string.Empty;
         IsFavorite = password.IsFavorite;
 
         if (password.Category != null)
@@ -148,11 +171,12 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         }
     }
 
-    private void onAuthenticated(object? sender, EventArgs e)
+    private void OnAuthenticated(object? sender, EventArgs e)
     {
         LoadCategories();
-        ResetForAdd();
+        Initialize();
     }
+
     private void LoadCategories()
     {
         _ = LoadCategoriesAsync();
@@ -184,7 +208,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         };
     }
 
-    partial void OnPasswordChanged(string value)
+    private void OnPasswordChanged(string value)
     {
         EvaluatePasswordStrength();
     }
@@ -203,7 +227,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     [RelayCommand]
     public void CreateCategory()
     {
-        _dialogManager.CreateDialog(_createCategoryViewModel)
+        _dialogManager.CreateDialog(_addCategoryDialogViewModel)
             .WithMinWidth(400)
             .WithSuccessCallback(async () =>
             {
@@ -221,6 +245,10 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     private async Task Submit()
     {
         ValidateAllProperties();
+        if (HasErrors)
+        {
+            return;
+        }
         try
         {
             if (IsEditMode && _passwordToEdit != null)
@@ -257,11 +285,11 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         catch (Exception ex)
         {
             // Show error notification
-            //await _dialogManager.("Failed to save password", ex.Message);
+            _toastManager.CreateToast("Failed to save password").WithContent(ex.Message).ShowError();
         }
         finally
         {
-            ResetForAdd();
+            Initialize();
         }
     }
 

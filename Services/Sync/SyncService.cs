@@ -1,7 +1,4 @@
-﻿using PasswordVault.Models;
-using PasswordVault.Services.Crypto;
-using PasswordVault.Services.Database;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +7,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using PasswordVault.Models;
+using PasswordVault.Services.Crypto;
+using PasswordVault.Services.Database;
 
 namespace PasswordVault.Services.Sync;
 
@@ -94,7 +94,11 @@ public class SyncService
         }
 
         var deviceId = Guid.NewGuid().ToString();
-        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        var directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
         File.WriteAllText(path, deviceId);
 
         return deviceId;
@@ -169,8 +173,10 @@ public class SyncService
         ApplyChanges(changes);
     }
 
-    private void ApplyChanges(List<Password> changes)
+    private void ApplyChanges(List<Password>? changes)
     {
+        if (changes == null) return;
+
         using (var db = _dbService.OpenDatabase())
         {
             var collection = db.GetCollection<Password>("passwords");

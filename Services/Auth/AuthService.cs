@@ -1,18 +1,17 @@
-﻿using LiteDB;
-using Microsoft.Extensions.Logging;
-using PasswordVault.Models;
-using PasswordVault.Services.Crypto;
-using PasswordVault.Services.Database;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using LiteDB;
+using PasswordVault.Models;
+using PasswordVault.Services.Crypto;
+using PasswordVault.Services.Database;
 
 namespace PasswordVault.Services.Auth;
 
-public partial class AuthService
+public partial class AuthService : IAuthService
 {
     private readonly ICryptoService _cryptoService;
     private readonly DatabaseService _databaseService;
