@@ -149,9 +149,11 @@ public partial class PasswordListViewModel : ViewModelBase
         }
     }
 
+#pragma warning disable CS1998 // Async method lacks 'await' - required for RelayCommand
     [RelayCommand]
     private async Task EditPasswordAsync(Password? passwordToEdit)
     {
+#pragma warning restore CS1998
         if (passwordToEdit == null) return;
 
         _addPasswordViewModel.SetPasswordToEdit(passwordToEdit);
@@ -194,9 +196,11 @@ public partial class PasswordListViewModel : ViewModelBase
         }
     }
 
+#pragma warning disable CS1998 // Async method lacks 'await' - required for RelayCommand
     [RelayCommand]
     public async Task ConfirmDeletePasswordAsync(Password? passwordToDelete)
     {
+#pragma warning restore CS1998
         if (passwordToDelete == null || passwordToDelete.Id == Guid.Empty) return;
 
         _dialogManager.CreateDialog("Confirm Deletion", $"Are you sure you want to delete the password entry for '{passwordToDelete.Title}'?")
