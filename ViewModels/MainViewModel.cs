@@ -114,6 +114,7 @@ public partial class MainViewModel : ViewModelBase
         }
         finally
         {
+            StatusMessage = "";
             IsBusy = false;
         }
     }
