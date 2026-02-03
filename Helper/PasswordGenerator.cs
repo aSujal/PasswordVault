@@ -38,14 +38,9 @@ public class PasswordGenerator
         "galaxy", "hammer", "igloo", "jacket", "kangaroo", "lighthouse", "magnet", "notebook"
     ];
 
-    private readonly Random _random;
-
     public PasswordGenerator()
     {
-        using var rng = RandomNumberGenerator.Create();
-        var seedBytes = new byte[4];
-        rng.GetBytes(seedBytes);
-        _random = new Random(BitConverter.ToInt32(seedBytes, 0));
+        // No initialization needed - using CSPRNG directly
     }
 
     public string GeneratePassword(int length = 16, bool includeUppercase = true, bool includeLowercase = true,
@@ -67,11 +62,12 @@ public class PasswordGenerator
         var passwordChars = new char[length];
         for (int i = 0; i < length; i++)
         {
-            passwordChars[i] = allChars[_random.Next(allChars.Length)];
+            passwordChars[i] = allChars[RandomNumberGenerator.GetInt32(allChars.Length)];
         }
 
         return new string(passwordChars);
     }
+
     public string GenerateMemorablePassword(int wordCount = 4, string separator = "-", bool includeNumbers = true)
     {
         if (wordCount < 2)
@@ -80,10 +76,10 @@ public class PasswordGenerator
         var words = new List<string>();
         for (int i = 0; i < wordCount; i++)
         {
-            var word = WordList[_random.Next(WordList.Length)];
+            var word = WordList[RandomNumberGenerator.GetInt32(WordList.Length)];
 
             // Capitalize first letter randomly
-            if (_random.Next(2) == 0)
+            if (RandomNumberGenerator.GetInt32(2) == 0)
             {
                 word = char.ToUpper(word[0]) + word.Substring(1);
             }
@@ -96,10 +92,10 @@ public class PasswordGenerator
         if (includeNumbers)
         {
             // Add 2-3 random numbers
-            var numberCount = _random.Next(2, 4);
+            var numberCount = RandomNumberGenerator.GetInt32(2, 4);
             for (int i = 0; i < numberCount; i++)
             {
-                password += _random.Next(0, 10).ToString();
+                password += RandomNumberGenerator.GetInt32(0, 10).ToString();
             }
         }
 
