@@ -14,10 +14,16 @@ public partial class SettingsViewModel : ViewModelBase
     public IRelayCommand SetLightCommand { get; }
     public IRelayCommand SetDarkCommand { get; }
     public IRelayCommand SetSystemCommand { get; }
+    public IRelayCommand ManageCategoriesCommand { get; }
 
-    public SettingsViewModel(ThemeWatcher watcher)
+    private readonly DialogManager _dialogManager;
+    private readonly ManageCategoriesViewModel _manageCategoriesViewModel;
+
+    public SettingsViewModel(ThemeWatcher watcher, DialogManager dialogManager, ManageCategoriesViewModel manageCategoriesViewModel)
     {
         _watcher = watcher;
+        _dialogManager = dialogManager;
+        _manageCategoriesViewModel = manageCategoriesViewModel;
 
         CurrentColors = watcher.ThemeColors;
 
@@ -26,5 +32,16 @@ public partial class SettingsViewModel : ViewModelBase
         SetLightCommand = new RelayCommand(() => _watcher.SwitchTheme(ThemeMode.Light));
         SetDarkCommand = new RelayCommand(() => _watcher.SwitchTheme(ThemeMode.Dark));
         SetSystemCommand = new RelayCommand(() => _watcher.SwitchTheme(ThemeMode.System));
+
+        ManageCategoriesCommand = new RelayCommand(OpenManageCategories);
+    }
+
+    private void OpenManageCategories()
+    {
+        _dialogManager.CreateDialog(_manageCategoriesViewModel)
+            .WithMinWidth(500)
+            .WithSuccessCallback(async () => await _manageCategoriesViewModel.InitializeAsync())
+            .Dismissible()
+            .Show();
     }
 }

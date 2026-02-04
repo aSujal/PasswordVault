@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+	xmlns:icons="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+	xmlns:i="https://github.com/projektanker/icons.avalonia"
+	xmlns:vm="using:PasswordVault.ViewModels"
+	mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="600"
+	x:Class="PasswordVault.ManageCategoriesDialog"
+	x:DataType="vm:ManageCategoriesViewModel">
+	<StackPanel Spacing="16" Margin="24">
+		<Button Classes="Primary" HorizontalAlignment="Stretch"
+			Command="{Binding AddCategoryCommand}">
+			<StackPanel Orientation="Horizontal" Spacing="8">
+				<icons:Lucide Icon="Plus" Height="16" Width="16"
+					StrokeBrush="{DynamicResource ForegroundColor}" />
+				<TextBlock Text="Add Category" />
+			</StackPanel>
+		</Button>
+
+		<ScrollViewer MaxHeight="400">
+			<ItemsControl ItemsSource="{Binding Categories}">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<StackPanel Spacing="8" />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border Background="{DynamicResource CardBackground}" CornerRadius="6"
+							Padding="12" BorderThickness="1"
+							BorderBrush="{DynamicResource BorderColor}">
+							<Grid ColumnDefinitions="Auto, *, Auto">
+								<Border Grid.Column="0" Background="{Binding Color}"
+									CornerRadius="4" Width="32" Height="32" Margin="0,0,12,0">
+									<i:Icon Value="{Binding Icon}" Foreground="White"
+										HorizontalAlignment="Center" VerticalAlignment="Center" />
+								</Border>
+
+								<TextBlock Grid.Column="1" Text="{Binding Name}"
+									VerticalAlignment="Center" FontWeight="Medium" />
+
+								<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+									<Button Classes="Ghost Icon" ToolTip.Tip="Edit"
+										Command="{Binding $parent[UserControl].((vm:ManageCategoriesViewModel)DataContext).EditCategoryCommand}"
+										CommandParameter="{Binding}">
+										<icons:Lucide Icon="Pen" Height="16" Width="16" />
+									</Button>
+									<Button Classes="Ghost Icon" ToolTip.Tip="Delete"
+										Command="{Binding $parent[UserControl].((vm:ManageCategoriesViewModel)DataContext).DeleteCategoryCommand}"
+										CommandParameter="{Binding}">
+										<icons:Lucide Icon="Trash2" Height="16" Width="16"
+											StrokeBrush="Coral" />
+									</Button>
+								</StackPanel>
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+
+		<ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
+	</StackPanel>
+</UserControl>

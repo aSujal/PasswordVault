@@ -1,11 +1,14 @@
 <DataTemplates xmlns="https://github.com/avaloniaui"
-               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-               xmlns:viewModels="clr-namespace:PasswordVault.ViewModels"
-               xmlns:pages="clr-namespace:PasswordVault.Views">
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:viewModels="clr-namespace:PasswordVault.ViewModels"
+	xmlns:pages="clr-namespace:PasswordVault.Views">
 	<DataTemplate DataType="{x:Type viewModels:PasswordListViewModel}">
-		<pages:PasswordsPage/>
+		<pages:PasswordsPage />
 	</DataTemplate>
 	<DataTemplate DataType="{x:Type viewModels:DashboardViewModel}">
-		<pages:DashboardPage/>
+		<pages:DashboardPage />
+	</DataTemplate>
+	<DataTemplate DataType="{x:Type viewModels:SettingsViewModel}">
+		<pages:SettingsPage />
 	</DataTemplate>
 </DataTemplates>

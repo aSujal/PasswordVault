@@ -7,16 +7,35 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/PasswordVault.csproj",
-                "--configuration",
-                "Debug"
+                "${workspaceFolder}/PasswordVault.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
-            "problemMatcher": "$msCompile",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "detail": "Build PasswordVault for Debug"
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/PasswordVault.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/PasswordVault.sln"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }

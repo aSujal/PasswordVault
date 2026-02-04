@@ -75,6 +75,7 @@ public partial class App : Application
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<SyncViewModel>();
         services.AddSingleton<DialogManager>();
+        services.AddSingleton<ManageCategoriesViewModel>();
 
         services.AddSingleton<MainWindow>();
         services.AddSingleton<PasswordsPage>();

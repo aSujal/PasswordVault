@@ -26,7 +26,18 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
     [ObservableProperty]
     private string _selectedIcon = string.Empty;
 
-    public ICommand CreateCommand { get; }
+    [ObservableProperty]
+    private bool _isEditMode;
+
+    [ObservableProperty]
+    private string _dialogTitle = "New Category";
+
+    [ObservableProperty]
+    private string _submitButtonText = "Create";
+
+    private Models.Category? _categoryToEdit;
+
+    public ICommand SubmitCommand { get; }
 
     public ObservableCollection<string> AvailableIcons { get; } = [
         "fa-solid fa-key",
@@ -63,10 +74,34 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
     {
         _dialogManager = dialogManager;
         _categoryService = categoryService;
-        CreateCommand = new RelayCommand(Create);
+        SubmitCommand = new RelayCommand(Submit);
     }
 
-    private async void Create()
+    public void Initialize()
+    {
+        IsEditMode = false;
+        _categoryToEdit = null;
+        Name = string.Empty;
+        SelectedColor = "#FF00A638";
+        SelectedIcon = string.Empty;
+        DialogTitle = "New Category";
+        SubmitButtonText = "Create";
+        ClearAllErrors();
+    }
+
+    public void SetCategoryToEdit(Models.Category category)
+    {
+        IsEditMode = true;
+        _categoryToEdit = category;
+        Name = category.Name;
+        SelectedColor = category.Color;
+        SelectedIcon = category.Icon;
+        DialogTitle = "Edit Category";
+        SubmitButtonText = "Save";
+        ClearAllErrors();
+    }
+
+    private async void Submit()
     {
         ClearErrors(nameof(Name));
         ClearErrors(nameof(SelectedColor));
@@ -95,20 +130,41 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
             return;
         }
 
-        if (await _categoryService.CategoryExistsAsync(Name))
+        if (!IsEditMode && await _categoryService.CategoryExistsAsync(Name))
         {
             AddError(nameof(Name), "A category with this name already exists.");
             return;
         }
 
-        var category = new Models.Category
+        // If editing and name changed, check for duplicate
+        if (IsEditMode && _categoryToEdit != null &&
+            !_categoryToEdit.Name.Equals(Name, StringComparison.OrdinalIgnoreCase) &&
+            await _categoryService.CategoryExistsAsync(Name))
         {
-            Name = Name.Trim(),
-            Color = SelectedColor,
-            Icon = SelectedIcon,
-        };
+            AddError(nameof(Name), "A category with this name already exists.");
+            return;
+        }
 
-        await _categoryService.AddCategoryAsync(category);
+        if (IsEditMode && _categoryToEdit != null)
+        {
+            _categoryToEdit.Name = Name.Trim();
+            _categoryToEdit.Color = SelectedColor;
+            _categoryToEdit.Icon = SelectedIcon;
+
+            await _categoryService.UpdateCategoryAsync(_categoryToEdit);
+        }
+        else
+        {
+            var category = new Models.Category
+            {
+                Name = Name.Trim(),
+                Color = SelectedColor,
+                Icon = SelectedIcon,
+            };
+
+            await _categoryService.AddCategoryAsync(category);
+        }
+
         _dialogManager.Close(this, new CloseDialogOptions { Success = true });
     }
 

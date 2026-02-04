@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using PasswordVault.ViewModels;
 using PasswordVault.Views;
@@ -22,6 +17,7 @@ public static class DialogRegistrationExtensions
         dialogService.Register<PasswordsPage, PasswordListViewModel>();
         dialogService.Register<AddPasswordDialog, AddPasswordDialogViewModel>();
         dialogService.Register<AddCategoryDialog, AddCategoryDialogViewModel>();
+        dialogService.Register<ManageCategoriesDialog, ManageCategoriesViewModel>();
 
         return service;
     }

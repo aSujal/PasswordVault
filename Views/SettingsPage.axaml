@@ -1,8 +1,58 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="PasswordVault.Views.SettingsPage">
-  Welcome to Avalonia!
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:vm="using:PasswordVault.ViewModels"
+  xmlns:icons="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+  xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+  mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+  x:Class="PasswordVault.Views.SettingsPage"
+  x:DataType="vm:SettingsViewModel">
+
+  <StackPanel Spacing="24" Margin="24">
+    <TextBlock Text="Settings" Classes="h2" />
+
+    <!-- Theme Settings -->
+    <shadui:Card Padding="24">
+      <StackPanel Spacing="16">
+        <StackPanel Spacing="4">
+          <TextBlock Text="Appearance" Classes="h4" />
+          <TextBlock Text="Customize the look and feel of the application." Classes="p"
+            Opacity="0.6" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Spacing="16">
+          <Button Command="{Binding SetLightCommand}" Classes="Outline" Padding="16">
+            <icons:Lucide Icon="Sun" HorizontalAlignment="Center"   
+              StrokeBrush="{DynamicResource ForegroundColor}" />
+          </Button>
+          <Button Command="{Binding SetDarkCommand}" Classes="Outline" Padding="16">
+            <icons:Lucide Icon="Moon" HorizontalAlignment="Center"
+              StrokeBrush="{DynamicResource ForegroundColor}" />
+          </Button>
+          <Button Command="{Binding SetSystemCommand}" Classes="Outline" Padding="16">
+            <icons:Lucide Icon="Monitor" HorizontalAlignment="Center"
+              StrokeBrush="{DynamicResource ForegroundColor}" />
+          </Button>
+        </StackPanel>
+      </StackPanel>
+    </shadui:Card>
+
+    <!-- Data Management -->
+    <shadui:Card Padding="24">
+      <StackPanel Spacing="16">
+        <StackPanel Spacing="4">
+          <TextBlock Text="Data Management" Classes="h4" />
+          <TextBlock Text="Manage your categories and vault data." Classes="p" Opacity="0.6" />
+        </StackPanel>
+
+        <Button Command="{Binding ManageCategoriesCommand}" Classes="Outline">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <icons:Lucide Icon="Tags" StrokeBrush="{DynamicResource ForegroundColor}" />
+            <TextBlock Text="Manage Categories" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </shadui:Card>
+  </StackPanel>
 </UserControl>
