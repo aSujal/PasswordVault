@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Threading.Tasks;
 using ShadUI;
 
 namespace PasswordVault.ViewModels;
@@ -33,14 +34,14 @@ public partial class SettingsViewModel : ViewModelBase
         SetDarkCommand = new RelayCommand(() => _watcher.SwitchTheme(ThemeMode.Dark));
         SetSystemCommand = new RelayCommand(() => _watcher.SwitchTheme(ThemeMode.System));
 
-        ManageCategoriesCommand = new RelayCommand(OpenManageCategories);
+        ManageCategoriesCommand = new AsyncRelayCommand(OpenManageCategories);
     }
 
-    private void OpenManageCategories()
+    private async Task OpenManageCategories()
     {
+        await _manageCategoriesViewModel.InitializeAsync();
         _dialogManager.CreateDialog(_manageCategoriesViewModel)
             .WithMinWidth(500)
-            .WithSuccessCallback(async () => await _manageCategoriesViewModel.InitializeAsync())
             .Dismissible()
             .Show();
     }

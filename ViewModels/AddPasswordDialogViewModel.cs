@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
+// using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,33 +21,14 @@ namespace PasswordVault.ViewModels;
 
 public partial class AddPasswordDialogViewModel : ViewModelBase
 {
+    [ObservableProperty]
     private string _title = string.Empty;
-    [Required(ErrorMessage = "Title is required")]
-    public string Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value, true);
-    }
 
+    [ObservableProperty]
     private string _username = string.Empty;
-    [Required(ErrorMessage = "Username is required")]
-    public string Username
-    {
-        get => _username;
-        set => SetProperty(ref _username, value, true);
-    }
 
+    [ObservableProperty]
     private string _password = string.Empty;
-    [Required(ErrorMessage = "Password is required")]
-    public string Password
-    {
-        get => _password;
-        set
-        {
-            SetProperty(ref _password, value, true);
-            OnPasswordChanged(value);
-        }
-    }
 
     [ObservableProperty]
     private string _url = string.Empty;
@@ -208,7 +189,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         };
     }
 
-    private void OnPasswordChanged(string value)
+    partial void OnPasswordChanged(string value)
     {
         EvaluatePasswordStrength();
     }
@@ -244,7 +225,11 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     [RelayCommand]
     private async Task Submit()
     {
-        ValidateAllProperties();
+        ClearAllErrors();
+        if (string.IsNullOrWhiteSpace(Title)) AddError(nameof(Title), "Title is required");
+        if (string.IsNullOrWhiteSpace(Username)) AddError(nameof(Username), "Username is required");
+        if (string.IsNullOrWhiteSpace(Password)) AddError(nameof(Password), "Password is required");
+
         if (HasErrors)
         {
             return;
