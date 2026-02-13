@@ -4,10 +4,12 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:i="https://github.com/projektanker/icons.avalonia"
 	xmlns:vm="using:PasswordVault.ViewModels"
+    xmlns:sys="using:System" 
 	xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
 	xmlns:converters="using:PasswordVault.Converters"
 	mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-	x:Class="PasswordVault.AddCategoryDialog"
+	x:Class="PasswordVault.Views.AddCategoryDialog"
+    x:Name="Root"
 	x:DataType="vm:AddCategoryDialogViewModel">
 	<StackPanel Spacing="16" Margin="24">
 		<TextBlock Text="{Binding DialogTitle}" Classes="h3" />
@@ -39,18 +41,21 @@
 							</ItemsPanelTemplate>
 						</ItemsControl.ItemsPanel>
 						<ItemsControl.ItemTemplate>
-							<DataTemplate>
-								<Button Classes="Ghost Icon" Margin="2"
+							<DataTemplate x:DataType="sys:String">
+								<Button Classes="Icon" Margin="2"
 									Command="{Binding $parent[UserControl].((vm:AddCategoryDialogViewModel)DataContext).SelectIconCommand}"
 									CommandParameter="{Binding .}"
-									ToolTip.Tip="{Binding .}">
+									ToolTip.Tip="{Binding .}"
+                                    CornerRadius="4"
+                                    Classes.Outline="{Binding $self.Tag}">
+                                    <Button.Tag>
+                                        <MultiBinding Converter="{x:Static converters:StringEqualityConverter.Instance}">
+                                            <Binding Path="$parent[UserControl].((vm:AddCategoryDialogViewModel)DataContext).SelectedIcon" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </Button.Tag>
 									<Panel>
-										<!-- Highlight selected icon -->
-										<Border CornerRadius="4"
-											Background="{DynamicResource PrimaryColor}"
-											Opacity="0.2"
-											IsVisible="{Binding $parent[UserControl].((vm:AddCategoryDialogViewModel)DataContext).SelectedIcon, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={Binding .}}" />
-										<i:Icon Value="{Binding .}" Height="16" Width="16" />
+										<i:Icon Value="{Binding .}" />
 									</Panel>
 								</Button>
 							</DataTemplate>

@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace PasswordVault;
+namespace PasswordVault.Views;
 
 public partial class ManageCategoriesDialog : UserControl
 {

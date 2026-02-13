@@ -7,13 +7,13 @@
 	xmlns:i="https://github.com/projektanker/icons.avalonia"
 	xmlns:vm="using:PasswordVault.ViewModels"
 	mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="600"
-	x:Class="PasswordVault.ManageCategoriesDialog"
+	x:Class="PasswordVault.Views.ManageCategoriesDialog"
 	x:DataType="vm:ManageCategoriesViewModel">
 	<StackPanel Spacing="16" Margin="24">
 		<Button Classes="Primary" HorizontalAlignment="Stretch"
 			Command="{Binding AddCategoryCommand}">
 			<StackPanel Orientation="Horizontal" Spacing="8">
-				<icons:Lucide Icon="Plus" Height="16" Width="16" />
+				<icons:Lucide Icon="Plus" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}"/>
 				<TextBlock Text="Add Category" />
 			</StackPanel>
 		</Button>
@@ -41,15 +41,19 @@
 									VerticalAlignment="Center" FontWeight="Medium" />
 
 								<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
-									<Button Classes="Ghost Icon" ToolTip.Tip="Edit"
+									<Button Classes="Icon" ToolTip.Tip="Edit" 
 										Command="{Binding $parent[UserControl].((vm:ManageCategoriesViewModel)DataContext).EditCategoryCommand}"
 										CommandParameter="{Binding}">
-										<icons:Lucide Icon="Pen" StrokeBrush="{DynamicResource ForegroundColor}"/>
+										<Panel>
+											<i:Icon Value="fa-solid fa-pen"/>
+										</Panel>
 									</Button>
-									<Button Classes="Ghost Icon" ToolTip.Tip="Delete"
+									<Button Classes="DestructiveIcon" ToolTip.Tip="Delete" 
 										Command="{Binding $parent[UserControl].((vm:ManageCategoriesViewModel)DataContext).DeleteCategoryCommand}"
 										CommandParameter="{Binding}">
-										<icons:Lucide Icon="Trash2" StrokeBrush="Coral" />
+										<Panel>
+											<i:Icon Value="fa-solid fa-trash"/>
+										</Panel>
 									</Button>
 								</StackPanel>
 							</Grid>

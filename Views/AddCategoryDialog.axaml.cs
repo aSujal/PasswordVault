@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace PasswordVault;
+namespace PasswordVault.Views;
 
 public partial class AddCategoryDialog : UserControl
 {

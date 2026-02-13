@@ -67,6 +67,7 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
         "fa-solid fa-user-secret",
         "fa-solid fa-file-invoice",
         "fa-solid fa-clipboard-list",
+        "fa-solid fa-building-columns",
         "fa-solid fa-vault"
      ];
 
