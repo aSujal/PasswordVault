@@ -9,6 +9,7 @@ using PasswordVault.Models;
 using PasswordVault.Services;
 using PasswordVault.Services.Auth;
 using PasswordVault.Services.Database;
+using PasswordVault.Services.Crypto;
 using ShadUI;
 using Windows.ApplicationModel.DataTransfer;
 
@@ -20,6 +21,7 @@ public partial class PasswordListViewModel : ViewModelBase
     private readonly AddPasswordDialogViewModel _addPasswordViewModel;
     private readonly IPasswordService _passwordService;
     private readonly IAuthService _authService;
+    private readonly ICryptoService _cryptoService;
     public readonly ToastManager _toastManager;
 
     [ObservableProperty]
@@ -36,6 +38,7 @@ public partial class PasswordListViewModel : ViewModelBase
         AddPasswordDialogViewModel addPasswordViewModel,
         IPasswordService passwordService,
         IAuthService authService,
+        ICryptoService cryptoService,
         ToastManager toastManager
         )
     {
@@ -43,6 +46,7 @@ public partial class PasswordListViewModel : ViewModelBase
         _addPasswordViewModel = addPasswordViewModel;
         _passwordService = passwordService;
         _authService = authService;
+        _cryptoService = cryptoService;
         _toastManager = toastManager;
         _authService.Authenticated += OnAuthenticated;
         _addPasswordViewModel.PasswordAddedSuccessfully += async (s, e) => await RefreshAsync();
@@ -59,6 +63,10 @@ public partial class PasswordListViewModel : ViewModelBase
         try
         {
             var allPasswords = await _passwordService.GetAllPasswordsAsync();
+            foreach (var password in allPasswords)
+            {
+                CalculatePasswordStrength(password);
+            }
             Passwords = new ObservableCollection<Password>(allPasswords);
         }
         catch (Exception ex)
@@ -72,6 +80,30 @@ public partial class PasswordListViewModel : ViewModelBase
         }
     }
 
+    private void CalculatePasswordStrength(Password password)
+    {
+        if (string.IsNullOrEmpty(password.EncryptedPassword)) return;
+        try
+        {
+            var decrypted = _cryptoService.DecryptPassword(password.EncryptedPassword);
+            var strength = Helper.PasswordGenerator.EvaluatePasswordStrength(decrypted);
+            
+            password.StrengthText = strength.Level;
+            password.StrengthColor = strength.Score switch
+            {
+                < 30 => "Red",           // Very Weak
+                < 50 => "DarkOrange",    // Weak
+                < 70 => "Orange",        // Moderate
+                < 90 => "LightGreen",    // Strong
+                _ => "Green"             // Very Strong
+            };
+        }
+        catch
+        {
+            password.StrengthColor = "Transparent";
+        }
+    }
+
     public async Task ExecuteSearchAsync()
     {
         try
@@ -80,11 +112,13 @@ public partial class PasswordListViewModel : ViewModelBase
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
                 var allPasswords = await _passwordService.GetAllPasswordsAsync();
+                foreach (var password in allPasswords) CalculatePasswordStrength(password);
                 Passwords = new ObservableCollection<Password>(allPasswords);
             }
             else
             {
                 var result = await _passwordService.SearchPasswordsAsync(searchTerm);
+                foreach (var password in result) CalculatePasswordStrength(password);
                 Passwords = new ObservableCollection<Password>(result);
             }
         }
@@ -107,6 +141,7 @@ public partial class PasswordListViewModel : ViewModelBase
         try
         {
             var allPasswords = await _passwordService.GetAllPasswordsAsync();
+            foreach (var password in allPasswords) CalculatePasswordStrength(password);
             Passwords = new ObservableCollection<Password>(allPasswords);
         }
         catch (Exception ex)
@@ -174,7 +209,6 @@ public partial class PasswordListViewModel : ViewModelBase
     {
         if (password == null) return;
 
-        // You might want to add a confirmation dialog here
         try
         {
             await _passwordService.DeletePasswordAsync(password.Id);

@@ -52,6 +52,9 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     private string _passwordStrengthText = "Very Weak";
 
     [ObservableProperty]
+    private bool _useMemorablePassword;
+
+    [ObservableProperty]
     private string _passwordStrengthColor = "Red";
     // Properties for Edit Mode
     [ObservableProperty]
@@ -194,15 +197,23 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         EvaluatePasswordStrength();
     }
 
+
     [RelayCommand]
     private void GeneratePassword()
     {
-        Password = _passwordGenerator.GeneratePassword(
-            length: 16,
-            includeUppercase: true,
-            includeLowercase: true,
-            includeNumbers: true,
-            includeSpecialChars: true);
+        if (UseMemorablePassword)
+        {
+            Password = _passwordGenerator.GenerateMemorablePassword();
+        }
+        else
+        {
+            Password = _passwordGenerator.GeneratePassword(
+                length: 16,
+                includeUppercase: true,
+                includeLowercase: true,
+                includeNumbers: true,
+                includeSpecialChars: true);
+        }
     }
 
     [RelayCommand]

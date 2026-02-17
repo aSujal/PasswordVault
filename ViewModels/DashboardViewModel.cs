@@ -75,9 +75,17 @@ public partial class DashboardViewModel : ViewModelBase
             // Calculate weak passwords
             WeakPasswords = passwords.Count(p =>
             {
-                var decrypted = _cryptoService.DecryptPassword(p.EncryptedPassword);
-                var strength = Helper.PasswordGenerator.EvaluatePasswordStrength(decrypted);
-                return strength.Score <= 2; // Weak or Very Weak
+                if (string.IsNullOrEmpty(p.EncryptedPassword)) return false;
+                try
+                {
+                    var decrypted = _cryptoService.DecryptPassword(p.EncryptedPassword);
+                    var strength = Helper.PasswordGenerator.EvaluatePasswordStrength(decrypted);
+                    return strength.Level == "Very Weak" || strength.Level == "Weak";
+                }
+                catch
+                {
+                    return false;
+                }
             });
 
             // Get recent passwords (last 5)

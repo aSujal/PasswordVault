@@ -32,5 +32,11 @@ public class Password
     // Sync metadata
     public bool IsDeleted { get; set; } = false;
     public long SyncVersion { get; set; } = 0;
+
+    [BsonIgnore]
+    public string StrengthColor { get; set; } = "Transparent";
+
+    [BsonIgnore]
+    public string StrengthText { get; set; } = string.Empty;
 }
 
