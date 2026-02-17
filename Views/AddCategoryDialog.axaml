@@ -11,6 +11,15 @@
 	x:Class="PasswordVault.Views.AddCategoryDialog"
     x:Name="Root"
 	x:DataType="vm:AddCategoryDialogViewModel">
+    <UserControl.Styles>
+        <Style Selector="Button.Outline">
+             <Setter Property="HorizontalContentAlignment" Value="Center" />
+             <Setter Property="VerticalContentAlignment" Value="Center" />
+             <Setter Property="Padding" Value="4" />
+             <Setter Property="Width" Value="36" />
+             <Setter Property="Height" Value="36" />
+        </Style>
+    </UserControl.Styles>
 	<StackPanel Spacing="16" Margin="24">
 		<TextBlock Text="{Binding DialogTitle}" Classes="h3" />
 
@@ -21,12 +30,19 @@
 
 		<StackPanel Spacing="8">
 			<Label Content="Color" />
-			<ColorPicker
+			<ColorPicker Name="ColorPicker"
 				Color="{Binding SelectedColor, Converter={x:Static converters:StringToColorConverter.Instance}, Mode=TwoWay}"
 				HorizontalAlignment="Stretch"
 				shadui:ControlAssist.Hint="Pick a color"
 				shadui:ControlAssist.Label="Category Color"
 			/>
+            <ItemsControl ItemsSource="{Binding #ColorPicker.(DataValidationErrors.Errors)}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Foreground="{DynamicResource destructive}" FontSize="12" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
 		</StackPanel>
 
 		<StackPanel Spacing="8">
@@ -47,7 +63,7 @@
 									CommandParameter="{Binding .}"
 									ToolTip.Tip="{Binding .}"
                                     CornerRadius="4"
-                                    Classes.Outline="{Binding $self.Tag}">
+                                    Classes.Outline="{Binding $self.Tag, TargetNullValue=False, FallbackValue=False}">
                                     <Button.Tag>
                                         <MultiBinding Converter="{x:Static converters:StringEqualityConverter.Instance}">
                                             <Binding Path="$parent[UserControl].((vm:AddCategoryDialogViewModel)DataContext).SelectedIcon" />
@@ -76,6 +92,10 @@
 					<TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Medium" />
 				</StackPanel>
 			</Border>
+
+			<Button Command="{Binding CancelCommand}" Classes="Destructive">
+				<TextBlock Text="Cancel" />
+			</Button>
 
 			<Button Command="{Binding SubmitCommand}" IsDefault="True" Classes="Primary">
 				<TextBlock Text="{Binding SubmitButtonText}" />

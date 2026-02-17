@@ -119,7 +119,7 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
             return;
         }
 
-        if (SelectedColor == null || SelectedColor.Length != 7 || !SelectedColor.StartsWith("#"))
+        if (SelectedColor == null || (SelectedColor.Length != 7 && SelectedColor.Length != 9) || !SelectedColor.StartsWith('#'))
         {
             AddError(nameof(SelectedColor), "Invalid color format. Use a hex color code (e.g., #00A638).");
             return;
@@ -176,6 +176,12 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
         {
             SelectedColor = color;
         }
+    }
+
+    [RelayCommand]
+    private void Cancel()
+    {
+        _dialogManager.Close(this);
     }
 
     [RelayCommand]

@@ -89,7 +89,7 @@ public partial class ManageCategoriesViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task DeleteCategoryAsync(Category category)
+    private void DeleteCategory(Category category)
     {
         if (category == null) return;
 
