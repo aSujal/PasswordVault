@@ -108,7 +108,6 @@
             <TransitioningContentControl
                 Grid.Column="1"
                 Content="{Binding CurrentViewModel}" />
-            <shadui:ToastHost Manager="{Binding ToastManager}" />
         </Grid>
 
         <!-- Auth Overlay Layer -->
@@ -156,5 +155,6 @@
                 </StackPanel>
             </shadui:Card>
         </Grid>
+        <shadui:ToastHost Manager="{Binding ToastManager}" />
     </Panel>
 </shadui:Window>

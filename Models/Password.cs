@@ -38,5 +38,8 @@ public class Password
 
     [BsonIgnore]
     public string StrengthText { get; set; } = string.Empty;
+
+    [BsonIgnore]
+    public bool IsWeak => StrengthText == "Weak" || StrengthText == "Very Weak";
 }
 
