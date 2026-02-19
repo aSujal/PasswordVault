@@ -22,6 +22,7 @@ public partial class PasswordListViewModel : ViewModelBase
     private readonly IPasswordService _passwordService;
     private readonly IAuthService _authService;
     private readonly ICryptoService _cryptoService;
+    private readonly ICategoryService _categoryService;
     public readonly ToastManager _toastManager;
 
     [ObservableProperty]
@@ -39,6 +40,7 @@ public partial class PasswordListViewModel : ViewModelBase
         IPasswordService passwordService,
         IAuthService authService,
         ICryptoService cryptoService,
+        ICategoryService categoryService,
         ToastManager toastManager
         )
     {
@@ -47,9 +49,11 @@ public partial class PasswordListViewModel : ViewModelBase
         _passwordService = passwordService;
         _authService = authService;
         _cryptoService = cryptoService;
+        _categoryService = categoryService;
         _toastManager = toastManager;
         _authService.Authenticated += OnAuthenticated;
         _addPasswordViewModel.PasswordAddedSuccessfully += async (s, e) => await RefreshAsync();
+        _categoryService.CategoriesChanged += async (s, e) => await RefreshAsync();
     }
 
     public void OnAuthenticated(object? sender, EventArgs e)

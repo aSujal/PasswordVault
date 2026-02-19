@@ -36,6 +36,8 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
     private string _submitButtonText = "Create";
 
     private Models.Category? _categoryToEdit;
+    
+    public Models.Category? CreatedCategory { get; private set; } // Property to expose the created category
 
     public ICommand SubmitCommand { get; }
 
@@ -87,6 +89,7 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
         SelectedIcon = string.Empty;
         DialogTitle = "New Category";
         SubmitButtonText = "Create";
+        CreatedCategory = null; 
         ClearAllErrors();
     }
 
@@ -163,7 +166,8 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
                 Icon = SelectedIcon,
             };
 
-            await _categoryService.AddCategoryAsync(category);
+            var newCategory = await _categoryService.AddCategoryAsync(category);
+            CreatedCategory = newCategory;
         }
 
         _dialogManager.Close(this, new CloseDialogOptions { Success = true });

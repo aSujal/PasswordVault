@@ -100,6 +100,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         _authService = authService;
         _addCategoryDialogViewModel = addCategoryDialogViewModel;
         _authService.Authenticated += OnAuthenticated;
+        _categoryService.CategoriesChanged += OnCategoriesChanged;
 
         EvaluatePasswordStrength();
         _authService = authService;
@@ -159,6 +160,11 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     {
         LoadCategories();
         Initialize();
+    }
+
+    private void OnCategoriesChanged(object? sender, EventArgs e)
+    {
+        _ = LoadCategoriesAsync();
     }
 
     private void LoadCategories()
@@ -224,6 +230,16 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
             .WithSuccessCallback(async () =>
             {
                 await LoadCategoriesAsync();
+                
+                // Check if a category was created and select it
+                if (_addCategoryDialogViewModel.CreatedCategory != null)
+                {
+                    var newCategory = Categories.FirstOrDefault(c => c.Id == _addCategoryDialogViewModel.CreatedCategory.Id);
+                    if (newCategory != null)
+                    {
+                        SelectedCategory = newCategory;
+                    }
+                }
             })
             .WithCancelCallback(() =>
             {

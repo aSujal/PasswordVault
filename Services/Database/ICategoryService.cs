@@ -7,6 +7,7 @@ namespace PasswordVault.Services.Database;
 
 public interface ICategoryService
 {
+    event EventHandler? CategoriesChanged;
     Task<IEnumerable<Category>> GetAllCategoriesAsync();
     Task<Category> GetCategoryByIdAsync(Guid id);
     Task<Category> GetCategoryByNameAsync(string name);

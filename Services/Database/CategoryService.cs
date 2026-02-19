@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LiteDB;
 using PasswordVault.Models;
 
 namespace PasswordVault.Services.Database;
 
-public class CategoryService : ICategoryService
+public class CategoryService(DatabaseService databaseService) : ICategoryService
 {
-    private readonly DatabaseService _databaseService;
+    private readonly DatabaseService _databaseService = databaseService;
     private readonly string _collectionName = "categories";
 
-    public CategoryService(DatabaseService databaseService)
-    {
-        _databaseService = databaseService;
-    }
+    public event EventHandler? CategoriesChanged;
 
     public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
     {
@@ -75,6 +73,7 @@ public class CategoryService : ICategoryService
             category.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             collection.Insert(category);
+            CategoriesChanged?.Invoke(this, EventArgs.Empty);
             return category;
         });
     }
@@ -103,6 +102,7 @@ public class CategoryService : ICategoryService
             category.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             collection.Update(category);
+            CategoriesChanged?.Invoke(this, EventArgs.Empty);
             return category;
         });
     }
@@ -118,26 +118,50 @@ public class CategoryService : ICategoryService
             if (category == null || category.IsDeleted)
                 return false;
 
-            // Soft delete
+            // Soft delete (preserves record for sync)
             category.IsDeleted = true;
             category.UpdatedAt = DateTime.UtcNow;
             category.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
             collection.Update(category);
 
-            // Move passwords in this category to "Uncategorized"
+            // Find the fallback "Uncategorized" category using in-memory filtering
+            // (LiteDB LINQ doesn't support String.Equals with StringComparison)
+            var allCategories = collection.FindAll().ToList();
+            var uncategorized = allCategories.FirstOrDefault(
+                x => x.Name.Equals("Uncategorized", StringComparison.OrdinalIgnoreCase) && !x.IsDeleted && x.Id != id);
+
+            // If not found, create one
+            if (uncategorized == null)
+            {
+                uncategorized = new Category
+                {
+                    Name = "Uncategorized",
+                    Color = "#6B7280",
+                    Icon = "Folder",
+                    Id = Guid.NewGuid(),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                collection.Insert(uncategorized);
+            }
+
+            // Move passwords: BsonRef stores the category as { $id: <guid> }
+            // so we query using BsonExpression to match the ref's $id
             var passwordCollection = db.GetCollection<Password>("passwords");
-            var passwordsToUpdate = passwordCollection.Query()
-                .Where(x => x.Category == category && !x.IsDeleted)
+            var passwordsToUpdate = passwordCollection
+                .Include(x => x.Category)
+                .Find(LiteDB.Query.EQ("Category.$id", new LiteDB.BsonValue(id)))
                 .ToList();
 
             foreach (var password in passwordsToUpdate)
             {
+                password.Category = uncategorized;
                 password.UpdatedAt = DateTime.UtcNow;
                 password.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 passwordCollection.Update(password);
             }
 
+            CategoriesChanged?.Invoke(this, EventArgs.Empty);
             return true;
         });
     }
