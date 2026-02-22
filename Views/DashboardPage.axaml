@@ -112,9 +112,10 @@
 													Padding="8,4"
 													MinWidth="30">
 												<TextBlock Text="{Binding PasswordCount}"
-														   HorizontalAlignment="Center"
-														   FontWeight="SemiBold"
-														   FontSize="12"/>
+													Foreground="White"
+													HorizontalAlignment="Center"
+													FontWeight="SemiBold"
+													FontSize="12"/>
 											</Border>
 										</Grid>
 									</DataTemplate>

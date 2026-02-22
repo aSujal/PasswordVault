@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -26,6 +28,15 @@ public partial class PasswordListViewModel : ViewModelBase
     public readonly ToastManager _toastManager;
 
     [ObservableProperty]
+    private FilterPopupViewModel _filterViewModel;
+
+    [ObservableProperty]
+    private int _activeFilterCount;
+
+    [ObservableProperty]
+    private bool _isFilterActive;
+
+    [ObservableProperty]
     private ObservableCollection<Password> _passwords = [];
 
     [ObservableProperty]
@@ -41,7 +52,8 @@ public partial class PasswordListViewModel : ViewModelBase
         IAuthService authService,
         ICryptoService cryptoService,
         ICategoryService categoryService,
-        ToastManager toastManager
+        ToastManager toastManager,
+        FilterPopupViewModel filterPopupViewModel
         )
     {
         _dialogManager = dialogManager;
@@ -51,9 +63,11 @@ public partial class PasswordListViewModel : ViewModelBase
         _cryptoService = cryptoService;
         _categoryService = categoryService;
         _toastManager = toastManager;
+        _filterViewModel = filterPopupViewModel;
         _authService.Authenticated += OnAuthenticated;
         _addPasswordViewModel.PasswordAddedSuccessfully += async (s, e) => await RefreshAsync();
         _categoryService.CategoriesChanged += async (s, e) => await RefreshAsync();
+        _filterViewModel.FiltersApplied += async (s, e) => await ApplyFiltersAsync();
     }
 
     public void OnAuthenticated(object? sender, EventArgs e)
@@ -113,18 +127,19 @@ public partial class PasswordListViewModel : ViewModelBase
         try
         {
             var searchTerm = SearchText;
+            IEnumerable<Password> passwords;
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
-                var allPasswords = await _passwordService.GetAllPasswordsAsync();
-                foreach (var password in allPasswords) CalculatePasswordStrength(password);
-                Passwords = new ObservableCollection<Password>(allPasswords);
+                passwords = await _passwordService.GetAllPasswordsAsync();
             }
             else
             {
-                var result = await _passwordService.SearchPasswordsAsync(searchTerm);
-                foreach (var password in result) CalculatePasswordStrength(password);
-                Passwords = new ObservableCollection<Password>(result);
+                passwords = await _passwordService.SearchPasswordsAsync(searchTerm);
             }
+
+            foreach (var password in passwords) CalculatePasswordStrength(password);
+            passwords = ApplyInMemoryFilters(passwords);
+            Passwords = new ObservableCollection<Password>(passwords);
         }
         catch (Exception ex)
         {
@@ -135,6 +150,84 @@ public partial class PasswordListViewModel : ViewModelBase
         {
             IsSearching = false;
         }
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        IsSearching = true;
+        try
+        {
+            IEnumerable<Password> passwords;
+            var searchTerm = SearchText;
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                passwords = await _passwordService.GetAllPasswordsAsync();
+            }
+            else
+            {
+                passwords = await _passwordService.SearchPasswordsAsync(searchTerm);
+            }
+
+            foreach (var password in passwords) CalculatePasswordStrength(password);
+            passwords = ApplyInMemoryFilters(passwords);
+            Passwords = new ObservableCollection<Password>(passwords);
+
+            IsFilterActive = FilterViewModel.IsAnyFilterActive;
+            ActiveFilterCount = CalculateActiveFilterCount();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error applying filters: {ex.Message}");
+            Passwords = [];
+        }
+        finally
+        {
+            IsSearching = false;
+        }
+    }
+
+    private IEnumerable<Password> ApplyInMemoryFilters(IEnumerable<Password> passwords)
+    {
+        var filtered = passwords;
+
+        // Category filter
+        if (FilterViewModel.SelectedCategory != null)
+        {
+            filtered = filtered.Where(p => p.Category?.Id == FilterViewModel.SelectedCategory.Id);
+        }
+
+        // Favorites filter
+        if (FilterViewModel.ShowFavoritesOnly)
+        {
+            filtered = filtered.Where(p => p.IsFavorite);
+        }
+
+        // Sort
+        filtered = FilterViewModel.SelectedSortOption switch
+        {
+            "Title A-Z" => filtered.OrderBy(p => p.Title),
+            "Title Z-A" => filtered.OrderByDescending(p => p.Title),
+            "Oldest First" => filtered.OrderBy(p => p.CreatedAt),
+            "Last Used" => filtered.OrderByDescending(p => p.LastUsed),
+            _ => filtered.OrderByDescending(p => p.CreatedAt) // "Newest First" default
+        };
+
+        return filtered;
+    }
+
+    private int CalculateActiveFilterCount()
+    {
+        int count = 0;
+        if (FilterViewModel.SelectedCategory != null) count++;
+        if (FilterViewModel.ShowFavoritesOnly) count++;
+        if (FilterViewModel.SelectedSortOption != "Newest First") count++;
+        return count;
+    }
+
+    [RelayCommand]
+    private async Task OpenFilterPopupAsync()
+    {
+        await FilterViewModel.LoadCategoriesAsync();
     }
 
     [RelayCommand]

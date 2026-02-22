@@ -10,10 +10,10 @@
 	x:Class="PasswordVault.Views.ManageCategoriesDialog"
 	x:DataType="vm:ManageCategoriesViewModel">
 	<StackPanel Spacing="16" Margin="24">
-		<Button Classes="Primary" HorizontalAlignment="Stretch"
+		<Button Classes="Primary" HorizontalAlignment="Stretch" 
 			Command="{Binding AddCategoryCommand}">
-			<StackPanel Orientation="Horizontal" Spacing="8">
-				<icons:Lucide Icon="Plus" Height="16" Width="16" StrokeBrush="{DynamicResource ForegroundColor}"/>
+			<StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+				<i:Icon Value="fa-solid fa-plus"/>
 				<TextBlock Text="Add Category" />
 			</StackPanel>
 		</Button>

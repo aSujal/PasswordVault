@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:icons="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
+             xmlns:i="https://github.com/projektanker/icons.avalonia"
+             xmlns:vm="using:PasswordVault.ViewModels"
+             xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+             xmlns:m="using:PasswordVault.Models"
+             x:DataType="vm:FilterPopupViewModel"
+             mc:Ignorable="d"
+             x:Class="PasswordVault.Views.FilterPopup"
+             Width="280">
+
+    <shadui:Card>
+        <StackPanel Spacing="16" Margin="4">
+            <DockPanel>
+                <TextBlock Text="Filters" Classes="h4" VerticalAlignment="Center"/>
+                <Button DockPanel.Dock="Right" Classes="Ghost"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ClearFiltersCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <icons:Lucide Icon="X" StrokeBrush="{DynamicResource ForegroundColor}" Height="14" Width="14"/>
+                        <TextBlock Text="Clear" FontSize="12"/>
+                    </StackPanel>
+                </Button>
+            </DockPanel>
+
+            <Separator/>
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="Category" FontSize="12" Opacity="0.7"/>
+                <ComboBox ItemsSource="{Binding Categories}"
+                        SelectedItem="{Binding SelectedCategory}"
+                        PlaceholderText="All Categories"
+                        HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="m:Category">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <i:Icon Value="{Binding Icon}" Foreground="{Binding Color}"/>
+                                <TextBlock Text="{Binding Name}" Foreground="{Binding Color}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Sort By -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Sort By" FontSize="12" Opacity="0.7"/>
+                <ComboBox ItemsSource="{Binding SortOptions}"
+                        SelectedItem="{Binding SelectedSortOption}"
+                        HorizontalAlignment="Stretch"/>
+            </StackPanel>
+
+            <!-- Favorites Toggle -->
+            <CheckBox IsChecked="{Binding ShowFavoritesOnly}"
+                    Content="Favorites only"/>
+
+            <!-- Apply Button -->
+            <Button Classes="Primary" HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Command="{Binding ApplyFiltersCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <icons:Lucide Icon="Check" Height="16" Width="16"/>
+                    <TextBlock Text="Apply Filters"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </shadui:Card>
+</UserControl>

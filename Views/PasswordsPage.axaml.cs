@@ -134,4 +134,19 @@ public partial class PasswordsPage : UserControl
 
         }
     }
+
+    private async void FilterButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        try
+        {
+            if (DataContext is PasswordListViewModel viewModel)
+            {
+                await viewModel.OpenFilterPopupCommand.ExecuteAsync(null);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error opening filter popup: {ex.Message}");
+        }
+    }
 }
