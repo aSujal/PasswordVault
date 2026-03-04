@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:PasswordVault.ViewModels"
 			 xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
-			 xmlns:icons="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
 			 xmlns:i="https://github.com/projektanker/icons.avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="PasswordVault.Views.DashboardPage"
@@ -19,7 +18,7 @@
 					<!-- Total Passwords -->
 					<shadui:Card Grid.Column="0" Padding="20">
 						<StackPanel Spacing="8">
-							<icons:Lucide Icon="Key" StrokeBrush="{DynamicResource PrimaryColor}" Height="24" Width="24"/>
+							<i:Icon Value="fa-solid fa-key" Foreground="{DynamicResource PrimaryColor}" FontSize="24"/>
 							<TextBlock Text="{Binding TotalPasswords}" Classes="h1"/>
 							<TextBlock Text="Total Passwords" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>
@@ -37,7 +36,7 @@
 					<!-- Weak Passwords -->
 					<shadui:Card Grid.Column="2" Padding="20">
 						<StackPanel Spacing="8">
-							<icons:Lucide Icon="TriangleAlert" StrokeBrush="Orange" Height="24" Width="24"/>
+							<i:Icon Value="fa-solid fa-triangle-exclamation" Foreground="Orange" FontSize="24"/>
 							<TextBlock Text="{Binding WeakPasswords}" Classes="h1"/>
 							<TextBlock Text="Weak Passwords" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>
@@ -46,7 +45,7 @@
 					<!-- Categories -->
 					<shadui:Card Grid.Column="3" Padding="20">
 						<StackPanel Spacing="8">
-							<icons:Lucide Icon="FolderOpen" StrokeBrush="{DynamicResource PrimaryColor}" Height="24" Width="24"/>
+							<i:Icon Value="fa-solid fa-folder-open" Foreground="{DynamicResource PrimaryColor}" FontSize="24"/>
 							<TextBlock Text="{Binding TotalCategories}" Classes="h1"/>
 							<TextBlock Text="Categories" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>

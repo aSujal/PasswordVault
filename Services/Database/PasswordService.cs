@@ -5,21 +5,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using PasswordVault.Models;
 using PasswordVault.Services.Crypto;
-using PasswordVault.Services.Database;
 
-namespace PasswordVault.Services;
+namespace PasswordVault.Services.Database;
 
-public class PasswordService : IPasswordService
+public class PasswordService(DatabaseService databaseService, ICryptoService cryptoService) : IPasswordService
 {
-    private readonly DatabaseService _databaseService;
-    private readonly ICryptoService _cryptoService;
+    private readonly DatabaseService _databaseService = databaseService;
+    private readonly ICryptoService _cryptoService = cryptoService;
     private readonly string _collectionName = "passwords";
-    private static readonly SemaphoreSlim _databaseAccessSemaphore = new SemaphoreSlim(1, 1);
-    public PasswordService(DatabaseService databaseService, ICryptoService cryptoService)
-    {
-        _databaseService = databaseService;
-        _cryptoService = cryptoService;
-    }
+    private static readonly SemaphoreSlim _databaseAccessSemaphore = new(1, 1);
 
     public async Task<IEnumerable<Password>> GetAllPasswordsAsync()
     {
@@ -64,11 +58,11 @@ public class PasswordService : IPasswordService
             var dbFiltered = collection.Query()
                 .Include(x => x.Category)
                 .Where(x => !x.IsDeleted && (
-                    x.Title.ToLower().Contains(searchLower) ||
-                    (x.Username != null && x.Username.ToLower().Contains(searchLower)) ||
-                    (x.Url != null && x.Url.ToLower().Contains(searchLower)) ||
-                    (x.Notes != null && x.Notes.ToLower().Contains(searchLower)) ||
-                    (x.Category != null && x.Category.Name.ToLower().Contains(searchLower))
+                    x.Title.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase) ||
+                    (x.Username != null && x.Username.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase)) ||
+                    (x.Url != null && x.Url.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase)) ||
+                    (x.Notes != null && x.Notes.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase)) ||
+                    (x.Category != null && x.Category.Name.Contains(searchLower, StringComparison.CurrentCultureIgnoreCase))
                 ))
                 .OrderByDescending(x => x.IsFavorite)
                 .ToList();
@@ -146,24 +140,38 @@ public class PasswordService : IPasswordService
         });
     }
 
+    private static bool DeletePasswordInternal(LiteDB.ILiteCollection<Password> collection, Guid id, DateTime now, long syncVersion)
+    {
+        var password = collection.FindById(id);
+        if (password == null || password.IsDeleted)
+            return false;
+
+        password.IsDeleted = true;
+        password.UpdatedAt = now;
+        password.SyncVersion = syncVersion;
+        collection.Update(password);
+        return true;
+    }
+
     public async Task<bool> DeletePasswordAsync(Guid id)
     {
         return await Task.Run(() =>
         {
             var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
+            return DeletePasswordInternal(collection, id, DateTime.UtcNow, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        });
+    }
 
-            var password = collection.FindById(id);
-            if (password == null || password.IsDeleted)
-                return false;
-
-            // Soft delete
-            password.IsDeleted = true;
-            password.UpdatedAt = DateTime.UtcNow;
-            password.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-            collection.Update(password);
-            return true;
+    public async Task<int> DeleteMultiplePasswordsAsync(IEnumerable<Guid> ids)
+    {
+        return await Task.Run(() =>
+        {
+            var db = _databaseService.OpenDatabase();
+            var collection = db.GetCollection<Password>(_collectionName);
+            var now = DateTime.UtcNow;
+            var syncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            return ids.Count(id => DeletePasswordInternal(collection, id, now, syncVersion));
         });
     }
 

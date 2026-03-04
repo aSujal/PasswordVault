@@ -16,7 +16,7 @@ public class User
     // Password hash (Argon2)
     public string PasswordHash { get; set; } = string.Empty;
     // Salt for password hashing
-    public byte[] PasswordSalt { get; set; } = new byte[0];
+    public byte[] PasswordSalt { get; set; } = [];
 
     public string ThemeName { get; set; } = "System";
     public bool BiometricUnlockEnabled { get; set; } = false;

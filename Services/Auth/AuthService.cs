@@ -11,10 +11,10 @@ using PasswordVault.Services.Database;
 
 namespace PasswordVault.Services.Auth;
 
-public partial class AuthService : IAuthService
+public partial class AuthService(ICryptoService cryptoService, DatabaseService databaseService) : IAuthService
 {
-    private readonly ICryptoService _cryptoService;
-    private readonly DatabaseService _databaseService;
+    private readonly ICryptoService _cryptoService = cryptoService ?? throw new ArgumentNullException(nameof(cryptoService));
+    private readonly DatabaseService _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
     private bool _isAuthenticated = false;
     private string? _currentUsername;
     private string? _currentKeyBase64;
@@ -25,12 +25,6 @@ public partial class AuthService : IAuthService
     public bool IsAuthenticated => _isAuthenticated;
     public string? CurrentUsername => _currentUsername;
     public string? CurrentKeyBase64 => _currentKeyBase64;
-
-    public AuthService(ICryptoService cryptoService, DatabaseService databaseService)
-    {
-        _cryptoService = cryptoService ?? throw new ArgumentNullException(nameof(cryptoService));
-        _databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
-    }
 
     public async Task<bool> ValidateMasterPasswordAsync(string masterPassword)
     {

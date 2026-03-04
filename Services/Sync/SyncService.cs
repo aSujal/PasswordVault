@@ -13,16 +13,10 @@ using PasswordVault.Services.Database;
 
 namespace PasswordVault.Services.Sync;
 
-public class SyncService
+public class SyncService(DatabaseService dbService, ICryptoService cryptoService)
 {
-    private readonly DatabaseService _dbService;
-    private readonly ICryptoService _cryptoService;
-
-    public SyncService(DatabaseService dbService, ICryptoService cryptoService)
-    {
-        _dbService = dbService;
-        _cryptoService = cryptoService;
-    }
+    private readonly DatabaseService _dbService = dbService;
+    private readonly ICryptoService _cryptoService = cryptoService;
 
     public void StartListening()
     {
@@ -79,7 +73,7 @@ public class SyncService
         return JsonSerializer.Serialize(deviceInfo);
     }
 
-    private string GetDeviceId()
+    private static string GetDeviceId()
     {
         // Get or create a unique device ID
         // Simple implementation for example

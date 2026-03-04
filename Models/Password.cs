@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LiteDB;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PasswordVault.Models;
 
-public class Password
+public partial class Password : ObservableObject
 {
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -34,12 +35,21 @@ public class Password
     public long SyncVersion { get; set; } = 0;
 
     [BsonIgnore]
-    public string StrengthColor { get; set; } = "Transparent";
+    [ObservableProperty]
+    [property: BsonIgnore]
+    private string _strengthColor = "Transparent";
 
     [BsonIgnore]
-    public string StrengthText { get; set; } = string.Empty;
+    [ObservableProperty]
+    [property: BsonIgnore]
+    private string _strengthText = string.Empty;
 
     [BsonIgnore]
     public bool IsWeak => StrengthText == "Weak" || StrengthText == "Very Weak";
+
+    [BsonIgnore]
+    [ObservableProperty]
+    [property: BsonIgnore]
+    private bool _isSelected;
 }
 

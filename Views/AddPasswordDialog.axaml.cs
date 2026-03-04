@@ -4,7 +4,7 @@ using Avalonia.Markup.Xaml;
 
 namespace PasswordVault.Views;
 
-public partial class AddPasswordDialog : Avalonia.Controls.UserControl
+public partial class AddPasswordDialog : UserControl
 {
     public AddPasswordDialog()
     {

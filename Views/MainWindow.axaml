@@ -4,8 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:PasswordVault.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:icons="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="https://github.com/projektanker/icons.avalonia"
     xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
     xmlns:toasts="clr-namespace:ShadUI.Toasts;assembly=ShadUI"
     xmlns:vm="using:PasswordVault.ViewModels"
@@ -50,11 +50,11 @@
                         CornerRadius="{DynamicResource LgCornerRadius}"
                         Theme="{DynamicResource SideTogglerTheme}">
                         <Viewbox>
-                            <icons:Lucide
+                            <i:Icon
                                 Width="16"
                                 Height="16"
-                                Icon="PanelLeft"
-                                StrokeBrush="{DynamicResource ForegroundColor}" />
+                                Value="fa-solid fa-columns"
+                                Foreground="{DynamicResource ForegroundColor}" />
                         </Viewbox>
                     </ToggleButton>
                 </shadui:Sidebar.Header>
@@ -63,32 +63,32 @@
                     <shadui:SidebarItem Command="{Binding NavigateToDashboardCommand}" Content="Dashboard">
                         <shadui:SidebarItem.Icon>
                             <Viewbox>
-                                <icons:Lucide
+                                <i:Icon
                                     Width="16"
                                     Height="16"
-                                    Icon="LayoutDashboard"
-                                    StrokeBrush="{DynamicResource ForegroundColor}" />
+                                    Value="fa-solid fa-tachometer-alt"
+                                    Foreground="{DynamicResource ForegroundColor}" />
                             </Viewbox>
                         </shadui:SidebarItem.Icon>
                     </shadui:SidebarItem>
 
                     <shadui:SidebarItem Command="{Binding NavigateToPasswordsCommand}" Content="Passwords">
                         <shadui:SidebarItem.Icon>
-                            <icons:Lucide
+                            <i:Icon
                                 Width="16"
                                 Height="16"
-                                Icon="KeyRound"
-                                StrokeBrush="{DynamicResource ForegroundColor}" />
+                                Value="fa-solid fa-key"
+                                Foreground="{DynamicResource ForegroundColor}" />
                         </shadui:SidebarItem.Icon>
                     </shadui:SidebarItem>
 
                     <shadui:SidebarItem Command="{Binding NavigateToSyncCommand}" Content="Sync">
                         <shadui:SidebarItem.Icon>
-                            <icons:Lucide
+                            <i:Icon
                                 Width="16"
                                 Height="16"
-                                Icon="Folder"
-                                StrokeBrush="{DynamicResource ForegroundColor}" />
+                                Value="fa-solid fa-sync"
+                                Foreground="{DynamicResource ForegroundColor}" />
                         </shadui:SidebarItem.Icon>
                     </shadui:SidebarItem>
 
@@ -96,11 +96,11 @@
 
                     <shadui:SidebarItem Command="{Binding NavigateToSettingsCommand}" Content="Settings">
                         <shadui:SidebarItem.Icon>
-                            <icons:Lucide
+                            <i:Icon
                                 Width="16"
                                 Height="16"
-                                Icon="Settings"
-                                StrokeBrush="{DynamicResource ForegroundColor}" />
+                                Value="fa-solid fa-cog"
+                                Foreground="{DynamicResource ForegroundColor}" />
                         </shadui:SidebarItem.Icon>
                     </shadui:SidebarItem>
                 </StackPanel>

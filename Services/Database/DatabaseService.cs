@@ -53,14 +53,11 @@ public class DatabaseService : IDatabaseService
             throw new InvalidOperationException("Database not unlocked – call Initialize or supply master password. test");
         lock (_dbLock)
         {
-            if (_databaseInstance == null)
+            _databaseInstance ??= new LiteDatabase(new ConnectionString
             {
-                _databaseInstance = new LiteDatabase(new ConnectionString
-                {
-                    Filename = _databaseFile,
-                    Password = Convert.ToBase64String(_encryptionKey)
-                });
-            }
+                Filename = _databaseFile,
+                Password = Convert.ToBase64String(_encryptionKey)
+            });
             return _databaseInstance;
         }
     }
@@ -111,7 +108,7 @@ public class DatabaseService : IDatabaseService
         DatabaseInitialized?.Invoke(this, EventArgs.Empty);
         _cachedUser = user;
     }
-    private void CreateDefaultCategories(LiteDatabase db)
+    private static void CreateDefaultCategories(LiteDatabase db)
     {
         var categories = db.GetCollection<Category>("categories");
 

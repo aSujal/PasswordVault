@@ -15,6 +15,7 @@ public interface IPasswordService
     Task<Password> AddPasswordAsync(Password password);
     Task<Password> UpdatePasswordAsync(Password password);
     Task<bool> DeletePasswordAsync(Guid id);
+    Task<int> DeleteMultiplePasswordsAsync(IEnumerable<Guid> ids);
     Task<string> GetDecryptedPasswordAsync(Guid passwordId);
     Task<bool> UpdateLastUsedAsync(Guid passwordId);
     Task<IEnumerable<Password>> GetRecentPasswordsAsync(int count = 10);

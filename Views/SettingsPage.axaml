@@ -3,9 +3,10 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:vm="using:PasswordVault.ViewModels"
-  xmlns:icons="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
   xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
-  mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+  xmlns:i="https://github.com/projektanker/icons.avalonia"
+  xmlns:views="using:PasswordVault.Views"
+  mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
   x:Class="PasswordVault.Views.SettingsPage"
   x:DataType="vm:SettingsViewModel">
 
@@ -17,22 +18,22 @@
       <StackPanel Spacing="16">
         <StackPanel Spacing="4">
           <TextBlock Text="Appearance" Classes="h4" />
-          <TextBlock Text="Customize the look and feel of the application." Classes="p"
+                <SelectableTextBlock Text="Customize the look and feel of the application." Classes="p"
             Opacity="0.6" />
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Spacing="16">
           <Button Command="{Binding SetLightCommand}" Classes="Outline" Padding="16">
-            <icons:Lucide Icon="Sun" HorizontalAlignment="Center"   
-              StrokeBrush="{DynamicResource ForegroundColor}" />
+                  <i:Icon Value="fa-solid fa-sun"   
+                    Foreground="{DynamicResource ForegroundColor}" />
           </Button>
           <Button Command="{Binding SetDarkCommand}" Classes="Outline" Padding="16">
-            <icons:Lucide Icon="Moon" HorizontalAlignment="Center"
-              StrokeBrush="{DynamicResource ForegroundColor}" />
+                  <i:Icon Value="fa-solid fa-moon"
+                    Foreground="{DynamicResource ForegroundColor}" />
           </Button>
           <Button Command="{Binding SetSystemCommand}" Classes="Outline" Padding="16">
-            <icons:Lucide Icon="Monitor" HorizontalAlignment="Center"
-              StrokeBrush="{DynamicResource ForegroundColor}" />
+                  <i:Icon Value="fa-solid fa-desktop"
+                    Foreground="{DynamicResource ForegroundColor}" />
           </Button>
         </StackPanel>
       </StackPanel>
@@ -48,7 +49,7 @@
 
         <Button Command="{Binding ManageCategoriesCommand}" Classes="Outline">
           <StackPanel Orientation="Horizontal" Spacing="8">
-            <icons:Lucide Icon="Tags" StrokeBrush="{DynamicResource ForegroundColor}" />
+                  <i:Icon Value="fa-solid fa-tags" Foreground="{DynamicResource ForegroundColor}" />
             <TextBlock Text="Manage Categories" />
           </StackPanel>
         </Button>

@@ -124,26 +124,7 @@ public class CategoryService(DatabaseService databaseService) : ICategoryService
             category.SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             collection.Update(category);
 
-            // Find the fallback "Uncategorized" category using in-memory filtering
-            // (LiteDB LINQ doesn't support String.Equals with StringComparison)
-            var allCategories = collection.FindAll().ToList();
-            var uncategorized = allCategories.FirstOrDefault(
-                x => x.Name.Equals("Uncategorized", StringComparison.OrdinalIgnoreCase) && !x.IsDeleted && x.Id != id);
-
-            // If not found, create one
-            if (uncategorized == null)
-            {
-                uncategorized = new Category
-                {
-                    Name = "Uncategorized",
-                    Color = "#6B7280",
-                    Icon = "Folder",
-                    Id = Guid.NewGuid(),
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-                collection.Insert(uncategorized);
-            }
+            var uncategorized = GetOrCreateUncategorizedCategoryInternal(db);
 
             // Move passwords: BsonRef stores the category as { $id: <guid> }
             // so we query using BsonExpression to match the ref's $id
@@ -176,6 +157,40 @@ public class CategoryService(DatabaseService databaseService) : ICategoryService
                 .Where(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted)
                 .Exists();
         });
+    }
+
+    public async Task<Category> GetOrCreateUncategorizedCategoryAsync()
+    {
+        return await Task.Run(() =>
+        {
+            var db = _databaseService.OpenDatabase();
+            return GetOrCreateUncategorizedCategoryInternal(db);
+        });
+    }
+
+    private Category GetOrCreateUncategorizedCategoryInternal(ILiteDatabase db)
+    {
+        var collection = db.GetCollection<Category>(_collectionName);
+        var uncategorized = collection.Find(x => !x.IsDeleted)
+            .FirstOrDefault(x => x.Name.Equals("Uncategorized", StringComparison.OrdinalIgnoreCase));
+
+        if (uncategorized == null)
+        {
+            uncategorized = new Category
+            {
+                Name = "Uncategorized",
+                Color = "#6B7280",
+                Icon = "Folder",
+                Id = Guid.NewGuid(),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                SyncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            };
+            collection.Insert(uncategorized);
+            CategoriesChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        return uncategorized;
     }
 
     public async Task InitializeDefaultCategoriesAsync()

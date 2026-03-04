@@ -15,5 +15,6 @@ public interface ICategoryService
     Task<Category> UpdateCategoryAsync(Category category);
     Task<bool> DeleteCategoryAsync(Guid id);
     Task<bool> CategoryExistsAsync(string name);
+    Task<Category> GetOrCreateUncategorizedCategoryAsync();
     Task InitializeDefaultCategoriesAsync();
 }

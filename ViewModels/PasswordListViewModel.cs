@@ -13,7 +13,6 @@ using PasswordVault.Services.Auth;
 using PasswordVault.Services.Database;
 using PasswordVault.Services.Crypto;
 using ShadUI;
-using Windows.ApplicationModel.DataTransfer;
 
 namespace PasswordVault.ViewModels;
 
@@ -44,6 +43,15 @@ public partial class PasswordListViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _isSearching;
+
+    [ObservableProperty]
+    private bool _isSelectionMode;
+
+    [ObservableProperty]
+    private int _selectedCount;
+
+    [ObservableProperty]
+    private bool _isAllSelected;
 
     public PasswordListViewModel(
         DialogManager dialogManager,
@@ -101,25 +109,35 @@ public partial class PasswordListViewModel : ViewModelBase
     private void CalculatePasswordStrength(Password password)
     {
         if (string.IsNullOrEmpty(password.EncryptedPassword)) return;
-        try
+
+        Task.Run(() =>
         {
-            var decrypted = _cryptoService.DecryptPassword(password.EncryptedPassword);
-            var strength = Helper.PasswordGenerator.EvaluatePasswordStrength(decrypted);
-            
-            password.StrengthText = strength.Level;
-            password.StrengthColor = strength.Score switch
+            try
             {
-                < 30 => "Red",           // Very Weak
-                < 50 => "DarkOrange",    // Weak
-                < 70 => "Orange",        // Moderate
-                < 90 => "LightGreen",    // Strong
-                _ => "Green"             // Very Strong
-            };
-        }
-        catch
-        {
-            password.StrengthColor = "Transparent";
-        }
+                var decrypted = _cryptoService.DecryptPassword(password.EncryptedPassword);
+                var strength = Helper.PasswordGenerator.EvaluatePasswordStrength(decrypted);
+
+                Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    password.StrengthText = strength.Level;
+                    password.StrengthColor = strength.Score switch
+                    {
+                        < 30 => "Red",           // Very Weak
+                        < 50 => "DarkOrange",    // Weak
+                        < 70 => "Orange",        // Moderate
+                        < 90 => "LightGreen",    // Strong
+                        _ => "Green"             // Very Strong
+                    };
+                });
+            }
+            catch
+            {
+                Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    password.StrengthColor = "Transparent";
+                });
+            }
+        });
     }
 
     public async Task ExecuteSearchAsync()
@@ -270,18 +288,6 @@ public partial class PasswordListViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private static void CopyUsernameAsync(string? username)
-    {
-        if (!string.IsNullOrEmpty(username))
-        {
-            var dataPackage = new DataPackage();
-            dataPackage.SetText(username);
-            Clipboard.SetContent(dataPackage);
-            Clipboard.Flush();
-        }
-    }
-
-    [RelayCommand]
     private void EditPassword(Password? passwordToEdit)
     {
         if (passwordToEdit == null) return;
@@ -379,13 +385,91 @@ public partial class PasswordListViewModel : ViewModelBase
         if (passwordId == null) return null;
         try
         {
-            // Fix: Use the Value property of the nullable Guid to pass a non-nullable Guid
             return await _passwordService.GetDecryptedPasswordAsync(passwordId.Value);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error decrypting/copying password: {ex.Message}");
             throw new InvalidOperationException("Failed to retrieve password", ex);
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleSelectionMode()
+    {
+        IsSelectionMode = !IsSelectionMode;
+        if (!IsSelectionMode)
+        {
+            ClearSelections();
+        }
+    }
+
+    [RelayCommand]
+    private void SelectionChanged()
+    {
+        UpdateSelectedCount();
+    }
+
+    [RelayCommand]
+    private void SelectAll()
+    {
+        IsAllSelected = !IsAllSelected;
+        foreach (var password in Passwords)
+        {
+            password.IsSelected = IsAllSelected;
+        }
+        UpdateSelectedCount();
+    }
+
+    public void UpdateSelectedCount()
+    {
+        SelectedCount = Passwords.Count(p => p.IsSelected);
+        IsAllSelected = Passwords.Count > 0 && SelectedCount == Passwords.Count;
+    }
+
+    private void ClearSelections()
+    {
+        foreach (var password in Passwords)
+        {
+            password.IsSelected = false;
+        }
+        SelectedCount = 0;
+        IsAllSelected = false;
+    }
+
+    [RelayCommand]
+    private void ConfirmDeleteSelected()
+    {
+        if (SelectedCount == 0) return;
+
+        _dialogManager.CreateDialog("Confirm Deletion", $"Are you sure you want to delete {SelectedCount} password(s)? This action cannot be undone.")
+            .WithPrimaryButton("Delete", async () => await DeleteSelectedAsync(), DialogButtonStyle.Destructive)
+            .WithCancelButton("Cancel")
+            .Dismissible()
+            .Show();
+    }
+
+    private async Task DeleteSelectedAsync()
+    {
+        try
+        {
+            var selectedIds = Passwords.Where(p => p.IsSelected).Select(p => p.Id).ToList();
+            var count = await _passwordService.DeleteMultiplePasswordsAsync(selectedIds);
+
+            IsSelectionMode = false;
+            ClearSelections();
+            await RefreshAsync();
+
+            _toastManager.CreateToast("Deleted")
+                .WithContent($"{count} password(s) deleted successfully.")
+                .ShowSuccess();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting passwords: {ex.Message}");
+            _toastManager.CreateToast("Error")
+                .WithContent("Failed to delete selected passwords. Please try again.")
+                .ShowError();
         }
     }
 }

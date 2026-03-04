@@ -2,7 +2,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:icons="clr-namespace:LucideAvalonia;assembly=LucideAvalonia"
              xmlns:i="https://github.com/projektanker/icons.avalonia"
              xmlns:vm="using:PasswordVault.ViewModels"
              xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
@@ -20,7 +19,7 @@
                         HorizontalAlignment="Right"
                         Command="{Binding ClearFiltersCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="4">
-                        <icons:Lucide Icon="X" StrokeBrush="{DynamicResource ForegroundColor}" Height="14" Width="14"/>
+                        <i:Icon Value="fa-solid fa-times" Foreground="{DynamicResource ForegroundColor}" Height="14" Width="14"/>
                         <TextBlock Text="Clear" FontSize="12"/>
                     </StackPanel>
                 </Button>
@@ -62,7 +61,7 @@
                     HorizontalContentAlignment="Center"
                     Command="{Binding ApplyFiltersCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <icons:Lucide Icon="Check" Height="16" Width="16"/>
+                    <i:Icon Value="fa-solid fa-check" Height="16" Width="16" Foreground="{DynamicResource ForegroundColor}"/>
                     <TextBlock Text="Apply Filters"/>
                 </StackPanel>
             </Button>

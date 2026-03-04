@@ -81,6 +81,7 @@ public partial class App : Application
         services.AddSingleton<MainWindow>();
         services.AddSingleton<PasswordsPage>();
         services.AddSingleton<AddPasswordDialog>();
+        services.AddSingleton<AddCategoryDialog>();
         services.AddSingleton<DashboardPage>();
         services.AddSingleton<SettingsPage>();
         services.AddSingleton<SyncPage>();

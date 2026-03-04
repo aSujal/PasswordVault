@@ -1,16 +1,8 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia.Threading;
-using Avalonia.VisualTree;
-using PasswordVault.Models;
 using PasswordVault.ViewModels;
 using ShadUI;
 using System;
-using System.Threading.Tasks;
-using Windows.ApplicationModel.DataTransfer;
-using Windows.UI.Xaml;
 
 namespace PasswordVault.Views;
 
@@ -21,10 +13,8 @@ public partial class PasswordsPage : UserControl
         InitializeComponent();
         Initialize();
     }
-    private void Initialize()
+    private static void Initialize()
     {
-        Console.WriteLine("PasswordsPage reloaded at " + DateTime.Now);
-        // Re-initialize or refresh logic here
     }
     private void InitializeComponent()
     {
@@ -149,4 +139,5 @@ public partial class PasswordsPage : UserControl
             System.Diagnostics.Debug.WriteLine($"Error opening filter popup: {ex.Message}");
         }
     }
+
 }
