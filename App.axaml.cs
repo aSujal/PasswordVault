@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -12,6 +12,7 @@ using PasswordVault.Services;
 using PasswordVault.Services.Auth;
 using PasswordVault.Services.Crypto;
 using PasswordVault.Services.Database;
+using PasswordVault.Services.ImportExport;
 using PasswordVault.Services.Sync;
 using PasswordVault.ViewModels;
 using PasswordVault.Views;
@@ -65,6 +66,7 @@ public partial class App : Application
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddSingleton<PasswordGenerator>();
         services.AddSingleton<ICategoryService, CategoryService>();
+        services.AddSingleton<IImportExportService, ImportExportService>();
 
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<PasswordListViewModel>();
@@ -77,6 +79,8 @@ public partial class App : Application
         services.AddSingleton<DialogManager>();
         services.AddSingleton<ManageCategoriesViewModel>();
         services.AddSingleton<FilterPopupViewModel>();
+        services.AddSingleton<ImportExportViewModel>();
+        services.AddTransient<ImportMappingViewModel>();
 
         services.AddSingleton<MainWindow>();
         services.AddSingleton<PasswordsPage>();
@@ -85,6 +89,7 @@ public partial class App : Application
         services.AddSingleton<DashboardPage>();
         services.AddSingleton<SettingsPage>();
         services.AddSingleton<SyncPage>();
+        services.AddTransient<ImportMappingDialog>();
 
         _serviceProvider = services.BuildServiceProvider(validateScopes: true)
                                     .RegisterDialogs();

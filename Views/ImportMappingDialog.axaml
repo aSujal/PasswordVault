@@ -1,0 +1,115 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PasswordVault.ViewModels"
+             xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="600"
+             x:Class="PasswordVault.Views.ImportMappingDialog"
+             x:DataType="vm:ImportMappingViewModel">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="24" Width="650">
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,24">
+            <TextBlock Text="Map CSV Headers" Classes="h4" />
+            <TextBlock Text="Match the columns from your file to the password fields." Classes="p" Opacity="0.6" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="24">
+                <!-- Mapping Grid -->
+                <shadui:Card Padding="16">
+                    <Grid ColumnDefinitions="*, *" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0">
+                        <Grid.Styles>
+                            <Style Selector="TextBlock.Label">
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Margin" Value="0,0,16,0"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Style>
+                            <Style Selector="ComboBox">
+                                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                <Setter Property="Margin" Value="0,4"/>
+                            </Style>
+                        </Grid.Styles>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Title (required)" Classes="Label" />
+                        <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding AvailableHeaders}" SelectedItem="{Binding TitleHeader}" PlaceholderText="Select column..." />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Username" Classes="Label" />
+                        <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding AvailableHeaders}" SelectedItem="{Binding UsernameHeader}" PlaceholderText="Select column..." />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Password" Classes="Label" />
+                        <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding AvailableHeaders}" SelectedItem="{Binding PasswordHeader}" PlaceholderText="Select column..." />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="URL" Classes="Label" />
+                        <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding AvailableHeaders}" SelectedItem="{Binding UrlHeader}" PlaceholderText="Select column..." />
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes" Classes="Label" />
+                        <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding AvailableHeaders}" SelectedItem="{Binding NotesHeader}" PlaceholderText="Select column..." />
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Category" Classes="Label" />
+                        <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding AvailableHeaders}" SelectedItem="{Binding CategoryHeader}" PlaceholderText="Select column..." />
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Tags" Classes="Label" />
+                        <ComboBox Grid.Row="6" Grid.Column="1" ItemsSource="{Binding AvailableHeaders}" SelectedItem="{Binding TagsHeader}" PlaceholderText="Select column..." />
+
+                        <TextBlock Grid.Row="7" Grid.Column="0" Text="Favorite" Classes="Label" />
+                        <ComboBox Grid.Row="7" Grid.Column="1" ItemsSource="{Binding AvailableHeaders}" SelectedItem="{Binding IsFavoriteHeader}" PlaceholderText="Select column..." />
+                    </Grid>
+                </shadui:Card>
+
+                <!-- Data Preview -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="File Preview (First 5 rows)" Classes="p" FontWeight="SemiBold" />
+                    <shadui:Card Padding="0" ClipToBounds="True">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <Border Background="{DynamicResource BackgroundColor}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+                                    <ItemsControl ItemsSource="{Binding Preview.Headers}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Width="120" Padding="8,12" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0">
+                                                    <TextBlock Text="{Binding}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Border>
+                                <ItemsControl ItemsSource="{Binding Preview.Rows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+                                                <ItemsControl ItemsSource="{Binding}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Width="120" Padding="8" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0">
+                                                                <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" Opacity="0.8" />
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </shadui:Card>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" Margin="0,24,0,0">
+            <Button Command="{Binding CancelCommand}" Classes="Outline">Cancel</Button>
+            <Button Command="{Binding SubmitCommand}" Classes="Primary" IsEnabled="{Binding TitleHeader, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">Import Now</Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

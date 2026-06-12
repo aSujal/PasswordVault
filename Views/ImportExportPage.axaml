@@ -1,0 +1,122 @@
+<UserControl
+  x:Class="PasswordVault.Views.ImportExportPage"
+  xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:i="https://github.com/projektanker/icons.avalonia"
+  xmlns:ie="using:PasswordVault.Services.ImportExport"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+  xmlns:vm="using:PasswordVault.ViewModels"
+  d:DesignHeight="600"
+  d:DesignWidth="800"
+  x:DataType="vm:ImportExportViewModel"
+  mc:Ignorable="d">
+
+  <StackPanel Margin="24" Spacing="24">
+    <TextBlock Classes="h2" Text="Import &amp; Export" />
+
+    <!--  Security Warning  -->
+    <shadui:Card Padding="16">
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <i:Icon Value="fa-solid fa-triangle-exclamation" />
+        <TextBlock
+          VerticalAlignment="Center"
+          Classes="p"
+          Opacity="0.8"
+          Text="Exported files contain plain-text passwords. Store them securely and delete after use."
+          TextWrapping="Wrap" />
+      </StackPanel>
+    </shadui:Card>
+
+    <!--  Export Section  -->
+    <shadui:Card Padding="24">
+      <StackPanel Spacing="16">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="h4" Text="Export" />
+          <TextBlock
+            Classes="p"
+            Opacity="0.6"
+            Text="Export your passwords to a file for backup or migration." />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <Button
+            x:Name="ExportCsvButton"
+            Classes="Outline"
+            Click="ExportCsvButton_Click"
+            IsEnabled="{Binding !IsBusy}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-file-csv" />
+              <TextBlock Text="Export as CSV" />
+            </StackPanel>
+          </Button>
+
+          <Button
+            x:Name="ExportJsonButton"
+            Classes="Outline"
+            Click="ExportJsonButton_Click"
+            IsEnabled="{Binding !IsBusy}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-file-code" />
+              <TextBlock Text="Export as JSON" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </StackPanel>
+    </shadui:Card>
+
+    <!--  Import Section  -->
+    <shadui:Card Padding="24">
+      <StackPanel Spacing="16">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="h4" Text="Import" />
+          <TextBlock
+            Classes="p"
+            Opacity="0.6"
+            Text="Import passwords from another password manager or a previous export." />
+        </StackPanel>
+
+        <Button
+          x:Name="ImportButton"
+          Classes="Outline"
+          Click="ImportButton_Click"
+          IsEnabled="{Binding !IsBusy}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-upload" />
+            <TextBlock Text="Select CSV or JSON File" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </shadui:Card>
+
+    <!--  Status  -->
+    <TextBlock
+      Classes="p"
+      IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+      Opacity="0.7"
+      Text="{Binding StatusMessage}" />
+
+    <!--  Supported Formats Info  -->
+    <shadui:Card Padding="24">
+      <StackPanel Spacing="12">
+        <TextBlock Classes="h4" Text="Supported Formats" />
+        <StackPanel Spacing="6">
+          <TextBlock
+            Classes="p"
+            Opacity="0.7"
+            Text="• Any CSV (Generic with Mapping Wizard)" />
+          <TextBlock
+            Classes="p"
+            Opacity="0.7"
+            Text="• Bitwarden, 1Password, LastPass, etc." />
+          <TextBlock
+            Classes="p"
+            Opacity="0.7"
+            Text="• PasswordVault (.csv, .json)" />
+        </StackPanel>
+      </StackPanel>
+    </shadui:Card>
+
+  </StackPanel>
+</UserControl>

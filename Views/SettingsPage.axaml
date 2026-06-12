@@ -1,59 +1,79 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl
+  x:Class="PasswordVault.Views.SettingsPage"
+  xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:vm="using:PasswordVault.ViewModels"
-  xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
   xmlns:i="https://github.com/projektanker/icons.avalonia"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
   xmlns:views="using:PasswordVault.Views"
-  mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
-  x:Class="PasswordVault.Views.SettingsPage"
-  x:DataType="vm:SettingsViewModel">
+  xmlns:vm="using:PasswordVault.ViewModels"
+  d:DesignHeight="600"
+  d:DesignWidth="800"
+  x:DataType="vm:SettingsViewModel"
+  mc:Ignorable="d">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 
-  <StackPanel Spacing="24" Margin="24">
-    <TextBlock Text="Settings" Classes="h2" />
 
-    <!-- Theme Settings -->
-    <shadui:Card Padding="24">
-      <StackPanel Spacing="16">
-        <StackPanel Spacing="4">
-          <TextBlock Text="Appearance" Classes="h4" />
-                <SelectableTextBlock Text="Customize the look and feel of the application." Classes="p"
-            Opacity="0.6" />
-        </StackPanel>
+    <StackPanel Margin="24" Spacing="24">
+      <TextBlock Classes="h2" Text="Settings" />
 
-        <StackPanel Orientation="Horizontal" Spacing="16">
-          <Button Command="{Binding SetLightCommand}" Classes="Outline" Padding="16">
-                  <i:Icon Value="fa-solid fa-sun"   
-                    Foreground="{DynamicResource ForegroundColor}" />
-          </Button>
-          <Button Command="{Binding SetDarkCommand}" Classes="Outline" Padding="16">
-                  <i:Icon Value="fa-solid fa-moon"
-                    Foreground="{DynamicResource ForegroundColor}" />
-          </Button>
-          <Button Command="{Binding SetSystemCommand}" Classes="Outline" Padding="16">
-                  <i:Icon Value="fa-solid fa-desktop"
-                    Foreground="{DynamicResource ForegroundColor}" />
-          </Button>
-        </StackPanel>
-      </StackPanel>
-    </shadui:Card>
+      <TabControl>
+        <!--  General Tab  -->
+        <TabItem Header="General">
+          <StackPanel Margin="0,16,0,0" Spacing="24">
+            <!--  Theme Settings  -->
+            <shadui:Card Padding="24">
+              <StackPanel Spacing="16">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="h4" Text="Appearance" />
+                  <SelectableTextBlock
+                    Classes="p"
+                    Opacity="0.6"
+                    Text="Customize the look and feel of the application." />
+                </StackPanel>
 
-    <!-- Data Management -->
-    <shadui:Card Padding="24">
-      <StackPanel Spacing="16">
-        <StackPanel Spacing="4">
-          <TextBlock Text="Data Management" Classes="h4" />
-          <TextBlock Text="Manage your categories and vault data." Classes="p" Opacity="0.6" />
-        </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                  <Button Classes="Outline" Command="{Binding SetLightCommand}">
+                    <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-sun" />
+                  </Button>
+                  <Button Classes="Outline" Command="{Binding SetDarkCommand}">
+                    <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-moon" />
+                  </Button>
+                  <Button Classes="Outline" Command="{Binding SetSystemCommand}">
+                    <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-desktop" />
+                  </Button>
+                </StackPanel>
+              </StackPanel>
+            </shadui:Card>
 
-        <Button Command="{Binding ManageCategoriesCommand}" Classes="Outline">
-          <StackPanel Orientation="Horizontal" Spacing="8">
-                  <i:Icon Value="fa-solid fa-tags" Foreground="{DynamicResource ForegroundColor}" />
-            <TextBlock Text="Manage Categories" />
+            <!--  Data Management  -->
+            <shadui:Card Padding="24">
+              <StackPanel Spacing="16">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="h4" Text="Data Management" />
+                  <TextBlock
+                    Classes="p"
+                    Opacity="0.6"
+                    Text="Manage your categories and vault data." />
+                </StackPanel>
+
+                <Button Classes="Outline" Command="{Binding ManageCategoriesCommand}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-tags" />
+                    <TextBlock Text="Manage Categories" />
+                  </StackPanel>
+                </Button>
+              </StackPanel>
+            </shadui:Card>
           </StackPanel>
-        </Button>
-      </StackPanel>
-    </shadui:Card>
-  </StackPanel>
+        </TabItem>
+
+        <!--  Import & Export Tab  -->
+        <TabItem Header="Import &amp; Export">
+          <views:ImportExportPage Margin="0,16,0,0" DataContext="{Binding ImportExportVM}" />
+        </TabItem>
+      </TabControl>
+    </StackPanel>
+  </ScrollViewer>
 </UserControl>

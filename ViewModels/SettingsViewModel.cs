@@ -17,14 +17,17 @@ public partial class SettingsViewModel : ViewModelBase
     public IRelayCommand SetSystemCommand { get; }
     public IRelayCommand ManageCategoriesCommand { get; }
 
+    public ImportExportViewModel ImportExportVM { get; }
+
     private readonly DialogManager _dialogManager;
     private readonly ManageCategoriesViewModel _manageCategoriesViewModel;
 
-    public SettingsViewModel(ThemeWatcher watcher, DialogManager dialogManager, ManageCategoriesViewModel manageCategoriesViewModel)
+    public SettingsViewModel(ThemeWatcher watcher, DialogManager dialogManager, ManageCategoriesViewModel manageCategoriesViewModel, ImportExportViewModel importExportViewModel)
     {
         _watcher = watcher;
         _dialogManager = dialogManager;
         _manageCategoriesViewModel = manageCategoriesViewModel;
+        ImportExportVM = importExportViewModel;
 
         CurrentColors = watcher.ThemeColors;
 

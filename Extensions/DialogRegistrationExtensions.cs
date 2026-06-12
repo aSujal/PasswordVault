@@ -18,6 +18,7 @@ public static class DialogRegistrationExtensions
         dialogService.Register<AddPasswordDialog, AddPasswordDialogViewModel>();
         dialogService.Register<AddCategoryDialog, AddCategoryDialogViewModel>();
         dialogService.Register<ManageCategoriesDialog, ManageCategoriesViewModel>();
+        dialogService.Register<ImportMappingDialog, ImportMappingViewModel>();
 
         return service;
     }
