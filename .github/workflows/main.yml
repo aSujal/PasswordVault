@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Essential: Gets tags and history for delta updates
+          fetch-depth: 0
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -26,14 +26,13 @@ jobs:
       - name: Install Velopack CLI
         run: dotnet tool install -g vpk
 
-      - name: Compile PasswordVault
-        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./publish
+      - name: Compile
+        run: dotnet publish ./PasswordVault/PasswordVault.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./publish
 
       - name: Download Previous Releases
         run: vpk download github --repoUrl "https://github.com/aSujal/PasswordVault" --outputDir ./releases
         continue-on-error: true
 
-      # Extract Version: This helper script strips the 'v' from 'v1.2.3' so Velopack gets a clean '1.2.3'
       - name: Extract Clean Version Number
         id: get_version
         shell: bash
@@ -42,12 +41,10 @@ jobs:
           CLEAN_VERSION="${TAG_NAME#v}"
           echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
 
-      # Build Velopack Package using your manual tag version
       - name: Build Velopack Package
         run: |
           vpk pack --packId "PasswordVault" --packVersion "${{ steps.get_version.outputs.version }}" --packDir ./publish --mainExe "PasswordVault.exe" --outputDir ./releases --packTitle "PasswordVault"
-
-      # Deploy using your manual tag
+          
       - name: Deploy to GitHub Releases
         run: |
           vpk upload github --repoUrl "https://github.com/aSujal/PasswordVault" --outputDir ./releases --token ${{ secrets.GITHUB_TOKEN }} --publish --tag "${{ github.ref_name }}" --releaseName "PasswordVault ${{ github.ref_name }}"
