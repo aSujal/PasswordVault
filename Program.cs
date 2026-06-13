@@ -1,6 +1,4 @@
-﻿using Avalonia;
-using Projektanker.Icons.Avalonia;
-using Projektanker.Icons.Avalonia.FontAwesome;
+using Avalonia;
 using System;
 
 namespace PasswordVault;
@@ -11,17 +9,23 @@ sealed class Program
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static void Main(string[] args) {
-        BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
-    } 
+    public static void Main(string[] args)
+    {
+        try
+        {
+            Velopack.VelopackApp.Build().Run();
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Unhandled exception: {ex}");
+            Console.Error.WriteLine(ex.StackTrace);
+        }
+    }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
     {
-        IconProvider.Current
-            .Register<FontAwesomeIconProvider>();
-
         return AppBuilder.Configure<App>()
                     .UsePlatformDetect()
                     .LogToTrace();

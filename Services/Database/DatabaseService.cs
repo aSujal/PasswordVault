@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using LiteDB;
 using PasswordVault.Models;
 using PasswordVault.Services.Crypto;
-using Projektanker.Icons.Avalonia.FontAwesome;
 
 namespace PasswordVault.Services.Database;
 

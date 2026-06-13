@@ -3,7 +3,7 @@
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:i="https://github.com/projektanker/icons.avalonia"
+  xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
   xmlns:views="using:PasswordVault.Views"
@@ -35,13 +35,13 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="16">
                   <Button Classes="Outline" Command="{Binding SetLightCommand}">
-                    <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-sun" />
+                    <fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-sun" />
                   </Button>
                   <Button Classes="Outline" Command="{Binding SetDarkCommand}">
-                    <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-moon" />
+                    <fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-moon" />
                   </Button>
                   <Button Classes="Outline" Command="{Binding SetSystemCommand}">
-                    <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-desktop" />
+                    <fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-desktop" />
                   </Button>
                 </StackPanel>
               </StackPanel>
@@ -60,10 +60,65 @@
 
                 <Button Classes="Outline" Command="{Binding ManageCategoriesCommand}">
                   <StackPanel Orientation="Horizontal" Spacing="8">
-                    <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-tags" />
+                    <fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-tags" />
                     <TextBlock Text="Manage Categories" />
                   </StackPanel>
                 </Button>
+              </StackPanel>
+            </shadui:Card>
+
+            <!--  App Updates  -->
+            <shadui:Card Padding="24">
+              <StackPanel Spacing="16">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="h4" Text="App Updates" />
+                  <TextBlock
+                    Classes="p"
+                    Opacity="0.6"
+                    Text="{Binding UpdateStatus}" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <TextBlock VerticalAlignment="Center" Classes="p" Opacity="0.5" Text="Current Version: " />
+                  <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Classes="p" Text="{Binding CurrentVersion, StringFormat='v{0}'}" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <!-- Check Button -->
+                  <Button
+                    Classes="Outline"
+                    Command="{Binding CheckForUpdatesCommand}"
+                    IsEnabled="{Binding !IsChecking}"
+                    IsVisible="{Binding ShowCheckButton}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-rotate" />
+                      <TextBlock Text="Check for Updates" />
+                    </StackPanel>
+                  </Button>
+
+                  <!-- Download Button -->
+                  <Button
+                    Classes="Primary"
+                    Command="{Binding DownloadUpdateCommand}"
+                    IsEnabled="{Binding !IsChecking}"
+                    IsVisible="{Binding UpdateAvailable}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <fa:FontAwesomeIcon Foreground="{DynamicResource BackgroundColor}" Value="fa-solid fa-download" />
+                      <TextBlock Text="Download Update" />
+                    </StackPanel>
+                  </Button>
+
+                  <!-- Restart Button -->
+                  <Button
+                    Classes="Primary"
+                    Command="{Binding RestartToApplyCommand}"
+                    IsVisible="{Binding UpdateReadyToInstall}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <fa:FontAwesomeIcon Foreground="{DynamicResource BackgroundColor}" Value="fa-solid fa-circle-check" />
+                      <TextBlock Text="Restart to Apply Update" />
+                    </StackPanel>
+                  </Button>
+                </StackPanel>
               </StackPanel>
             </shadui:Card>
           </StackPanel>

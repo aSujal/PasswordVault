@@ -95,16 +95,16 @@ public partial class App : Application
                                     .RegisterDialogs();
     }
 
-    private void DisableAvaloniaDataAnnotationValidation()
-    {
-        // Get an array of plugins to remove
-        var dataValidationPluginsToRemove =
-            BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
-
-        // remove each entry found
-        foreach (var plugin in dataValidationPluginsToRemove)
-        {
-            BindingPlugins.DataValidators.Remove(plugin);
-        }
-    }
+    // private void DisableAvaloniaDataAnnotationValidation()
+    // {
+    //     // Get an array of plugins to remove
+    //     var dataValidationPluginsToRemove =
+    //         BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
+    // 
+    //     // remove each entry found
+    //     foreach (var plugin in dataValidationPluginsToRemove)
+    //     {
+    //         BindingPlugins.DataValidators.Remove(plugin);
+    //     }
+    // }
 }

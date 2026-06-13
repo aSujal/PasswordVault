@@ -3,7 +3,7 @@
   xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:i="https://github.com/projektanker/icons.avalonia"
+  xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
   xmlns:ie="using:PasswordVault.Services.ImportExport"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
@@ -19,7 +19,7 @@
     <!--  Security Warning  -->
     <shadui:Card Padding="16">
       <StackPanel Orientation="Horizontal" Spacing="12">
-        <i:Icon Value="fa-solid fa-triangle-exclamation" />
+        <fa:FontAwesomeIcon Value="fa-solid fa-triangle-exclamation" />
         <TextBlock
           VerticalAlignment="Center"
           Classes="p"
@@ -47,7 +47,7 @@
             Click="ExportCsvButton_Click"
             IsEnabled="{Binding !IsBusy}">
             <StackPanel Orientation="Horizontal" Spacing="8">
-              <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-file-csv" />
+              <fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-file-csv" />
               <TextBlock Text="Export as CSV" />
             </StackPanel>
           </Button>
@@ -58,7 +58,7 @@
             Click="ExportJsonButton_Click"
             IsEnabled="{Binding !IsBusy}">
             <StackPanel Orientation="Horizontal" Spacing="8">
-              <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-file-code" />
+              <fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-file-code" />
               <TextBlock Text="Export as JSON" />
             </StackPanel>
           </Button>
@@ -83,7 +83,7 @@
           Click="ImportButton_Click"
           IsEnabled="{Binding !IsBusy}">
           <StackPanel Orientation="Horizontal" Spacing="8">
-            <i:Icon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-upload" />
+            <fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-upload" />
             <TextBlock Text="Select CSV or JSON File" />
           </StackPanel>
         </Button>

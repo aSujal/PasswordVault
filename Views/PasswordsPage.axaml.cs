@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Markup.Xaml;
 using PasswordVault.ViewModels;
 using ShadUI;

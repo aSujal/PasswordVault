@@ -1,54 +1,67 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:i="https://github.com/projektanker/icons.avalonia"
-	xmlns:vm="using:PasswordVault.ViewModels"
-    xmlns:sys="using:System" 
-	xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
-	xmlns:converters="using:PasswordVault.Converters"
-	mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+<UserControl
 	x:Class="PasswordVault.Views.AddCategoryDialog"
-    x:Name="Root"
-	x:DataType="vm:AddCategoryDialogViewModel">
-    <UserControl.Styles>
-        <Style Selector="Button.Outline">
-             <Setter Property="HorizontalContentAlignment" Value="Center" />
-             <Setter Property="VerticalContentAlignment" Value="Center" />
-             <Setter Property="Padding" Value="4" />
-             <Setter Property="Width" Value="36" />
-             <Setter Property="Height" Value="36" />
-        </Style>
-    </UserControl.Styles>
-	<StackPanel Spacing="16" Margin="24">
-		<TextBlock Text="{Binding DialogTitle}" Classes="h3" />
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:converters="using:PasswordVault.Converters"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+	xmlns:sys="using:System"
+	xmlns:vm="using:PasswordVault.ViewModels"
+	x:Name="Root"
+	d:DesignHeight="450"
+	d:DesignWidth="800"
+	x:DataType="vm:AddCategoryDialogViewModel"
+	mc:Ignorable="d">
+	<UserControl.Styles>
+		<Style Selector="Button.Outline">
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="Padding" Value="4" />
+			<Setter Property="Width" Value="36" />
+			<Setter Property="Height" Value="36" />
+		</Style>
+	</UserControl.Styles>
+	<StackPanel Margin="24" Spacing="16">
+		<TextBlock Classes="h3" Text="{Binding DialogTitle}" />
 
 		<StackPanel Spacing="8">
 			<Label Content="Name" Target="NameBox" />
-			<TextBox Name="NameBox" Watermark="e.g. Finance" Text="{Binding Name}" />
+			<TextBox
+				Name="NameBox"
+				PlaceholderText="e.g. Finance"
+				Text="{Binding Name}" />
 		</StackPanel>
 
 		<StackPanel Spacing="8">
 			<Label Content="Color" />
-			<ColorPicker Name="ColorPicker"
-				Color="{Binding SelectedColor, Converter={x:Static converters:StringToColorConverter.Instance}, Mode=TwoWay}"
+			<ColorPicker
+				Name="ColorPicker"
 				HorizontalAlignment="Stretch"
 				shadui:ControlAssist.Hint="Pick a color"
 				shadui:ControlAssist.Label="Category Color"
-			/>
-            <ItemsControl ItemsSource="{Binding #ColorPicker.(DataValidationErrors.Errors)}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding}" Foreground="{DynamicResource destructive}" FontSize="12" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+				Color="{Binding SelectedColor, Converter={x:Static converters:StringToColorConverter.Instance}, Mode=TwoWay}" />
+			<ItemsControl ItemsSource="{Binding #ColorPicker.(DataValidationErrors.Errors)}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<TextBlock
+							FontSize="12"
+							Foreground="{DynamicResource destructive}"
+							Text="{Binding}" />
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
 		</StackPanel>
 
 		<StackPanel Spacing="8">
 			<Label Content="Icon" />
-			<Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" CornerRadius="6"
-				Padding="12" MaxHeight="200">
+			<Border
+				MaxHeight="200"
+				Padding="12"
+				BorderBrush="{DynamicResource BorderColor}"
+				BorderThickness="1"
+				CornerRadius="6">
 				<ScrollViewer>
 					<ItemsControl ItemsSource="{Binding AvailableIcons}">
 						<ItemsControl.ItemsPanel>
@@ -58,20 +71,22 @@
 						</ItemsControl.ItemsPanel>
 						<ItemsControl.ItemTemplate>
 							<DataTemplate x:DataType="sys:String">
-								<Button Classes="Icon" Margin="2"
+								<Button
+									Margin="2"
+									Classes="Icon"
+									Classes.Outline="{Binding $self.Tag, TargetNullValue=False, FallbackValue=False}"
 									Command="{Binding $parent[UserControl].((vm:AddCategoryDialogViewModel)DataContext).SelectIconCommand}"
 									CommandParameter="{Binding .}"
-									ToolTip.Tip="{Binding .}"
-                                    CornerRadius="4"
-                                    Classes.Outline="{Binding $self.Tag, TargetNullValue=False, FallbackValue=False}">
-                                    <Button.Tag>
-                                        <MultiBinding Converter="{x:Static converters:StringEqualityConverter.Instance}">
-                                            <Binding Path="$parent[UserControl].((vm:AddCategoryDialogViewModel)DataContext).SelectedIcon" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </Button.Tag>
+									CornerRadius="4"
+									ToolTip.Tip="{Binding .}">
+									<Button.Tag>
+										<MultiBinding Converter="{x:Static converters:StringEqualityConverter.Instance}">
+											<Binding Path="$parent[UserControl].((vm:AddCategoryDialogViewModel)DataContext).SelectedIcon" />
+											<Binding Path="." />
+										</MultiBinding>
+									</Button.Tag>
 									<Panel>
-										<i:Icon Value="{Binding .}" />
+										<fa:FontAwesomeIcon Value="{Binding .}" />
 									</Panel>
 								</Button>
 							</DataTemplate>
@@ -82,22 +97,38 @@
 		</StackPanel>
 
 
-		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10"
-			Margin="0,10,0,0">
-			<!-- Preview -->
-			<Border Background="{Binding SelectedColor}" CornerRadius="6" Padding="8,4"
-				VerticalAlignment="Center">
+		<StackPanel
+			Margin="0,10,0,0"
+			HorizontalAlignment="Right"
+			Orientation="Horizontal"
+			Spacing="10">
+			<!--  Preview  -->
+			<Border
+				Padding="8,4"
+				VerticalAlignment="Center"
+				Background="{Binding SelectedColor}"
+				CornerRadius="6">
 				<StackPanel Orientation="Horizontal" Spacing="6">
-					<i:Icon Value="{Binding SelectedIcon}" Foreground="White" Height="14" Width="14" />
-					<TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Medium" />
+					<fa:FontAwesomeIcon
+						Width="14"
+						Height="14"
+						Foreground="White"
+						Value="{Binding SelectedIcon}" />
+					<TextBlock
+						FontWeight="Medium"
+						Foreground="White"
+						Text="{Binding Name}" />
 				</StackPanel>
 			</Border>
 
-			<Button Command="{Binding CancelCommand}" Classes="Destructive">
+			<Button Classes="Destructive" Command="{Binding CancelCommand}">
 				<TextBlock Text="Cancel" />
 			</Button>
 
-			<Button Command="{Binding SubmitCommand}" IsDefault="True" Classes="Primary">
+			<Button
+				Classes="Primary"
+				Command="{Binding SubmitCommand}"
+				IsDefault="True">
 				<TextBlock Text="{Binding SubmitButtonText}" />
 			</Button>
 		</StackPanel>

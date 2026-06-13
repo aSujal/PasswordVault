@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:PasswordVault.ViewModels"
 			 xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
-			 xmlns:i="https://github.com/projektanker/icons.avalonia"
+			 xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="PasswordVault.Views.DashboardPage"
 			 x:DataType="vm:DashboardViewModel">
@@ -18,7 +18,7 @@
 					<!-- Total Passwords -->
 					<shadui:Card Grid.Column="0" Padding="20">
 						<StackPanel Spacing="8">
-							<i:Icon Value="fa-solid fa-key" Foreground="{DynamicResource PrimaryColor}" FontSize="24"/>
+							<fa:FontAwesomeIcon Value="fa-solid fa-key" Foreground="{DynamicResource PrimaryColor}" FontSize="24"/>
 							<TextBlock Text="{Binding TotalPasswords}" Classes="h1"/>
 							<TextBlock Text="Total Passwords" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>
@@ -27,7 +27,7 @@
 					<!-- Favorites -->
 					<shadui:Card Grid.Column="1" Padding="20">
 						<StackPanel Spacing="8">
-							<i:Icon Value="fa-solid fa-star" Foreground="Gold" FontSize="24"/>
+							<fa:FontAwesomeIcon Value="fa-solid fa-star" Foreground="Gold" FontSize="24"/>
 							<TextBlock Text="{Binding FavoritePasswords}" Classes="h1"/>
 							<TextBlock Text="Favorites" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>
@@ -36,7 +36,7 @@
 					<!-- Weak Passwords -->
 					<shadui:Card Grid.Column="2" Padding="20">
 						<StackPanel Spacing="8">
-							<i:Icon Value="fa-solid fa-triangle-exclamation" Foreground="Orange" FontSize="24"/>
+							<fa:FontAwesomeIcon Value="fa-solid fa-triangle-exclamation" Foreground="Orange" FontSize="24"/>
 							<TextBlock Text="{Binding WeakPasswords}" Classes="h1"/>
 							<TextBlock Text="Weak Passwords" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>
@@ -45,7 +45,7 @@
 					<!-- Categories -->
 					<shadui:Card Grid.Column="3" Padding="20">
 						<StackPanel Spacing="8">
-							<i:Icon Value="fa-solid fa-folder-open" Foreground="{DynamicResource PrimaryColor}" FontSize="24"/>
+							<fa:FontAwesomeIcon Value="fa-solid fa-folder-open" Foreground="{DynamicResource PrimaryColor}" FontSize="24"/>
 							<TextBlock Text="{Binding TotalCategories}" Classes="h1"/>
 							<TextBlock Text="Categories" Foreground="{DynamicResource ForegroundLeadColor}"/>
 						</StackPanel>
@@ -65,7 +65,7 @@
 												BorderThickness="0,0,0,1"
 												Padding="0,8">
 											<Grid ColumnDefinitions="Auto,*,Auto">
-												<i:Icon Grid.Column="0"
+												<fa:FontAwesomeIcon Grid.Column="0"
 														Value="{Binding Category.Icon}"
 														Foreground="{Binding Category.Color}"
 														FontSize="20"
@@ -97,7 +97,7 @@
 								<ItemsControl.ItemTemplate>
 									<DataTemplate>
 										<Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
-											<i:Icon Grid.Column="0"
+											<fa:FontAwesomeIcon Grid.Column="0"
 													Value="{Binding Category.Icon}"
 													Foreground="{Binding Category.Color}"
 													FontSize="18"

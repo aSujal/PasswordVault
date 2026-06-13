@@ -4,8 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:PasswordVault.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:i="https://github.com/projektanker/icons.avalonia"
     xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
     xmlns:toasts="clr-namespace:ShadUI.Toasts;assembly=ShadUI"
     xmlns:vm="using:PasswordVault.ViewModels"
@@ -24,7 +24,7 @@
     </shadui:Window.DataTemplates>
 
     <shadui:Window.Hosts>
-        <shadui:DialogHost Manager="{Binding DialogManager}" Owner="{Binding RelativeSource={RelativeSource AncestorType=shadui:Window}}" />
+        <shadui:DialogHost Manager="{Binding DialogManager}" />
     </shadui:Window.Hosts>
 
     <Panel>
@@ -50,11 +50,11 @@
                         CornerRadius="{DynamicResource LgCornerRadius}"
                         Theme="{DynamicResource SideTogglerTheme}">
                         <Viewbox>
-                            <i:Icon
+                            <fa:FontAwesomeIcon
                                 Width="16"
                                 Height="16"
-                                Value="fa-solid fa-columns"
-                                Foreground="{DynamicResource ForegroundColor}" />
+                                Foreground="{DynamicResource ForegroundColor}"
+                                Value="fa-solid fa-columns" />
                         </Viewbox>
                     </ToggleButton>
                 </shadui:Sidebar.Header>
@@ -63,32 +63,32 @@
                     <shadui:SidebarItem Command="{Binding NavigateToDashboardCommand}" Content="Dashboard">
                         <shadui:SidebarItem.Icon>
                             <Viewbox>
-                                <i:Icon
+                                <fa:FontAwesomeIcon
                                     Width="16"
                                     Height="16"
-                                    Value="fa-solid fa-tachometer-alt"
-                                    Foreground="{DynamicResource ForegroundColor}" />
+                                    Foreground="{DynamicResource ForegroundColor}"
+                                    Value="fa-solid fa-tachometer-alt" />
                             </Viewbox>
                         </shadui:SidebarItem.Icon>
                     </shadui:SidebarItem>
 
                     <shadui:SidebarItem Command="{Binding NavigateToPasswordsCommand}" Content="Passwords">
                         <shadui:SidebarItem.Icon>
-                            <i:Icon
+                            <fa:FontAwesomeIcon
                                 Width="16"
                                 Height="16"
-                                Value="fa-solid fa-key"
-                                Foreground="{DynamicResource ForegroundColor}" />
+                                Foreground="{DynamicResource ForegroundColor}"
+                                Value="fa-solid fa-key" />
                         </shadui:SidebarItem.Icon>
                     </shadui:SidebarItem>
 
                     <shadui:SidebarItem Command="{Binding NavigateToSyncCommand}" Content="Sync">
                         <shadui:SidebarItem.Icon>
-                            <i:Icon
+                            <fa:FontAwesomeIcon
                                 Width="16"
                                 Height="16"
-                                Value="fa-solid fa-sync"
-                                Foreground="{DynamicResource ForegroundColor}" />
+                                Foreground="{DynamicResource ForegroundColor}"
+                                Value="fa-solid fa-sync" />
                         </shadui:SidebarItem.Icon>
                     </shadui:SidebarItem>
 
@@ -96,24 +96,20 @@
 
                     <shadui:SidebarItem Command="{Binding NavigateToSettingsCommand}" Content="Settings">
                         <shadui:SidebarItem.Icon>
-                            <i:Icon
+                            <fa:FontAwesomeIcon
                                 Width="16"
                                 Height="16"
-                                Value="fa-solid fa-cog"
-                                Foreground="{DynamicResource ForegroundColor}" />
+                                Foreground="{DynamicResource ForegroundColor}"
+                                Value="fa-solid fa-cog" />
                         </shadui:SidebarItem.Icon>
                     </shadui:SidebarItem>
                 </StackPanel>
             </shadui:Sidebar>
-            <TransitioningContentControl
-                Grid.Column="1"
-                Content="{Binding CurrentViewModel}" />
+            <TransitioningContentControl Grid.Column="1" Content="{Binding CurrentViewModel}" />
         </Grid>
 
-        <!-- Auth Overlay Layer -->
-        <Grid
-            Background="#09090B"
-            IsVisible="{Binding !IsAuthenticated}">
+        <!--  Auth Overlay Layer  -->
+        <Grid Background="#09090B" IsVisible="{Binding !IsAuthenticated}">
             <shadui:Card
                 Width="350"
                 HorizontalAlignment="Center"
