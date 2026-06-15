@@ -9,7 +9,16 @@
              x:Class="PasswordVault.Views.DashboardPage"
 			 x:DataType="vm:DashboardViewModel">
 	<Grid RowDefinitions="Auto,*" Margin="48,24" MaxWidth="1536">
-		<TextBlock Grid.Row="0" Text="Dashboard" Classes="h2" Margin="0,0,0,24"/>
+		<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,24"> 
+			<TextBlock Text="Dashboard" Classes="h2"/>
+			<Button Classes="Icon" Command="{Binding LoadDashboardDataCommand}" ToolTip.Tip="Refresh">
+					<fa:FontAwesomeIcon
+						Width="16"
+						Height="16"
+						Foreground="{DynamicResource ForegroundColor}"
+						Value="fa-solid fa-arrows-rotate" />
+			</Button>
+		</StackPanel>
 
 		<ScrollViewer Grid.Row="1">
 			<StackPanel Spacing="24">

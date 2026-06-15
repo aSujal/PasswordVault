@@ -18,6 +18,7 @@ public partial class Password : ObservableObject
     public string? Username { get; set; }
     public string? Url { get; set; }
     public string? Notes { get; set; }
+    public string? TwoFactorSecret { get; set; }
 
 
     [BsonRef("categories")]
