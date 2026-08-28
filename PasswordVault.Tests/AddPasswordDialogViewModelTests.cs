@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using PasswordVault.Helper;
 using PasswordVault.Models;
+using PasswordVault.Services.AI;
 using PasswordVault.Services.Auth;
 using PasswordVault.Services.Crypto;
 using PasswordVault.Services.Database;
@@ -19,6 +20,7 @@ public class AddPasswordDialogViewModelTests
     private readonly IPasswordService _passwordService;
     private readonly PasswordGenerator _passwordGenerator;
     private readonly IAuthService _authService;
+    private readonly IAiCategorizationService _aiService;
 
     public AddPasswordDialogViewModelTests()
     {
@@ -27,6 +29,7 @@ public class AddPasswordDialogViewModelTests
         _cryptoService = Substitute.For<ICryptoService>();
         _passwordService = Substitute.For<IPasswordService>();
         _authService = Substitute.For<IAuthService>();
+        _aiService = Substitute.For<IAiCategorizationService>();
 
         // PasswordGenerator is concrete but pure logic - instantiate a real one
         _passwordGenerator = new PasswordGenerator();
@@ -45,7 +48,8 @@ public class AddPasswordDialogViewModelTests
             _passwordService,
             null!, // DatabaseService (not needed for these tests)
             _passwordGenerator,
-            _authService
+            _authService,
+            _aiService
         );
     }
 
@@ -103,5 +107,40 @@ public class AddPasswordDialogViewModelTests
         // Assert
         Assert.True(vm.PasswordStrength >= 70);
         Assert.Contains(vm.PasswordStrengthText, new[] { "Strong", "Very Strong" });
+    }
+
+    [Fact]
+    public async Task Submit_EncryptsTwoFactorSecret_BeforeSaving()
+    {
+        // Arrange - a fake but recognizable "encryption" so we can assert it was applied
+        // rather than the raw secret being persisted.
+        _cryptoService.EncryptPassword(Arg.Any<string>()).Returns(ci => "ENC:" + ci.Arg<string>());
+
+        Password? saved = null;
+        _ = _passwordService.AddPasswordAsync(Arg.Do<Password>(p => saved = p));
+
+        var vm = new AddPasswordDialogViewModel(
+            new ShadUI.DialogManager(),
+            new ShadUI.ToastManager(),
+            _categoryService,
+            null!,
+            _cryptoService,
+            _passwordService,
+            null!,
+            _passwordGenerator,
+            _authService,
+            _aiService
+        );
+        vm.Title = "Example";
+        vm.Username = "user@example.com";
+        vm.Password = "correct horse battery staple";
+        vm.TwoFactorSecret = "jbswy3dpehpk3pxp"; // lowercase w/ no padding, as a user might type it
+
+        // Act
+        await vm.SubmitCommand.ExecuteAsync(null);
+
+        // Assert
+        Assert.NotNull(saved);
+        Assert.Equal("ENC:JBSWY3DPEHPK3PXP", saved!.TwoFactorSecret);
     }
 }
