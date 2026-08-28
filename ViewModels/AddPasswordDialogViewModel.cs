@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 // using System.ComponentModel.DataAnnotations;
@@ -15,6 +15,8 @@ using PasswordVault.Services.Auth;
 using PasswordVault.Services.Crypto;
 using PasswordVault.Services.Database;
 using PasswordVault.Services.Sync;
+using PasswordVault.Services.AI;
+using PasswordVault.Services.Totp;
 using ShadUI;
 
 namespace PasswordVault.ViewModels;
@@ -38,6 +40,9 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _isFavorite = false;
+
+    [ObservableProperty]
+    private string _twoFactorSecret = string.Empty;
 
     [ObservableProperty]
     private ObservableCollection<Category> _categories = new();
@@ -76,6 +81,15 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     private readonly PasswordGenerator _passwordGenerator;
     private readonly AddCategoryDialogViewModel _addCategoryDialogViewModel;
     private readonly IAuthService _authService;
+    private readonly IAiCategorizationService _aiService;
+
+    // AI Suggestion State
+    [ObservableProperty] private bool _isAiEnabled;
+    [ObservableProperty] private bool _isSuggestingCategory;
+    [ObservableProperty] private bool _hasAiSuggestion;
+    [ObservableProperty] private string _suggestedCategoryName = string.Empty;
+    [ObservableProperty] private string _suggestedTagsText = string.Empty;
+    private AiSuggestion? _currentSuggestion;
 
     public event EventHandler? PasswordAddedSuccessfully;
     public event EventHandler? PasswordUpdatedSuccessfully;
@@ -89,7 +103,8 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         IPasswordService passwordService,
         DatabaseService databaseService,
         PasswordGenerator passwordGenerator,
-        IAuthService authService)
+        IAuthService authService,
+        IAiCategorizationService aiService)
     {
         _dialogManager = dialogManager;
         _toastManager = toastManager;
@@ -98,6 +113,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         _passwordService = passwordService;
         _passwordGenerator = passwordGenerator;
         _authService = authService;
+        _aiService = aiService;
         _addCategoryDialogViewModel = addCategoryDialogViewModel;
         _authService.Authenticated += OnAuthenticated;
         _categoryService.CategoriesChanged += OnCategoriesChanged;
@@ -106,7 +122,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         _authService = authService;
     }
 
-    public void Initialize()
+    public async Task InitializeAsync()
     {
         IsEditMode = false;
         _passwordToEdit = null;
@@ -116,14 +132,23 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         Url = string.Empty;
         Notes = string.Empty;
         IsFavorite = false;
+        TwoFactorSecret = string.Empty;
+
         SelectedCategory = Categories.FirstOrDefault(c => c.Name == "Uncategorized") ?? Categories.FirstOrDefault();
         SubmitButtonText = "Add";
         DialogTitle = "Add New Password";
-        if (!Categories.Any())
+        try
         {
-            LoadCategories();
+            await LoadCategoriesAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastManager.CreateToast("Failed to load categories").WithContent(ex.Message).ShowError();
         }
         ClearAllErrors();
+
+        IsAiEnabled = _aiService.IsConfigured;
+        DismissSuggestion();
     }
 
     public async void SetPasswordToEdit(Password password)
@@ -145,6 +170,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         Url = password.Url ?? string.Empty;
         Notes = password.Notes ?? string.Empty;
         IsFavorite = password.IsFavorite;
+        TwoFactorSecret = string.IsNullOrEmpty(password.TwoFactorSecret) ? string.Empty : _cryptoService.DecryptPassword(password.TwoFactorSecret);
 
         if (password.Category != null)
         {
@@ -158,16 +184,10 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
 
     private void OnAuthenticated(object? sender, EventArgs e)
     {
-        LoadCategories();
-        Initialize();
+        _ = InitializeAsync();
     }
 
     private void OnCategoriesChanged(object? sender, EventArgs e)
-    {
-        _ = LoadCategoriesAsync();
-    }
-
-    private void LoadCategories()
     {
         _ = LoadCategoriesAsync();
     }
@@ -225,12 +245,13 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     [RelayCommand]
     public void CreateCategory()
     {
+        _addCategoryDialogViewModel.Initialize();
         _dialogManager.CreateDialog(_addCategoryDialogViewModel)
             .WithMinWidth(400)
             .WithSuccessCallback(async () =>
             {
                 await LoadCategoriesAsync();
-                
+
                 // Check if a category was created and select it
                 if (_addCategoryDialogViewModel.CreatedCategory != null)
                 {
@@ -250,12 +271,69 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task SuggestCategory()
+    {
+        if (IsSuggestingCategory || !_aiService.IsConfigured) return;
+
+        IsSuggestingCategory = true;
+        HasAiSuggestion = false;
+
+        try
+        {
+            var categoryNames = Categories.Select(c => c.Name).ToList();
+            _currentSuggestion = await _aiService.SuggestCategoryAsync(
+                Title, Url, Username, categoryNames);
+
+            SuggestedCategoryName = _currentSuggestion.SuggestedCategory;
+            SuggestedTagsText = _currentSuggestion.SuggestedTags.Any()
+                ? string.Join(", ", _currentSuggestion.SuggestedTags)
+                : string.Empty;
+
+            HasAiSuggestion = true;
+        }
+        catch (Exception ex)
+        {
+            _toastManager.CreateToast("AI Error")
+                .WithContent($"Could not suggest category: {ex.Message}")
+                .ShowError();
+        }
+        finally
+        {
+            IsSuggestingCategory = false;
+        }
+    }
+
+    [RelayCommand]
+    private void AcceptSuggestion()
+    {
+        if (!HasAiSuggestion || _currentSuggestion == null) return;
+
+        var category = Categories.FirstOrDefault(c =>
+            c.Name.Equals(_currentSuggestion.SuggestedCategory, StringComparison.OrdinalIgnoreCase));
+
+        if (category != null)
+        {
+            SelectedCategory = category;
+        }
+        DismissSuggestion();
+    }
+
+    [RelayCommand]
+    private void DismissSuggestion()
+    {
+        HasAiSuggestion = false;
+        _currentSuggestion = null;
+    }
+
+    [RelayCommand]
     private async Task Submit()
     {
         ClearAllErrors();
         if (string.IsNullOrWhiteSpace(Title)) AddError(nameof(Title), "Title is required");
         if (string.IsNullOrWhiteSpace(Username)) AddError(nameof(Username), "Username is required");
         if (string.IsNullOrWhiteSpace(Password)) AddError(nameof(Password), "Password is required");
+        if (!string.IsNullOrWhiteSpace(TwoFactorSecret) && !TotpService.IsValidSecret(TwoFactorSecret))
+            AddError(nameof(TwoFactorSecret), "Invalid 2FA secret key (must be Base32)");
 
         if (HasErrors)
         {
@@ -263,6 +341,10 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         }
         try
         {
+            string? encryptedTwoFactorSecret = string.IsNullOrWhiteSpace(TwoFactorSecret)
+                ? null
+                : _cryptoService.EncryptPassword(TwoFactorSecret.Trim().Replace(" ", "").ToUpperInvariant());
+
             if (IsEditMode && _passwordToEdit != null)
             {
                 _passwordToEdit.Title = Title;
@@ -272,7 +354,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
                 _passwordToEdit.Notes = Notes;
                 _passwordToEdit.Category = SelectedCategory;
                 _passwordToEdit.IsFavorite = IsFavorite;
-
+                _passwordToEdit.TwoFactorSecret = encryptedTwoFactorSecret;
                 await _passwordService.UpdatePasswordAsync(_passwordToEdit);
                 PasswordUpdatedSuccessfully?.Invoke(this, EventArgs.Empty);
             }
@@ -286,7 +368,8 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
                     Url = Url,
                     Notes = Notes,
                     Category = SelectedCategory,
-                    IsFavorite = IsFavorite
+                    IsFavorite = IsFavorite,
+                    TwoFactorSecret = encryptedTwoFactorSecret,
                 };
                 await _passwordService.AddPasswordAsync(newPassword);
                 PasswordAddedSuccessfully?.Invoke(this, EventArgs.Empty);
@@ -301,7 +384,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         }
         finally
         {
-            Initialize();
+            await InitializeAsync();
         }
     }
 

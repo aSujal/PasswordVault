@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using PasswordVault.Services.Auth;
 using ShadUI;
 using Velopack;
 using Velopack.Sources;
@@ -40,16 +41,38 @@ public partial class SettingsViewModel : ViewModelBase
     public IRelayCommand ManageCategoriesCommand { get; }
 
     public ImportExportViewModel ImportExportVM { get; }
+    public BackupSettingsViewModel BackupSettingsVM { get; }
+    public AiSettingsViewModel AiSettingsVM { get; }
 
     private readonly DialogManager _dialogManager;
     private readonly ManageCategoriesViewModel _manageCategoriesViewModel;
+    private readonly IAuthService _authService;
 
-    public SettingsViewModel(ThemeWatcher watcher, DialogManager dialogManager, ManageCategoriesViewModel manageCategoriesViewModel, ImportExportViewModel importExportViewModel)
+    // ── Change Master Password ───────────────────────────────────────
+    [ObservableProperty] private string _currentMasterPassword = string.Empty;
+    [ObservableProperty] private string _newMasterPassword = string.Empty;
+    [ObservableProperty] private string _confirmNewMasterPassword = string.Empty;
+    [ObservableProperty] private bool _isChangingPassword;
+    [ObservableProperty] private string _passwordChangeStatus = string.Empty;
+    [ObservableProperty] private bool _passwordChangeSuccess;
+    [ObservableProperty] private bool _hasPasswordChangeResult;
+
+    public SettingsViewModel(
+        ThemeWatcher watcher,
+        DialogManager dialogManager,
+        ManageCategoriesViewModel manageCategoriesViewModel,
+        ImportExportViewModel importExportViewModel,
+        BackupSettingsViewModel backupSettingsViewModel,
+        AiSettingsViewModel aiSettingsViewModel,
+        IAuthService authService)
     {
         _watcher = watcher;
         _dialogManager = dialogManager;
         _manageCategoriesViewModel = manageCategoriesViewModel;
+        _authService = authService;
         ImportExportVM = importExportViewModel;
+        BackupSettingsVM = backupSettingsViewModel;
+        AiSettingsVM = aiSettingsViewModel;
 
         CurrentColors = watcher.ThemeColors;
 
@@ -72,6 +95,64 @@ public partial class SettingsViewModel : ViewModelBase
             .WithMinWidth(500)
             .Dismissible()
             .Show();
+    }
+
+    [RelayCommand]
+    private async Task ChangeMasterPassword()
+    {
+        if (IsChangingPassword) return;
+
+        // Validate inputs
+        if (string.IsNullOrWhiteSpace(CurrentMasterPassword))
+        {
+            PasswordChangeStatus = "Current password cannot be empty.";
+            PasswordChangeSuccess = false;
+            HasPasswordChangeResult = true;
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(NewMasterPassword) || NewMasterPassword.Length < 8)
+        {
+            PasswordChangeStatus = "New password must be at least 8 characters.";
+            PasswordChangeSuccess = false;
+            HasPasswordChangeResult = true;
+            return;
+        }
+        if (NewMasterPassword != ConfirmNewMasterPassword)
+        {
+            PasswordChangeStatus = "New passwords do not match.";
+            PasswordChangeSuccess = false;
+            HasPasswordChangeResult = true;
+            return;
+        }
+
+        IsChangingPassword = true;
+        HasPasswordChangeResult = false;
+        try
+        {
+            await _authService.ChangeMasterPasswordAsync(CurrentMasterPassword, NewMasterPassword);
+            CurrentMasterPassword = string.Empty;
+            NewMasterPassword = string.Empty;
+            ConfirmNewMasterPassword = string.Empty;
+            PasswordChangeStatus = "Master password changed successfully.";
+            PasswordChangeSuccess = true;
+            HasPasswordChangeResult = true;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            PasswordChangeStatus = "Current password is incorrect.";
+            PasswordChangeSuccess = false;
+            HasPasswordChangeResult = true;
+        }
+        catch (Exception ex)
+        {
+            PasswordChangeStatus = $"Failed to change password: {ex.Message}";
+            PasswordChangeSuccess = false;
+            HasPasswordChangeResult = true;
+        }
+        finally
+        {
+            IsChangingPassword = false;
+        }
     }
 
     [RelayCommand]

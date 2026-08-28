@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using PasswordVault.ViewModels;
 using ShadUI;
 using System;
@@ -9,13 +10,36 @@ namespace PasswordVault.Views;
 
 public partial class PasswordsPage : UserControl
 {
+    private DispatcherTimer? _clipboardClearTimer;
+
     public PasswordsPage()
     {
         InitializeComponent();
-        Initialize();
     }
-    private static void Initialize()
+
+    /// <summary>
+    /// Starts (or resets) the 30-second clipboard auto-clear timer.
+    /// </summary>
+    private void ScheduleClipboardClear(IClipboard clipboard, PasswordListViewModel viewModel)
     {
+        // Cancel any existing timer so back-to-back copies reset the countdown.
+        _clipboardClearTimer?.Stop();
+        _clipboardClearTimer = null;
+
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+        timer.Tick += async (_, _) =>
+        {
+            timer.Stop();
+            _clipboardClearTimer = null;
+            await clipboard.ClearAsync();
+            viewModel._toastManager
+                .CreateToast("Clipboard cleared")
+                .WithContent("Your copied password has been cleared from the clipboard.")
+                .WithDelay(3)
+                .Show();
+        };
+        _clipboardClearTimer = timer;
+        timer.Start();
     }
     private void InitializeComponent()
     {
@@ -73,9 +97,12 @@ public partial class PasswordsPage : UserControl
                     {
                         await clipboard.SetTextAsync(password);
                         viewModel._toastManager.CreateToast("Password copied!")
-                          .WithContent("The password has been securely copied to the clipboard.")
-                          .WithDelay(1)
+                          .WithContent("Clipboard will be cleared automatically in 30 seconds.")
+                          .WithDelay(3)
                           .Show();
+
+                        // Schedule auto-clear after 30 seconds
+                        ScheduleClipboardClear(clipboard, viewModel);
                     }
                     else
                     {
@@ -96,6 +123,36 @@ public partial class PasswordsPage : UserControl
                                       .WithContent("An unexpected error occurred while trying to copy the password.")
                                       .WithDelay(2)
                                       .ShowError();
+            }
+        }
+    }
+
+    private async void CopyTotpButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        try
+        {
+            if (sender is not Button button || button.Tag is not string secret || string.IsNullOrWhiteSpace(secret)) return;
+
+            var topLevel = TopLevel.GetTopLevel(this);
+            var clipboard = topLevel?.Clipboard;
+            if (clipboard == null || DataContext is not PasswordListViewModel viewModel) return;
+
+            var code = PasswordVault.Services.Totp.TotpService.GenerateCode(secret);
+            await clipboard.SetTextAsync(code);
+            viewModel._toastManager.CreateToast("2FA code copied!")
+                .WithContent($"Code {code} valid for {PasswordVault.Services.Totp.TotpService.GetSecondsRemaining()}s.")
+                .WithDelay(3)
+                .Show();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error copying 2FA code: {ex.Message}");
+            if (DataContext is PasswordListViewModel viewModel)
+            {
+                viewModel._toastManager.CreateToast("Copy Failed")
+                                  .WithContent("Could not generate the 2FA code. Check the secret key.")
+                                  .WithDelay(2)
+                                  .ShowError();
             }
         }
     }

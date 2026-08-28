@@ -362,3 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 publish.ps1
+CLAUDE.md
+ROADMAP.md
+skills-lock.json
+.claude

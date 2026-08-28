@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PasswordVault.Extensions;
 using PasswordVault.Helper;
 using PasswordVault.Services;
+using PasswordVault.Services.AI;
 using PasswordVault.Services.Auth;
 using PasswordVault.Services.Crypto;
 using PasswordVault.Services.Database;
@@ -42,10 +44,22 @@ public partial class App : Application
             var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
             _ = mainViewModel.InitializeAsync();
 
-            desktop.MainWindow = new MainWindow
+            var mainWindow = new MainWindow
             {
                 DataContext = mainViewModel
             };
+            desktop.MainWindow = mainWindow;
+
+            Helper.SingleInstanceGuard.StartActivationListener(() =>
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    if (mainWindow.WindowState == WindowState.Minimized)
+                        mainWindow.WindowState = WindowState.Normal;
+                    mainWindow.Show();
+                    mainWindow.Activate();
+                });
+            });
             // desktop.Exit += OnExit;
         }
 
@@ -61,12 +75,20 @@ public partial class App : Application
         services.AddSingleton<ShadUI.ToastManager>();
 
         services.AddSingleton<DatabaseService>();
+        services.AddSingleton<IDatabaseService>(sp => sp.GetRequiredService<DatabaseService>());
         services.AddSingleton<SyncService>();
         services.AddSingleton<IAuthService, AuthService>();
         services.AddSingleton<IPasswordService, PasswordService>();
+        services.AddSingleton<IDocumentService, DocumentService>();
         services.AddSingleton<PasswordGenerator>();
         services.AddSingleton<ICategoryService, CategoryService>();
         services.AddSingleton<IImportExportService, ImportExportService>();
+        services.AddSingleton<AiSettingsService, AiSettingsService>();
+        services.AddHttpClient("Ollama", c => c.Timeout = TimeSpan.FromSeconds(300));
+        services.AddHttpClient("CloudAi", c => c.Timeout = TimeSpan.FromSeconds(60));
+        services.AddSingleton<OllamaProvider>();
+        services.AddSingleton<CloudAiProvider>();
+        services.AddSingleton<IAiCategorizationService, AiCategorizationService>();
 
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<PasswordListViewModel>();
@@ -80,6 +102,8 @@ public partial class App : Application
         services.AddSingleton<ManageCategoriesViewModel>();
         services.AddSingleton<FilterPopupViewModel>();
         services.AddSingleton<ImportExportViewModel>();
+        services.AddSingleton<BackupSettingsViewModel>();
+        services.AddSingleton<AiSettingsViewModel>();
         services.AddTransient<ImportMappingViewModel>();
 
         services.AddSingleton<MainWindow>();

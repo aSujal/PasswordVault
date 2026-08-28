@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,6 +46,8 @@ public partial class AuthService(ICryptoService cryptoService, DatabaseService d
             byte[] derivedKey = Convert.FromBase64String(user.PasswordHash);
             await _databaseService.SetEncryptionKeyAsync(derivedKey);
             Authenticated?.Invoke(this, EventArgs.Empty);
+
+            _ = _databaseService.AutoBackupAsync();
         }
 
         return ok;
@@ -53,23 +55,44 @@ public partial class AuthService(ICryptoService cryptoService, DatabaseService d
 
     public async Task ChangeMasterPasswordAsync(string currentPassword, string newPassword)
     {
-        if (!await ValidateMasterPasswordAsync(currentPassword))
+        if (string.IsNullOrEmpty(currentPassword))
+            throw new UnauthorizedAccessException("Current password is incorrect");
+
+        var user = await _databaseService.GetUserAsync()
+                  ?? throw new InvalidOperationException("User record missing.");
+
+        string currentHash = _cryptoService.DeriveKeyFromPassword(currentPassword, user.PasswordSalt);
+        if (currentHash != user.PasswordHash)
             throw new UnauthorizedAccessException("Current password is incorrect");
 
         if (string.IsNullOrEmpty(newPassword))
             throw new ArgumentException("New password cannot be empty");
 
-        var user = await _databaseService.GetUserAsync()
-                  ?? throw new InvalidOperationException("User record missing.");
+        // Make sure the database is unlocked with the CURRENT key before we ask it to
+        // rebuild under the new one. Deliberately avoids ValidateMasterPasswordAsync here:
+        // that method fires the Authenticated event (re-triggering page reloads and an
+        // AutoBackup) which can race with the file rebuild below.
+        await _databaseService.SetEncryptionKeyAsync(Convert.FromBase64String(currentHash));
 
         byte[] newSalt = _cryptoService.GenerateRandomBytes(16);
         string newHash = _cryptoService.DeriveKeyFromPassword(newPassword, newSalt);
 
+        // Prepare both the rekeyed vault and the new user record as temp files WITHOUT
+        // touching the live vault.db/user.dat. Only once both are ready do we
+        // commit them, back to back. If anything throws before both commits run, the live
+        // vault and user.dat are untouched and the user can just retry - there's no window
+        // where the two files disagree about which password is current.
+        string tempVault = await _databaseService.PrepareVaultRekeyAsync(newHash);
+
         user.PasswordHash = newHash;
         user.PasswordSalt = newSalt;
+        string tempUser = await _databaseService.PrepareUserDataAsync(user);
 
-        await _databaseService.UpdateUserAsync(user);
+        await _databaseService.CommitVaultRekeyAsync(tempVault, newHash);
+        await _databaseService.CommitUserDataAsync(tempUser, user);
 
+        _isAuthenticated = true;
+        _currentUsername = user.Username;
         _currentKeyBase64 = newHash;
     }
 
@@ -83,6 +106,7 @@ public partial class AuthService(ICryptoService cryptoService, DatabaseService d
         _isAuthenticated = false;
         _currentUsername = null;
         _currentKeyBase64 = null;
+        _databaseService.LockDatabase();
         Locked?.Invoke(this, EventArgs.Empty);
         return Task.CompletedTask;
     }

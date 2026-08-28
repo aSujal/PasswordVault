@@ -36,7 +36,7 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
     private string _submitButtonText = "Create";
 
     private Models.Category? _categoryToEdit;
-    
+
     public Models.Category? CreatedCategory { get; private set; } // Property to expose the created category
 
     public ICommand SubmitCommand { get; }
@@ -77,7 +77,7 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
     {
         _dialogManager = dialogManager;
         _categoryService = categoryService;
-        SubmitCommand = new RelayCommand(Submit);
+        SubmitCommand = new AsyncRelayCommand(Submit);
     }
 
     public void Initialize()
@@ -89,7 +89,7 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
         SelectedIcon = string.Empty;
         DialogTitle = "New Category";
         SubmitButtonText = "Create";
-        CreatedCategory = null; 
+        CreatedCategory = null;
         ClearAllErrors();
     }
 
@@ -105,7 +105,7 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
         ClearAllErrors();
     }
 
-    private async void Submit()
+    private async Task Submit()
     {
         ClearErrors(nameof(Name));
         ClearErrors(nameof(SelectedColor));
@@ -149,28 +149,34 @@ public partial class AddCategoryDialogViewModel : ViewModelBase
             return;
         }
 
-        if (IsEditMode && _categoryToEdit != null)
+        try
         {
-            _categoryToEdit.Name = Name.Trim();
-            _categoryToEdit.Color = SelectedColor;
-            _categoryToEdit.Icon = SelectedIcon;
-
-            await _categoryService.UpdateCategoryAsync(_categoryToEdit);
-        }
-        else
-        {
-            var category = new Models.Category
+            if (IsEditMode && _categoryToEdit != null)
             {
-                Name = Name.Trim(),
-                Color = SelectedColor,
-                Icon = SelectedIcon,
-            };
+                _categoryToEdit.Name = Name.Trim();
+                _categoryToEdit.Color = SelectedColor;
+                _categoryToEdit.Icon = SelectedIcon;
 
-            var newCategory = await _categoryService.AddCategoryAsync(category);
-            CreatedCategory = newCategory;
+                await _categoryService.UpdateCategoryAsync(_categoryToEdit);
+            }
+            else
+            {
+                var category = new Models.Category
+                {
+                    Name = Name.Trim(),
+                    Color = SelectedColor,
+                    Icon = SelectedIcon,
+                };
+
+                CreatedCategory = await _categoryService.AddCategoryAsync(category);
+            }
+
+            _dialogManager.Close(this, new CloseDialogOptions { Success = true });
         }
-
-        _dialogManager.Close(this, new CloseDialogOptions { Success = true });
+        catch (Exception ex)
+        {
+            AddError(nameof(Name), ex.Message);
+        }
     }
 
     [RelayCommand]

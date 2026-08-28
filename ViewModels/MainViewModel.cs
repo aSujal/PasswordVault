@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
@@ -98,9 +98,11 @@ public partial class MainViewModel : ViewModelBase
         //_syncService.Authenticated += OnSyncStateChanged;
     }
 
+    [ObservableProperty] private bool _isAppLoading = true;
+
     public async Task InitializeAsync()
     {
-        IsBusy = true;
+        IsAppLoading = true;
         StatusMessage = "Checking database status...";
         try
         {
@@ -115,7 +117,7 @@ public partial class MainViewModel : ViewModelBase
         finally
         {
             StatusMessage = "";
-            IsBusy = false;
+            IsAppLoading = false;
         }
     }
 

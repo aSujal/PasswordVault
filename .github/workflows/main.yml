@@ -27,7 +27,7 @@ jobs:
         run: dotnet tool install -g vpk
 
       - name: Compile
-        run: dotnet publish PasswordVault.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./publish
+        run: dotnet publish PasswordVault.csproj -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -o ./publish
 
       - name: Download Previous Releases
         run: vpk download github --repoUrl "https://github.com/aSujal/PasswordVault" --outputDir ./releases

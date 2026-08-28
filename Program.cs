@@ -1,5 +1,6 @@
 using Avalonia;
 using System;
+using PasswordVault.Helper;
 
 namespace PasswordVault;
 
@@ -11,6 +12,12 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        if (!SingleInstanceGuard.TryAcquire())
+        {
+            SingleInstanceGuard.NotifyRunningInstance();
+            return;
+        }
+
         try
         {
             Velopack.VelopackApp.Build().Run();

@@ -116,8 +116,9 @@
                 VerticalAlignment="Center">
                 <shadui:Card.Header>
                     <StackPanel Spacing="4">
-                        <shadui:CardTitle FontSize="18">Password Vault</shadui:CardTitle>
-                        <shadui:CardDescription>Enter your master password</shadui:CardDescription>
+                        <fa:FontAwesomeIcon Value="fa-solid fa-shield-halved" Foreground="{DynamicResource PrimaryColor}" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                        <shadui:CardTitle FontSize="18" HorizontalAlignment="Center">Password Vault</shadui:CardTitle>
+                        <shadui:CardDescription HorizontalAlignment="Center">Enter your master password</shadui:CardDescription>
                     </StackPanel>
                 </shadui:Card.Header>
 
@@ -151,6 +152,16 @@
                 </StackPanel>
             </shadui:Card>
         </Grid>
+
+        <!--  App Loading Overlay Layer  -->
+        <Grid Background="#09090B" IsVisible="{Binding IsAppLoading}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="24">
+                <fa:FontAwesomeIcon Value="fa-solid fa-shield-halved" Foreground="{DynamicResource PrimaryColor}" FontSize="64" HorizontalAlignment="Center" />
+                <TextBlock Classes="h2" Text="Password Vault" HorizontalAlignment="Center" />
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4" HorizontalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+
         <shadui:ToastHost Manager="{Binding ToastManager}" />
     </Panel>
 </shadui:Window>

@@ -52,5 +52,10 @@ public partial class Password : ObservableObject
     [ObservableProperty]
     [property: BsonIgnore]
     private bool _isSelected;
+
+    [BsonIgnore]
+    [ObservableProperty]
+    [property: BsonIgnore]
+    private string? _liveTwoFactorSecret;
 }
 

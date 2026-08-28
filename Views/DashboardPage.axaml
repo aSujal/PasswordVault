@@ -26,38 +26,54 @@
 				<Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="16">
 					<!-- Total Passwords -->
 					<shadui:Card Grid.Column="0" Padding="20">
-						<StackPanel Spacing="8">
-							<fa:FontAwesomeIcon Value="fa-solid fa-key" Foreground="{DynamicResource PrimaryColor}" FontSize="24"/>
-							<TextBlock Text="{Binding TotalPasswords}" Classes="h1"/>
-							<TextBlock Text="Total Passwords" Foreground="{DynamicResource ForegroundLeadColor}"/>
-						</StackPanel>
+						<Grid ColumnDefinitions="Auto,*">
+							<Border Grid.Column="0" Width="48" Height="48" CornerRadius="24" Background="#1A3B82F6" Margin="0,0,16,0">
+								<fa:FontAwesomeIcon Value="fa-solid fa-key" Foreground="#3B82F6" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+							</Border>
+							<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+								<TextBlock Text="Total Passwords" FontSize="13" Foreground="{DynamicResource ForegroundLeadColor}" FontWeight="SemiBold"/>
+								<TextBlock Text="{Binding TotalPasswords}" Classes="h2" Margin="0,-4,0,0"/>
+							</StackPanel>
+						</Grid>
 					</shadui:Card>
 
 					<!-- Favorites -->
 					<shadui:Card Grid.Column="1" Padding="20">
-						<StackPanel Spacing="8">
-							<fa:FontAwesomeIcon Value="fa-solid fa-star" Foreground="Gold" FontSize="24"/>
-							<TextBlock Text="{Binding FavoritePasswords}" Classes="h1"/>
-							<TextBlock Text="Favorites" Foreground="{DynamicResource ForegroundLeadColor}"/>
-						</StackPanel>
+						<Grid ColumnDefinitions="Auto,*">
+							<Border Grid.Column="0" Width="48" Height="48" CornerRadius="24" Background="#1AF59E0B" Margin="0,0,16,0">
+								<fa:FontAwesomeIcon Value="fa-solid fa-star" Foreground="#F59E0B" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+							</Border>
+							<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+								<TextBlock Text="Favorites" FontSize="13" Foreground="{DynamicResource ForegroundLeadColor}" FontWeight="SemiBold"/>
+								<TextBlock Text="{Binding FavoritePasswords}" Classes="h2" Margin="0,-4,0,0"/>
+							</StackPanel>
+						</Grid>
 					</shadui:Card>
 
 					<!-- Weak Passwords -->
 					<shadui:Card Grid.Column="2" Padding="20">
-						<StackPanel Spacing="8">
-							<fa:FontAwesomeIcon Value="fa-solid fa-triangle-exclamation" Foreground="Orange" FontSize="24"/>
-							<TextBlock Text="{Binding WeakPasswords}" Classes="h1"/>
-							<TextBlock Text="Weak Passwords" Foreground="{DynamicResource ForegroundLeadColor}"/>
-						</StackPanel>
+						<Grid ColumnDefinitions="Auto,*">
+							<Border Grid.Column="0" Width="48" Height="48" CornerRadius="24" Background="#1AEF4444" Margin="0,0,16,0">
+								<fa:FontAwesomeIcon Value="fa-solid fa-triangle-exclamation" Foreground="#EF4444" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+							</Border>
+							<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+								<TextBlock Text="Weak Passwords" FontSize="13" Foreground="{DynamicResource ForegroundLeadColor}" FontWeight="SemiBold"/>
+								<TextBlock Text="{Binding WeakPasswords}" Classes="h2" Margin="0,-4,0,0"/>
+							</StackPanel>
+						</Grid>
 					</shadui:Card>
 
 					<!-- Categories -->
 					<shadui:Card Grid.Column="3" Padding="20">
-						<StackPanel Spacing="8">
-							<fa:FontAwesomeIcon Value="fa-solid fa-folder-open" Foreground="{DynamicResource PrimaryColor}" FontSize="24"/>
-							<TextBlock Text="{Binding TotalCategories}" Classes="h1"/>
-							<TextBlock Text="Categories" Foreground="{DynamicResource ForegroundLeadColor}"/>
-						</StackPanel>
+						<Grid ColumnDefinitions="Auto,*">
+							<Border Grid.Column="0" Width="48" Height="48" CornerRadius="24" Background="#1A10B981" Margin="0,0,16,0">
+								<fa:FontAwesomeIcon Value="fa-solid fa-folder-open" Foreground="#10B981" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+							</Border>
+							<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+								<TextBlock Text="Categories" FontSize="13" Foreground="{DynamicResource ForegroundLeadColor}" FontWeight="SemiBold"/>
+								<TextBlock Text="{Binding TotalCategories}" Classes="h2" Margin="0,-4,0,0"/>
+							</StackPanel>
+						</Grid>
 					</shadui:Card>
 				</Grid>
 
