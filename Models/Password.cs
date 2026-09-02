@@ -20,6 +20,12 @@ public partial class Password : ObservableObject
     public string? Notes { get; set; }
     public string? TwoFactorSecret { get; set; }
 
+    // TOTP parameters for TwoFactorSecret. Most services use the defaults (SHA1/6 digits/30s),
+    // captured when the secret is entered as a full otpauth:// URI instead of a bare key.
+    // most but some use SHA256/SHA512 or a different digit/period count
+    public string TwoFactorAlgorithm { get; set; } = Services.Totp.TotpService.DefaultAlgorithm;
+    public int TwoFactorDigits { get; set; } = Services.Totp.TotpService.DefaultDigits;
+    public int TwoFactorPeriod { get; set; } = Services.Totp.TotpService.DefaultPeriod;
 
     [BsonRef("categories")]
     public Category? Category { get; set; }
@@ -57,5 +63,23 @@ public partial class Password : ObservableObject
     [ObservableProperty]
     [property: BsonIgnore]
     private string? _liveTwoFactorSecret;
+
+    // Current TOTP code and countdown, refreshed every second by PasswordListViewModel while
+    // LiveTwoFactorSecret is set - lets the list show a live code instead of only on click.
+    [BsonIgnore]
+    [ObservableProperty]
+    [property: BsonIgnore]
+    private string? _currentTotpCode;
+
+    [BsonIgnore]
+    [ObservableProperty]
+    [property: BsonIgnore]
+    private int _totpSecondsRemaining;
+
+    // Fraction (0..1) of the current TOTP period remaining, drives the countdown ring in the list.
+    [BsonIgnore]
+    [ObservableProperty]
+    [property: BsonIgnore]
+    private double _totpProgressFraction;
 }
 

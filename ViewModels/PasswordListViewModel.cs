@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PasswordVault.Models;
@@ -13,6 +14,7 @@ using PasswordVault.Services.Auth;
 using PasswordVault.Services.Database;
 using PasswordVault.Services.Crypto;
 using PasswordVault.Services.AI;
+using PasswordVault.Services.Totp;
 using ShadUI;
 
 namespace PasswordVault.ViewModels;
@@ -96,6 +98,27 @@ public partial class PasswordListViewModel : ViewModelBase
         _addPasswordViewModel.PasswordUpdatedSuccessfully += async (s, e) => await ApplyFiltersAsync();
         _categoryService.CategoriesChanged += async (s, e) => await ApplyFiltersAsync();
         _filterViewModel.FiltersApplied += async (s, e) => await ApplyFiltersAsync();
+
+        var totpTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        totpTimer.Tick += (s, e) => RefreshTotpCodes();
+        totpTimer.Start();
+    }
+
+    private void RefreshTotpCodes()
+    {
+        foreach (var password in Passwords)
+        {
+            if (string.IsNullOrEmpty(password.LiveTwoFactorSecret))
+            {
+                password.CurrentTotpCode = null;
+                continue;
+            }
+
+            password.CurrentTotpCode = TotpService.GenerateCode(
+                password.LiveTwoFactorSecret, password.TwoFactorAlgorithm, password.TwoFactorDigits, password.TwoFactorPeriod);
+            password.TotpSecondsRemaining = TotpService.GetSecondsRemaining(password.TwoFactorPeriod);
+            password.TotpProgressFraction = password.TotpSecondsRemaining / (double)Math.Max(1, password.TwoFactorPeriod);
+        }
     }
 
     public void OnAuthenticated(object? sender, EventArgs e)
@@ -115,6 +138,7 @@ public partial class PasswordListViewModel : ViewModelBase
                 CalculatePasswordStrength(password);
             }
             Passwords = new ObservableCollection<Password>(allPasswords);
+            RefreshTotpCodes();
         }
         catch (Exception ex)
         {
@@ -194,6 +218,7 @@ public partial class PasswordListViewModel : ViewModelBase
             foreach (var password in passwords) CalculatePasswordStrength(password);
             passwords = ApplyInMemoryFilters(passwords);
             Passwords = new ObservableCollection<Password>(passwords);
+            RefreshTotpCodes();
 
             IsFilterActive = FilterViewModel.IsAnyFilterActive;
             ActiveFilterCount = CalculateActiveFilterCount();

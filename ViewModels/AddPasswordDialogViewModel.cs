@@ -44,6 +44,13 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     [ObservableProperty]
     private string _twoFactorSecret = string.Empty;
 
+    // TOTP parameters for TwoFactorSecret - only overwritten when the user pastes a fresh
+    // otpauth:// URI (see Submit); editing a password without retyping the secret preserves
+    // whatever algorithm/digits/period it already had instead of silently resetting to SHA1.
+    private string _twoFactorAlgorithm = TotpService.DefaultAlgorithm;
+    private int _twoFactorDigits = TotpService.DefaultDigits;
+    private int _twoFactorPeriod = TotpService.DefaultPeriod;
+
     [ObservableProperty]
     private ObservableCollection<Category> _categories = new();
 
@@ -133,6 +140,9 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         Notes = string.Empty;
         IsFavorite = false;
         TwoFactorSecret = string.Empty;
+        _twoFactorAlgorithm = TotpService.DefaultAlgorithm;
+        _twoFactorDigits = TotpService.DefaultDigits;
+        _twoFactorPeriod = TotpService.DefaultPeriod;
 
         SelectedCategory = Categories.FirstOrDefault(c => c.Name == "Uncategorized") ?? Categories.FirstOrDefault();
         SubmitButtonText = "Add";
@@ -171,6 +181,9 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         Notes = password.Notes ?? string.Empty;
         IsFavorite = password.IsFavorite;
         TwoFactorSecret = string.IsNullOrEmpty(password.TwoFactorSecret) ? string.Empty : _cryptoService.DecryptPassword(password.TwoFactorSecret);
+        _twoFactorAlgorithm = password.TwoFactorAlgorithm;
+        _twoFactorDigits = password.TwoFactorDigits;
+        _twoFactorPeriod = password.TwoFactorPeriod;
 
         if (password.Category != null)
         {
@@ -332,8 +345,35 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(Title)) AddError(nameof(Title), "Title is required");
         if (string.IsNullOrWhiteSpace(Username)) AddError(nameof(Username), "Username is required");
         if (string.IsNullOrWhiteSpace(Password)) AddError(nameof(Password), "Password is required");
-        if (!string.IsNullOrWhiteSpace(TwoFactorSecret) && !TotpService.IsValidSecret(TwoFactorSecret))
-            AddError(nameof(TwoFactorSecret), "Invalid 2FA secret key (must be Base32)");
+
+        string? parsedSecret = null;
+        if (!string.IsNullOrWhiteSpace(TwoFactorSecret))
+        {
+            try
+            {
+                var parsed = TotpService.ParseSecretInput(TwoFactorSecret);
+                if (!TotpService.IsValidSecret(parsed.Secret))
+                {
+                    AddError(nameof(TwoFactorSecret), "Invalid 2FA secret key (must be Base32 or an otpauth:// URI)");
+                }
+                else
+                {
+                    parsedSecret = parsed.Secret;
+                    // Only a fresh otpauth:// paste updates the algorithm/digits/period - editing
+                    // other fields re-submits the same decrypted secret and must not reset them.
+                    if (TwoFactorSecret.TrimStart().StartsWith("otpauth://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _twoFactorAlgorithm = parsed.Algorithm;
+                        _twoFactorDigits = parsed.Digits;
+                        _twoFactorPeriod = parsed.Period;
+                    }
+                }
+            }
+            catch (FormatException)
+            {
+                AddError(nameof(TwoFactorSecret), "Invalid 2FA secret key (must be Base32 or an otpauth:// URI)");
+            }
+        }
 
         if (HasErrors)
         {
@@ -341,9 +381,9 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         }
         try
         {
-            string? encryptedTwoFactorSecret = string.IsNullOrWhiteSpace(TwoFactorSecret)
+            string? encryptedTwoFactorSecret = parsedSecret == null
                 ? null
-                : _cryptoService.EncryptPassword(TwoFactorSecret.Trim().Replace(" ", "").ToUpperInvariant());
+                : _cryptoService.EncryptPassword(parsedSecret);
 
             if (IsEditMode && _passwordToEdit != null)
             {
@@ -355,6 +395,9 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
                 _passwordToEdit.Category = SelectedCategory;
                 _passwordToEdit.IsFavorite = IsFavorite;
                 _passwordToEdit.TwoFactorSecret = encryptedTwoFactorSecret;
+                _passwordToEdit.TwoFactorAlgorithm = _twoFactorAlgorithm;
+                _passwordToEdit.TwoFactorDigits = _twoFactorDigits;
+                _passwordToEdit.TwoFactorPeriod = _twoFactorPeriod;
                 await _passwordService.UpdatePasswordAsync(_passwordToEdit);
                 PasswordUpdatedSuccessfully?.Invoke(this, EventArgs.Empty);
             }
@@ -370,6 +413,9 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
                     Category = SelectedCategory,
                     IsFavorite = IsFavorite,
                     TwoFactorSecret = encryptedTwoFactorSecret,
+                    TwoFactorAlgorithm = _twoFactorAlgorithm,
+                    TwoFactorDigits = _twoFactorDigits,
+                    TwoFactorPeriod = _twoFactorPeriod,
                 };
                 await _passwordService.AddPasswordAsync(newPassword);
                 PasswordAddedSuccessfully?.Invoke(this, EventArgs.Empty);

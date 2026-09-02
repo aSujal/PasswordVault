@@ -14,6 +14,8 @@
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
         <converters:JoinConverter x:Key="JoinConverter" Separator=", " />
+        <converters:TotpRingPathConverter x:Key="TotpRingPathConverter" />
+        <converters:TotpUrgentBrushConverter x:Key="TotpUrgentBrushConverter" />
         <!--<converters:BooleonConverters x:Key="BooleonConverters" />-->
         <x:Double x:Key="ControlContentThemeFontSize">12</x:Double>
         <FontFamily x:Key="FontAwesomeSolid">avares://PasswordVault/Assets/Fonts/Font Awesome 7 Free-Solid-900.otf#Font Awesome 7 Free Solid</FontFamily>

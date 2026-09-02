@@ -131,13 +131,12 @@ public partial class PasswordsPage : UserControl
     {
         try
         {
-            if (sender is not Button button || button.Tag is not string secret || string.IsNullOrWhiteSpace(secret)) return;
+            if (sender is not Button button || button.Tag is not string code || string.IsNullOrWhiteSpace(code)) return;
 
             var topLevel = TopLevel.GetTopLevel(this);
             var clipboard = topLevel?.Clipboard;
             if (clipboard == null || DataContext is not PasswordListViewModel viewModel) return;
 
-            var code = PasswordVault.Services.Totp.TotpService.GenerateCode(secret);
             await clipboard.SetTextAsync(code);
             viewModel._toastManager.CreateToast("2FA code copied!")
                 .WithContent($"Code {code} valid for {PasswordVault.Services.Totp.TotpService.GetSecondsRemaining()}s.")
