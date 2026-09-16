@@ -7,7 +7,7 @@
     RequestedThemeVariant="Default">
 
     <Application.Resources>
-        <ResourceDictionary>
+        <ResourceDictionary x:Key="AppResources">
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceInclude x:Key="Light" Source="Themes/Light.axaml" />
                 <ResourceInclude x:Key="Dark" Source="Themes/Dark.axaml" />
@@ -16,6 +16,8 @@
         <converters:JoinConverter x:Key="JoinConverter" Separator=", " />
         <converters:TotpRingPathConverter x:Key="TotpRingPathConverter" />
         <converters:TotpUrgentBrushConverter x:Key="TotpUrgentBrushConverter" />
+        <converters:DocumentIconConverter x:Key="DocumentIconConverter" />
+        <converters:DepthIndentConverter x:Key="DepthIndentConverter" />
         <!--<converters:BooleonConverters x:Key="BooleonConverters" />-->
         <x:Double x:Key="ControlContentThemeFontSize">12</x:Double>
         <FontFamily x:Key="FontAwesomeSolid">avares://PasswordVault/Assets/Fonts/Font Awesome 7 Free-Solid-900.otf#Font Awesome 7 Free Solid</FontFamily>

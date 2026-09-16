@@ -38,6 +38,10 @@ public partial class App : Application
             var themeWatcher = _serviceProvider.GetRequiredService<ThemeWatcher>();
             themeWatcher.Initialize();
 
+            // Clean up any decrypted document temp files a previous run left behind (crash,
+            // forced kill) before anything in this run could open new ones.
+            _serviceProvider.GetRequiredService<Helper.SecureTempFileManager>().SweepStaleFiles();
+
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             //DisableAvaloniaDataAnnotationValidation();
@@ -61,6 +65,7 @@ public partial class App : Application
                 });
             });
             // desktop.Exit += OnExit;
+            desktop.Exit += (_, _) => _serviceProvider.GetRequiredService<Helper.SecureTempFileManager>().ShredAll();
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -78,8 +83,9 @@ public partial class App : Application
         services.AddSingleton<IDatabaseService>(sp => sp.GetRequiredService<DatabaseService>());
         services.AddSingleton<SyncService>();
         services.AddSingleton<IAuthService, AuthService>();
-        services.AddSingleton<IPasswordService, PasswordService>();
         services.AddSingleton<IDocumentService, DocumentService>();
+        services.AddSingleton<IDocumentFolderService, DocumentFolderService>();
+        services.AddSingleton<IPasswordService, PasswordService>();
         services.AddSingleton<PasswordGenerator>();
         services.AddSingleton<ICategoryService, CategoryService>();
         services.AddSingleton<IImportExportService, ImportExportService>();
@@ -89,6 +95,8 @@ public partial class App : Application
         services.AddSingleton<OllamaProvider>();
         services.AddSingleton<CloudAiProvider>();
         services.AddSingleton<IAiCategorizationService, AiCategorizationService>();
+
+        services.AddSingleton<Helper.SecureTempFileManager>();
 
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<PasswordListViewModel>();
@@ -105,6 +113,10 @@ public partial class App : Application
         services.AddSingleton<BackupSettingsViewModel>();
         services.AddSingleton<AiSettingsViewModel>();
         services.AddTransient<ImportMappingViewModel>();
+        services.AddSingleton<DocumentListViewModel>();
+        services.AddSingleton<EditDocumentDialogViewModel>();
+        services.AddSingleton<AddFolderDialogViewModel>();
+        services.AddSingleton<DocumentPreviewViewModel>();
 
         services.AddSingleton<MainWindow>();
         services.AddSingleton<PasswordsPage>();
@@ -114,6 +126,10 @@ public partial class App : Application
         services.AddSingleton<SettingsPage>();
         services.AddSingleton<SyncPage>();
         services.AddTransient<ImportMappingDialog>();
+        services.AddSingleton<DocumentsPage>();
+        services.AddSingleton<EditDocumentDialog>();
+        services.AddSingleton<AddFolderDialog>();
+        services.AddSingleton<DocumentPreviewDialog>();
 
         _serviceProvider = services.BuildServiceProvider(validateScopes: true)
                                     .RegisterDialogs();

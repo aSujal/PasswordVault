@@ -1,0 +1,101 @@
+<UserControl
+	x:Class="PasswordVault.Views.DocumentPreviewDialog"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:converters="clr-namespace:PasswordVault.Converters"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="using:PasswordVault.ViewModels"
+	x:Name="Root"
+	d:DesignHeight="500"
+	d:DesignWidth="600"
+	x:DataType="vm:DocumentPreviewViewModel"
+	mc:Ignorable="d">
+	<Grid Width="600" Height="500" Margin="24" RowDefinitions="Auto,*,Auto">
+		<DockPanel Grid.Row="0" Margin="0,0,0,16">
+			<fa:FontAwesomeIcon
+				DockPanel.Dock="Left"
+				Width="18"
+				Height="18"
+				Margin="0,0,8,0"
+				Foreground="{DynamicResource ForegroundColor}"
+				Value="{Binding Document.FileName, Converter={x:Static converters:DocumentIconConverter.Instance}}" />
+			<TextBlock
+				VerticalAlignment="Center"
+				Classes="h4"
+				Text="{Binding Document.FileName}"
+				TextTrimming="CharacterEllipsis" />
+		</DockPanel>
+
+		<Border
+			Grid.Row="1"
+			Background="{DynamicResource CardBackgroundColor}"
+			BorderBrush="{DynamicResource BorderColor}"
+			BorderThickness="1"
+			CornerRadius="8">
+			<Grid>
+				<ProgressBar
+					Width="200"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					IsIndeterminate="True"
+					IsVisible="{Binding IsLoading}" />
+
+				<Image
+					Margin="8"
+					IsVisible="{Binding IsImage}"
+					Source="{Binding ImageSource}"
+					Stretch="Uniform" />
+
+				<ScrollViewer IsVisible="{Binding IsText}">
+					<TextBox
+						Margin="8"
+						BorderThickness="0"
+						FontFamily="Consolas,Cascadia Code,monospace"
+						IsReadOnly="True"
+						Text="{Binding TextContent}"
+						TextWrapping="Wrap" />
+				</ScrollViewer>
+
+				<StackPanel
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					IsVisible="{Binding IsOther}"
+					Spacing="12">
+					<fa:FontAwesomeIcon
+						Width="48"
+						Height="48"
+						HorizontalAlignment="Center"
+						Foreground="{DynamicResource ForegroundLeadColor}"
+						Value="{Binding Document.FileName, Converter={x:Static converters:DocumentIconConverter.Instance}}" />
+					<TextBlock
+						HorizontalAlignment="Center"
+						Opacity="0.7"
+						Text="No in-app preview for this file type." />
+				</StackPanel>
+			</Grid>
+		</Border>
+
+		<StackPanel
+			Grid.Row="2"
+			Margin="0,16,0,0"
+			HorizontalAlignment="Right"
+			Orientation="Horizontal"
+			Spacing="8">
+			<Button Classes="Outline" Command="{Binding OpenExternallyCommand}">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<fa:FontAwesomeIcon Value="fa-solid fa-arrow-up-right-from-square" />
+					<TextBlock Text="Open Externally" />
+				</StackPanel>
+			</Button>
+			<Button Classes="Outline" Click="SaveAsButton_Click">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<fa:FontAwesomeIcon Value="fa-solid fa-download" />
+					<TextBlock Text="Save As" />
+				</StackPanel>
+			</Button>
+			<Button Classes="Primary" Command="{Binding CloseCommand}">Close</Button>
+		</StackPanel>
+	</Grid>
+</UserControl>

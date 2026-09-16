@@ -65,13 +65,41 @@ public class DatabaseService : IDatabaseService
             throw new InvalidOperationException("Database not unlocked - call Initialize or supply master password.");
         lock (_dbLock)
         {
-            _databaseInstance ??= new LiteDatabase(new ConnectionString
+            if (_databaseInstance == null)
             {
-                Filename = _databaseFile,
-                Password = Convert.ToBase64String(_encryptionKey)
-            });
+                _databaseInstance = new LiteDatabase(new ConnectionString
+                {
+                    Filename = _databaseFile,
+                    Password = Convert.ToBase64String(_encryptionKey)
+                });
+                // Every unlock runs this, not just first-ever vault creation, so a schema
+                // added after a vault already exists (e.g. the documents/documentFolders
+                // collections) still gets created and indexed on the next unlock.
+                EnsureSchema(_databaseInstance);
+            }
             return _databaseInstance;
         }
+    }
+
+    // Single chokepoint for collection/index setup, called wherever a LiteDatabase handle is
+    // created or rebuilt: the lazy OpenDatabase() above, InitializeDatabaseAsync (new vault),
+    // and PrepareVaultRekeyAsync (master password change). Keeping it in one place means a new
+    // collection only needs to be added here once.
+    private static void EnsureSchema(LiteDatabase db)
+    {
+        var passwords = db.GetCollection<Password>("passwords");
+        passwords.EnsureIndex("Category.$id");
+        passwords.EnsureIndex(x => x.Tags);
+        passwords.EnsureIndex(x => x.SyncVersion);
+
+        var documents = db.GetCollection<VaultDocument>("documents");
+        documents.EnsureIndex(x => x.PasswordId);
+        documents.EnsureIndex(x => x.FolderId);
+        documents.EnsureIndex(x => x.IsDeleted);
+        documents.EnsureIndex(x => x.Tags);
+
+        var documentFolders = db.GetCollection<DocumentFolder>("documentFolders");
+        documentFolders.EnsureIndex(x => x.ParentId);
     }
 
     public async Task SetEncryptionKeyAsync(byte[] encryptionKey)
@@ -128,22 +156,28 @@ public class DatabaseService : IDatabaseService
 
             using (var newDb = new LiteDatabase(new ConnectionString { Filename = tempFile, Password = newPasswordBase64 }))
             {
+                // FileStorage keeps its bytes in "_files"/"_chunks", not in a regular
+                // document collection - GetCollection(name).FindAll() below would return
+                // BsonDocuments for them but skip the actual chunk bytes, silently corrupting
+                // every stored document on a master-password change. Skip those two here and
+                // copy file storage explicitly instead.
                 foreach (var collectionName in db.GetCollectionNames())
                 {
+                    if (collectionName.StartsWith('_')) continue;
+
                     var allDocs = db.GetCollection(collectionName).FindAll().ToList();
                     if (allDocs.Count > 0)
                         newDb.GetCollection(collectionName).InsertBulk(allDocs);
                 }
 
-                // Secondary indexes aren't copied by the document-level rebuild above;
-                // recreate the ones InitializeDatabaseAsync sets up on "passwords".
-                var passwords = newDb.GetCollection<Password>("passwords");
-                passwords.EnsureIndex("Category.$id");
-                passwords.EnsureIndex(x => x.Tags);
-                passwords.EnsureIndex(x => x.SyncVersion);
+                foreach (var file in db.FileStorage.FindAll())
+                {
+                    using var stream = file.OpenRead();
+                    newDb.FileStorage.Upload(file.Id, file.Filename, stream);
+                }
 
-                var documents = newDb.GetCollection<DocumentAttachment>("documents");
-                documents.EnsureIndex("PasswordId");
+                // Secondary indexes aren't copied by the document-level rebuild above.
+                EnsureSchema(newDb);
             }
 
             return Task.FromResult(tempFile);
@@ -188,21 +222,8 @@ public class DatabaseService : IDatabaseService
             PasswordSalt = salt,
             BiometricUnlockEnabled = false,
         };
-        var db = OpenDatabase();
-        // Create collections
-        var passwords = db.GetCollection<Password>("passwords");
+        var db = OpenDatabase();  // already ran EnsureSchema via the lazy create above
         var categories = db.GetCollection<Category>("categories");
-        var syncDevices = db.GetCollection<SyncDevice>("syncDevices");
-        var users = db.GetCollection<User>("users");
-
-        // Create indexes for optimization
-        //passwords.EnsureIndex(x => x.Category);
-        passwords.EnsureIndex("Category.$id");
-        passwords.EnsureIndex(x => x.Tags);
-        passwords.EnsureIndex(x => x.SyncVersion);
-
-        var documents = db.GetCollection<DocumentAttachment>("documents");
-        documents.EnsureIndex("PasswordId");
 
         // Create default categories
         if (categories.Count() == 0)

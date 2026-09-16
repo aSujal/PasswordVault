@@ -11,4 +11,7 @@
 	<DataTemplate DataType="{x:Type viewModels:SettingsViewModel}">
 		<pages:SettingsPage />
 	</DataTemplate>
+	<DataTemplate DataType="{x:Type viewModels:DocumentListViewModel}">
+		<pages:DocumentsPage />
+	</DataTemplate>
 </DataTemplates>

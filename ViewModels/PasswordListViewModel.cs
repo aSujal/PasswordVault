@@ -344,14 +344,15 @@ public partial class PasswordListViewModel : ViewModelBase
             var sourceDocuments = await _documentService.GetDocumentsForPasswordAsync(source.Id);
             foreach (var d in sourceDocuments)
             {
-                await _documentService.AddDocumentAsync(new DocumentAttachment
+                using var content = await _documentService.OpenDocumentAsync(d.Id);
+                await _documentService.AddDocumentAsync(new VaultDocument
                 {
                     PasswordId = duplicate.Id,
+                    FolderId = d.FolderId,
                     FileName = d.FileName,
                     ContentType = d.ContentType,
                     SizeBytes = d.SizeBytes,
-                    Data = d.Data,
-                });
+                }, content);
             }
 
             await RefreshAsync();

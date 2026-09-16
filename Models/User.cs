@@ -34,6 +34,9 @@ public class User
     public int BackupRetentionCount { get; set; } = 7;
     public DateTime? LastBackupAt { get; set; }
 
+    // Warning before a document is decrypted to a temp file to "Open externally" shown only once
+    public bool HasAcceptedDocumentOpenWarning { get; set; } = false;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastLogin { get; set; } = DateTime.UtcNow;

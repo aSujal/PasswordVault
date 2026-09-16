@@ -63,6 +63,10 @@ public static class FontAwesomeGlyphMap
         ["fa-file-lines"] = '\uf15c',
 
         ["fa-folder-open"] = '\uf07c',
+        ["fa-folder"] = '\uf07b',
+        ["fa-file-pdf"] = '\uf1c1',
+        ["fa-image"] = '\uf03e',
+        ["fa-arrow-up-right-from-square"] = '\uf08e',
 
         ["fa-envelope"] = '\uf0e0',
         ["fa-credit-card"] = '\uf09d',

@@ -8,10 +8,11 @@ using PasswordVault.Services.Crypto;
 
 namespace PasswordVault.Services.Database;
 
-public class PasswordService(DatabaseService databaseService, ICryptoService cryptoService) : IPasswordService
+public class PasswordService(DatabaseService databaseService, ICryptoService cryptoService, IDocumentService documentService) : IPasswordService
 {
     private readonly DatabaseService _databaseService = databaseService;
     private readonly ICryptoService _cryptoService = cryptoService;
+    private readonly IDocumentService _documentService = documentService;
     private readonly string _collectionName = "passwords";
     private static readonly SemaphoreSlim _databaseAccessSemaphore = new(1, 1);
 
@@ -155,24 +156,35 @@ public class PasswordService(DatabaseService databaseService, ICryptoService cry
 
     public async Task<bool> DeletePasswordAsync(Guid id)
     {
-        return await Task.Run(() =>
+        var deleted = await Task.Run(() =>
         {
             var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             return DeletePasswordInternal(collection, id, DateTime.UtcNow, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         });
+
+        if (deleted)
+            await _documentService.DeleteDocumentsForPasswordAsync(id);
+
+        return deleted;
     }
 
     public async Task<int> DeleteMultiplePasswordsAsync(IEnumerable<Guid> ids)
     {
-        return await Task.Run(() =>
+        var idList = ids.ToList();
+        var deletedIds = await Task.Run(() =>
         {
             var db = _databaseService.OpenDatabase();
             var collection = db.GetCollection<Password>(_collectionName);
             var now = DateTime.UtcNow;
             var syncVersion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            return ids.Count(id => DeletePasswordInternal(collection, id, now, syncVersion));
+            return idList.Where(id => DeletePasswordInternal(collection, id, now, syncVersion)).ToList();
         });
+
+        foreach (var id in deletedIds)
+            await _documentService.DeleteDocumentsForPasswordAsync(id);
+
+        return deletedIds.Count;
     }
 
     public async Task<string> GetDecryptedPasswordAsync(Guid passwordId)

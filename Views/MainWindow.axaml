@@ -82,6 +82,16 @@
                         </shadui:SidebarItem.Icon>
                     </shadui:SidebarItem>
 
+                    <shadui:SidebarItem Command="{Binding NavigateToDocumentsCommand}" Content="Documents">
+                        <shadui:SidebarItem.Icon>
+                            <fa:FontAwesomeIcon
+                                Width="16"
+                                Height="16"
+                                Foreground="{DynamicResource ForegroundColor}"
+                                Value="fa-solid fa-folder-open" />
+                        </shadui:SidebarItem.Icon>
+                    </shadui:SidebarItem>
+
                     <shadui:SidebarItem Command="{Binding NavigateToSyncCommand}" Content="Sync">
                         <shadui:SidebarItem.Icon>
                             <fa:FontAwesomeIcon

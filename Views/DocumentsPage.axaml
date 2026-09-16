@@ -1,0 +1,339 @@
+<UserControl
+	x:Class="PasswordVault.Views.DocumentsPage"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:converters="clr-namespace:PasswordVault.Converters"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
+	xmlns:m="using:PasswordVault.Models"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+	xmlns:vm="using:PasswordVault.ViewModels"
+	x:Name="Root"
+	d:DesignHeight="600"
+	d:DesignWidth="1000"
+	x:DataType="vm:DocumentListViewModel"
+	mc:Ignorable="d">
+
+	<Grid
+		MaxWidth="1536"
+		Margin="48,24"
+		RowDefinitions="Auto,*">
+		<StackPanel
+			Grid.Row="0"
+			Margin="0,0,0,16"
+			Spacing="16">
+			<DockPanel IsVisible="{Binding !IsSelectionMode}">
+				<TextBlock
+					VerticalAlignment="Center"
+					Classes="h2"
+					Text="Documents"
+					TextWrapping="Wrap" />
+				<StackPanel
+					HorizontalAlignment="Right"
+					Orientation="Horizontal"
+					Spacing="8">
+					<Button Classes="Outline" Command="{Binding ToggleSelectionModeCommand}">
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<fa:FontAwesomeIcon Value="fa-solid fa-check-square" />
+							<TextBlock Text="Select" />
+						</StackPanel>
+					</Button>
+					<Button Classes="Outline" Command="{Binding AddFolderCommand}">
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<fa:FontAwesomeIcon Value="fa-solid fa-plus" />
+							<TextBlock Text="Folder" />
+						</StackPanel>
+					</Button>
+					<Button Classes="Primary" Click="AddDocumentButton_Click">
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<fa:FontAwesomeIcon Value="fa-solid fa-upload" />
+							<TextBlock Text="Add Document" />
+						</StackPanel>
+					</Button>
+				</StackPanel>
+			</DockPanel>
+
+			<!--  Selection mode action bar  -->
+			<DockPanel IsVisible="{Binding IsSelectionMode}">
+				<StackPanel
+					VerticalAlignment="Center"
+					Orientation="Horizontal"
+					Spacing="12">
+					<CheckBox
+						VerticalAlignment="Center"
+						Command="{Binding SelectAllCommand}"
+						Content="Select All"
+						IsChecked="{Binding IsAllSelected, Mode=OneWay}" />
+					<TextBlock
+						VerticalAlignment="Center"
+						Opacity="0.7"
+						Text="{Binding SelectedCount, StringFormat='{}{0} selected'}" />
+				</StackPanel>
+				<StackPanel
+					HorizontalAlignment="Right"
+					Orientation="Horizontal"
+					Spacing="8">
+					<Button
+						Classes="Outline"
+						IsEnabled="{Binding SelectedCount}">
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<fa:FontAwesomeIcon Value="fa-solid fa-folder" />
+							<TextBlock Text="Move" />
+						</StackPanel>
+						<Button.Flyout>
+							<Flyout Placement="BottomEdgeAlignedRight">
+								<StackPanel Width="220" Margin="4" Spacing="12">
+									<TextBlock
+										FontSize="12"
+										Opacity="0.7"
+										Text="Move selected to folder"
+										TextWrapping="Wrap" />
+									<ComboBox
+										HorizontalAlignment="Stretch"
+										ItemsSource="{Binding BulkMoveOptions}"
+										PlaceholderText="(Documents root)"
+										SelectedItem="{Binding BulkMoveTarget}">
+										<ComboBox.ItemTemplate>
+											<DataTemplate x:DataType="m:DocumentFolder">
+												<StackPanel Orientation="Horizontal" Spacing="8">
+													<fa:FontAwesomeIcon Foreground="{Binding Color}" Value="fa-solid fa-folder" />
+													<TextBlock Foreground="{Binding Color}" Text="{Binding Name}" />
+												</StackPanel>
+											</DataTemplate>
+										</ComboBox.ItemTemplate>
+									</ComboBox>
+									<Button
+										HorizontalAlignment="Stretch"
+										HorizontalContentAlignment="Center"
+										Classes="Primary"
+										Command="{Binding ApplyBulkMoveCommand}">
+										<TextBlock Text="Move" />
+									</Button>
+								</StackPanel>
+							</Flyout>
+						</Button.Flyout>
+					</Button>
+					<Button
+						Classes="Destructive"
+						Command="{Binding ConfirmDeleteSelectedCommand}"
+						IsEnabled="{Binding SelectedCount}">
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<fa:FontAwesomeIcon Value="fa-solid fa-trash" />
+							<TextBlock Text="Delete Selected" />
+						</StackPanel>
+					</Button>
+					<Button Classes="Outline" Command="{Binding ToggleSelectionModeCommand}">
+						<TextBlock Text="Cancel" />
+					</Button>
+				</StackPanel>
+			</DockPanel>
+
+			<TextBox
+				VerticalAlignment="Center"
+				shadui:ControlAssist.ShowProgress="{Binding IsSearching}"
+				Classes="Clearable"
+				PlaceholderText="Search documents..."
+				Text="{Binding SearchText, Mode=TwoWay}"
+				TextChanged="DocumentSearch_TextChanged">
+				<TextBox.InnerLeftContent>
+					<fa:FontAwesomeIcon
+						Width="16"
+						Height="16"
+						Margin="8,0,0,0"
+						Foreground="{DynamicResource ForegroundColor}"
+						Opacity="0.75"
+						Value="fa-solid fa-search" />
+				</TextBox.InnerLeftContent>
+			</TextBox>
+		</StackPanel>
+
+		<Grid
+			Grid.Row="1"
+			ColumnDefinitions="240,*">
+
+			<!--  Folders sidebar  -->
+			<shadui:Card
+				Grid.Column="0"
+				Margin="0,0,16,0"
+				Padding="8">
+				<ScrollViewer>
+					<ItemsControl ItemsSource="{Binding FolderNodes}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate x:DataType="vm:DocumentFolderNode">
+								<Button
+									Margin="0,1"
+									Padding="6,6"
+									HorizontalAlignment="Stretch"
+									HorizontalContentAlignment="Stretch"
+									Command="{Binding DataContext.SelectNodeCommand, ElementName=Root}"
+									CommandParameter="{Binding}">
+
+									<Grid
+										ColumnDefinitions="Auto,*,Auto"
+										Margin="{Binding Depth, Converter={StaticResource DepthIndentConverter}}">
+
+										<fa:FontAwesomeIcon
+											Grid.Column="0"
+											Width="14"
+											Height="14"
+											Margin="0,0,8,0"
+											Foreground="{Binding Color}"
+											Value="{Binding Icon}" />
+
+										<TextBlock
+											Grid.Column="1"
+											VerticalAlignment="Center"
+											Text="{Binding Name}"
+											TextTrimming="CharacterEllipsis" />
+
+										<!--  //FIx this later */ -->
+
+										<TextBlock
+											Grid.Column="2"
+											VerticalAlignment="Center"
+											FontSize="11"
+											Foreground="{DynamicResource ForegroundLeadColor}"
+											Text="{Binding DocumentCount}" />
+									</Grid>
+								</Button>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</ScrollViewer>
+			</shadui:Card>
+
+			<!--  Document list  -->
+			<Grid Grid.Column="1" RowDefinitions="Auto,*,Auto">
+				<TextBlock
+					Grid.Row="0"
+					Margin="0,0,0,8"
+					FontSize="13"
+					Foreground="{DynamicResource ForegroundLeadColor}"
+					Text="{Binding Breadcrumb}" />
+
+				<ScrollViewer Grid.Row="1">
+					<ItemsControl ItemsSource="{Binding Documents}">
+						<ItemsControl.ItemsPanel>
+							<ItemsPanelTemplate>
+								<VirtualizingStackPanel Orientation="Vertical" />
+							</ItemsPanelTemplate>
+						</ItemsControl.ItemsPanel>
+						<ItemsControl.ItemTemplate>
+							<DataTemplate x:DataType="m:VaultDocument">
+								<shadui:Card Margin="0,0,0,8" Padding="12">
+									<Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+										<CheckBox
+											Grid.Column="0"
+											Margin="0,0,8,0"
+											VerticalAlignment="Center"
+											Command="{Binding DataContext.SelectionChangedCommand, ElementName=Root}"
+											IsChecked="{Binding IsSelected}"
+											IsVisible="{Binding DataContext.IsSelectionMode, ElementName=Root}" />
+
+										<fa:FontAwesomeIcon
+											Grid.Column="1"
+											Width="20"
+											Height="20"
+											Margin="0,0,12,0"
+											VerticalAlignment="Center"
+											Foreground="{DynamicResource ForegroundColor}"
+											Value="{Binding FileName, Converter={StaticResource DocumentIconConverter}}" />
+
+										<StackPanel Grid.Column="2" VerticalAlignment="Center">
+											<Button
+												HorizontalAlignment="Left"
+												Classes="Ghost"
+												Command="{Binding DataContext.PreviewDocumentCommand, ElementName=Root}"
+												CommandParameter="{Binding}">
+												<TextBlock FontSize="13" Text="{Binding FileName}" TextTrimming="CharacterEllipsis" />
+											</Button>
+											<StackPanel Orientation="Horizontal" Spacing="8">
+												<TextBlock
+													FontSize="11"
+													Foreground="{DynamicResource ForegroundLeadColor}"
+													Text="{Binding AddedAt, StringFormat='{}{0:MMM d, yyyy}'}" />
+												<TextBlock
+													FontSize="11"
+													Foreground="{DynamicResource ForegroundLeadColor}"
+													IsVisible="{Binding Tags.Count}"
+													Text="{Binding Tags, Converter={StaticResource JoinConverter}}" />
+											</StackPanel>
+										</StackPanel>
+
+										<Button
+											Grid.Column="3"
+											Padding="4"
+											VerticalAlignment="Center"
+											Classes="Icon"
+											Command="{Binding DataContext.ToggleFavoriteCommand, ElementName=Root}"
+											CommandParameter="{Binding}"
+											ToolTip.Tip="Toggle Favorite">
+											<Grid Width="18" Height="18" HorizontalAlignment="Center">
+												<fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" IsVisible="{Binding !IsFavorite}" Value="fa-regular fa-star" />
+												<fa:FontAwesomeIcon Foreground="Gold" IsVisible="{Binding IsFavorite}" Value="fa-solid fa-star" />
+											</Grid>
+										</Button>
+
+										<Button
+											Grid.Column="4"
+											Padding="4"
+											HorizontalAlignment="Right"
+											VerticalAlignment="Center"
+											Classes="Icon Ghost">
+											<fa:FontAwesomeIcon
+												Width="18"
+												Height="18"
+												Foreground="{DynamicResource ForegroundColor}"
+												Value="fa-solid fa-ellipsis-v" />
+											<Button.Flyout>
+												<MenuFlyout Placement="BottomEdgeAlignedRight">
+													<MenuItem
+														Command="{Binding DataContext.PreviewDocumentCommand, ElementName=Root}"
+														CommandParameter="{Binding}"
+														Header="Preview" />
+													<MenuItem
+														Command="{Binding DataContext.EditDocumentCommand, ElementName=Root}"
+														CommandParameter="{Binding}"
+														Header="Edit"
+														IsVisible="{Binding !IsDeleted}" />
+													<Separator IsVisible="{Binding !IsDeleted}" />
+													<MenuItem
+														Command="{Binding DataContext.ConfirmDeleteDocumentCommand, ElementName=Root}"
+														CommandParameter="{Binding}"
+														Header="Move to Trash"
+														IsVisible="{Binding !IsDeleted}" />
+													<MenuItem
+														Command="{Binding DataContext.RestoreDocumentCommand, ElementName=Root}"
+														CommandParameter="{Binding}"
+														Header="Restore"
+														IsVisible="{Binding IsDeleted}" />
+													<MenuItem
+														Command="{Binding DataContext.ConfirmPermanentlyDeleteCommand, ElementName=Root}"
+														CommandParameter="{Binding}"
+														Header="Delete Permanently"
+														IsVisible="{Binding IsDeleted}">
+														<MenuItem.Icon>
+															<fa:FontAwesomeIcon Foreground="Coral" Value="fa-solid fa-trash" />
+														</MenuItem.Icon>
+													</MenuItem>
+												</MenuFlyout>
+											</Button.Flyout>
+										</Button>
+									</Grid>
+								</shadui:Card>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</ScrollViewer>
+
+				<TextBlock
+					Grid.Row="2"
+					Margin="0,8,0,0"
+					FontSize="12"
+					Foreground="{DynamicResource ForegroundLeadColor}"
+					Text="{Binding Documents.Count, StringFormat='{}{0} document(s)'}" />
+			</Grid>
+		</Grid>
+	</Grid>
+</UserControl>

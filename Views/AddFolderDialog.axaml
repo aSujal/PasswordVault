@@ -1,0 +1,66 @@
+<UserControl
+	x:Class="PasswordVault.Views.AddFolderDialog"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:converters="using:PasswordVault.Converters"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
+	xmlns:m="using:PasswordVault.Models"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+	xmlns:vm="using:PasswordVault.ViewModels"
+	x:Name="Root"
+	d:DesignHeight="350"
+	d:DesignWidth="400"
+	x:DataType="vm:AddFolderDialogViewModel"
+	mc:Ignorable="d">
+	<StackPanel Width="400" Margin="24" Spacing="16">
+		<TextBlock Classes="h4" Text="{Binding DialogTitle}" />
+
+		<StackPanel Spacing="8">
+			<Label Content="Name" Target="NameBox" />
+			<TextBox
+				Name="NameBox"
+				PlaceholderText="e.g. Personal"
+				Text="{Binding Name}" />
+		</StackPanel>
+
+		<StackPanel Spacing="8">
+			<Label Content="Color" />
+			<ColorPicker
+				HorizontalAlignment="Stretch"
+				shadui:ControlAssist.Hint="Pick a color"
+				Color="{Binding SelectedColor, Converter={x:Static converters:StringToColorConverter.Instance}, Mode=TwoWay}" />
+		</StackPanel>
+
+		<StackPanel Spacing="8">
+			<Label Content="Parent Folder" />
+			<ComboBox
+				HorizontalAlignment="Stretch"
+				ItemsSource="{Binding AvailableParents}"
+				PlaceholderText="(Root)"
+				SelectedItem="{Binding SelectedParent, Mode=TwoWay}">
+				<ComboBox.ItemTemplate>
+					<DataTemplate x:DataType="m:DocumentFolder">
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<fa:FontAwesomeIcon Foreground="{Binding Color}" Value="fa-solid fa-folder" />
+							<TextBlock Foreground="{Binding Color}" Text="{Binding Name}" />
+						</StackPanel>
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+		</StackPanel>
+
+		<StackPanel
+			Margin="0,10,0,0"
+			HorizontalAlignment="Right"
+			Orientation="Horizontal"
+			Spacing="8">
+			<Button Classes="Destructive" Command="{Binding CancelCommand}">Cancel</Button>
+			<Button
+				Classes="Primary"
+				Command="{Binding SubmitCommand}"
+				Content="{Binding SubmitButtonText}" />
+		</StackPanel>
+	</StackPanel>
+</UserControl>

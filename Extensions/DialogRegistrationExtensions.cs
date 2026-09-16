@@ -19,6 +19,9 @@ public static class DialogRegistrationExtensions
         dialogService.Register<AddCategoryDialog, AddCategoryDialogViewModel>();
         dialogService.Register<ManageCategoriesDialog, ManageCategoriesViewModel>();
         dialogService.Register<ImportMappingDialog, ImportMappingViewModel>();
+        dialogService.Register<EditDocumentDialog, EditDocumentDialogViewModel>();
+        dialogService.Register<AddFolderDialog, AddFolderDialogViewModel>();
+        dialogService.Register<DocumentPreviewDialog, DocumentPreviewViewModel>();
 
         return service;
     }

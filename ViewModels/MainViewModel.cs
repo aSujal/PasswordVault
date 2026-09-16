@@ -56,11 +56,13 @@ public partial class MainViewModel : ViewModelBase
     public DashboardViewModel DashboardVM { get; }
     public SettingsViewModel SettingsVM { get; }
     public SyncViewModel SyncVM { get; }
+    public DocumentListViewModel DocumentListVM { get; }
 
     public ICommand NavigateToPasswordsCommand { get; }
     public ICommand NavigateToDashboardCommand { get; }
     public ICommand NavigateToSettingsCommand { get; }
     public ICommand NavigateToSyncCommand { get; }
+    public ICommand NavigateToDocumentsCommand { get; }
     public ICommand LockCommand { get; }
     public ICommand LoginCommand { get; }
 
@@ -80,6 +82,7 @@ public partial class MainViewModel : ViewModelBase
         DashboardVM = provider.GetRequiredService<DashboardViewModel>();
         SettingsVM = provider.GetRequiredService<SettingsViewModel>();
         SyncVM = provider.GetRequiredService<SyncViewModel>();
+        DocumentListVM = provider.GetRequiredService<DocumentListViewModel>();
 
         Title = "Password Vault";
 
@@ -87,6 +90,7 @@ public partial class MainViewModel : ViewModelBase
         NavigateToDashboardCommand = new RelayCommand(() => NavigateTo(DashboardVM));
         NavigateToSettingsCommand = new RelayCommand(() => NavigateTo(SettingsVM));
         NavigateToSyncCommand = new RelayCommand(() => NavigateTo(SyncVM));
+        NavigateToDocumentsCommand = new RelayCommand(() => NavigateTo(DocumentListVM));
 
         LockCommand = new AsyncRelayCommand(LockApplicationAsync);
         LoginCommand = new AsyncRelayCommand(HandleLoginAsync);

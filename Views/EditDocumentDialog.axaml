@@ -1,0 +1,95 @@
+<UserControl
+	x:Class="PasswordVault.Views.EditDocumentDialog"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
+	xmlns:m="using:PasswordVault.Models"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="using:PasswordVault.ViewModels"
+	x:Name="Root"
+	d:DesignHeight="450"
+	d:DesignWidth="500"
+	x:DataType="vm:EditDocumentDialogViewModel"
+	mc:Ignorable="d">
+	<Grid Width="500" Margin="24" RowDefinitions="Auto,*,Auto">
+		<TextBlock
+			Grid.Row="0"
+			Margin="0,0,0,16"
+			Classes="h4"
+			Text="Edit Document" />
+
+		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+			<StackPanel Spacing="16">
+				<TextBox PlaceholderText="File name" Text="{Binding FileName, Mode=TwoWay}">
+					<TextBox.InnerLeftContent>
+						<fa:FontAwesomeIcon
+							Width="16"
+							Height="16"
+							Margin="8,0,0,0"
+							Foreground="{DynamicResource ForegroundColor}"
+							Opacity="0.75"
+							Value="fa-solid fa-file-lines" />
+					</TextBox.InnerLeftContent>
+				</TextBox>
+
+				<StackPanel Spacing="8">
+					<Label Content="Folder" />
+					<ComboBox
+						HorizontalAlignment="Stretch"
+						ItemsSource="{Binding Folders}"
+						PlaceholderText="(Documents root)"
+						SelectedItem="{Binding SelectedFolder, Mode=TwoWay}">
+						<ComboBox.ItemTemplate>
+							<DataTemplate x:DataType="m:DocumentFolder">
+								<StackPanel Orientation="Horizontal" Spacing="8">
+									<fa:FontAwesomeIcon Foreground="{Binding Color}" Value="fa-solid fa-folder" />
+									<TextBlock Foreground="{Binding Color}" Text="{Binding Name}" />
+								</StackPanel>
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
+				</StackPanel>
+
+				<TextBox PlaceholderText="Tags, comma separated" Text="{Binding TagsText, Mode=TwoWay}">
+					<TextBox.InnerLeftContent>
+						<fa:FontAwesomeIcon
+							Width="16"
+							Height="16"
+							Margin="8,0,0,0"
+							Foreground="{DynamicResource ForegroundColor}"
+							Opacity="0.75"
+							Value="fa-solid fa-tags" />
+					</TextBox.InnerLeftContent>
+				</TextBox>
+
+				<TextBox
+					AcceptsReturn="True"
+					PlaceholderText="Notes (optional)"
+					Text="{Binding Notes, Mode=TwoWay}">
+					<TextBox.InnerLeftContent>
+						<fa:FontAwesomeIcon
+							Width="16"
+							Height="16"
+							Margin="8,0,0,0"
+							Foreground="{DynamicResource ForegroundColor}"
+							Opacity="0.75"
+							Value="fa-solid fa-file-lines" />
+					</TextBox.InnerLeftContent>
+				</TextBox>
+
+				<CheckBox Content="Mark as Favorite" IsChecked="{Binding IsFavorite, Mode=TwoWay}" />
+			</StackPanel>
+		</ScrollViewer>
+
+		<StackPanel
+			Grid.Row="2"
+			Margin="0,16,0,0"
+			HorizontalAlignment="Right"
+			Orientation="Horizontal"
+			Spacing="8">
+			<Button Classes="Destructive" Command="{Binding CancelCommand}">Cancel</Button>
+			<Button Classes="Primary" Command="{Binding SubmitCommand}" Content="Save" />
+		</StackPanel>
+	</Grid>
+</UserControl>

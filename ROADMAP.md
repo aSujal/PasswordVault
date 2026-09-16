@@ -1,68 +1,69 @@
 # PasswordVault – Roadmap
-> Last updated: 2026-02-23
+> Last updated: 2026-08-26
 
 # Known Issues
 
-- [ ] Filters are reset after editing a Password.
+- [x] Filters are reset after editing a Password.
 - [ ] Need a quicker way to edit categories.
 
+# Quick TODO
+
+- [x] Duplicate Entry Option
 
 # Notes 
 
 > This is a work in progress. 
 > I will add more features as I go.
-> This is a cross-platform application.
-> This is a free and open source application.
-> This is a password manager.
 
 ---
 
-## Milestone 1 — Import/Export *current*
-> **Goal:** Let users move data in and out of PasswordVault.
+## Milestone 1 - Import/Export
+> Goal: Let users move data in and out of PasswordVault.
 
-- [x] `ImportExportService` — CSV export (Title, Username, Password, URL, Notes, Category, Tags)
+- [x] `ImportExportService` - CSV export (Title, Username, Password, URL, Notes, Category, Tags)
 - [x] Auto-detect CSV format by headers
 - [x] Security warning dialog before plain-text export
 
 --- 
 <!-- AI generated features / TODO Change later -->
 
-## Milestone 2 — Quick Security Wins
-> **Goal:** Low-effort features that significantly improve security posture.
+## Milestone 2 - Quick Security Wins
+> Goal: Low-effort features that significantly improve security posture.
 
-- [ ] **Auto-lock timer** — enforce the existing `AutoLockTimeMinutes` with a `DispatcherTimer`
-- [ ] **Clipboard auto-clear** — clear clipboard 30s after copying a password
-- [ ] **Master password change UI** — button in Settings, backend already exists in `AuthService`
-
----
-
-## Milestone 3 — Vault Health & Awareness
-> **Goal:** Help users understand the security state of their vault.
-
-- [ ] **Breach detection (HIBP)** — check passwords via k-anonymity API, flag compromised ones
-- [ ] **Duplicate password detection** — compare encrypted hashes, warn on reuse
-- [ ] **Password age warnings** — flag passwords not changed in 90+ days
-- [ ] **Vault health report** — aggregate score: weak + reused + old + breached
+- [ ] Auto lock timer - enforce the existing `AutoLockTimeMinutes` with a `DispatcherTimer`
+- [x] Clipboard auto-clear - clear clipboard 30s after copying a password
+- [x] Master password change in Settings 
 
 ---
 
-## Milestone 4 — UX Polish
-> **Goal:** Small features that make daily use smoother.
+## Milestone 3 - Vault Health & Awareness
+> Goal: Help users understand the security state of their vault.
 
-- [ ] **Trash / soft-delete recovery** — UI to view & restore `IsDeleted` entries
-- [ ] **Sorting options** — sort password list by name, date, strength, category
-- [ ] **Keyboard shortcuts** — Ctrl+N (new), Ctrl+F (search), Ctrl+L (lock)
-- [ ] **Favicon fetching** — show website icons next to entries
+- [ ] Breach detection (HIBP) - check passwords via k-anonymity API, flag compromised ones
+- [ ] Duplicate password detection - compare encrypted hashes, warn on reuse
+- [ ] Password age warnings - flag passwords not changed in 90+ days
+- [ ] Vault health report - aggregate score: weak + reused + old + breached
 
 ---
 
-## Milestone 5 — Advanced Features
-> **Goal:** Features that set PasswordVault apart.
+## Milestone 4 - UX Polish
+> Goal: Small features that make daily use smoother.
 
-- [ ] **TOTP / 2FA codes** — store TOTP secrets, generate live 6-digit codes
-- [ ] **Secure notes** — standalone encrypted notes (not tied to a password entry)
-- [ ] **Custom fields** — key-value pairs per entry (security questions, PINs, etc.)
-- [ ] **Biometric unlock** — Windows Hello integration (stubs already exist)
+- [ ] Trash / soft-delete recovery - UI to view & restore `IsDeleted` entries
+- [ ] Sorting options - sort password list by name, date, strength, category
+- [ ] Keyboard shortcuts - Ctrl+N (new), Ctrl+F (search), Ctrl+L (lock)
+- [ ] Favicon fetching - show website icons next to entries
+
+---
+
+## Milestone 5 - Advanced Features
+> Goal: Features that set PasswordVault apart.
+
+- [x] TOTP / 2FA codes - store a Base32 secret per entry, generate live 6-digit codes (RFC 6238), one-click copy from the password list
+- [ ] Card details - cardholder name, number, expiry, CVV and brand per entry, number/CVV encrypted like the password field
+- [ ] Secure notes - standalone encrypted notes (not tied to a password entry)
+- [ ] Custom fields - free-form key-value pairs per entry (beyond the built-in card/2FA fields)
+- [ ] Biometric unlock - Windows Hello integration (stubs already exist)
 
 ---
 
@@ -75,7 +76,6 @@
 - [ ] Multiple vaults (personal/work)
 - [ ] Emergency access (trusted contacts)
 - [ ] Dark web monitoring (paid API)
-- [ ] Attachments (encrypted file storage)
 - [ ] Nested categories / folders
 - [ ] Password expiry reminders / notifications
 
@@ -95,4 +95,7 @@
 - [x] Tags system
 - [x] Dark/light/system theme
 - [x] Database backup/restore
-- [x] Basic test scaffold (xUnit + NSubstitute)
+- [x] Configurable auto-backup - schedule (manual/on login/daily/weekly), custom save location, retention count
+- [x] AI-assisted categorization - Ollama (local), Gemini, Groq, OpenRouter, OpenAI, Anthropic, Mistral, with one click free local setup and free tier hints
+- [x] TOTP / 2FA codes per entry
+- [x] Documents - standalone or attached to an entry, nested folders, favorites, trash, search, in-app preview for images/text, guarded "open externally" with an auto-shredded temp file, Save As
