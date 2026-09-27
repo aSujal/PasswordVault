@@ -7,7 +7,6 @@
     xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
-    xmlns:toasts="clr-namespace:ShadUI.Toasts;assembly=ShadUI"
     xmlns:vm="using:PasswordVault.ViewModels"
     x:Name="Window"
     Title="PasswordVault"
@@ -27,15 +26,17 @@
         <shadui:DialogHost Manager="{Binding DialogManager}" />
     </shadui:Window.Hosts>
 
+
+
+
     <Panel>
-        <Grid ColumnDefinitions="Auto *">
+        <Grid ColumnDefinitions="Auto *" IsVisible="{Binding IsAuthenticated}">
             <shadui:Sidebar
+                Name="MainSidebar"
                 Grid.Column="0"
                 Width="220"
                 MinWidth="60"
                 Padding="{Binding #Toggler.IsChecked, Converter={x:Static converters:BooleanConverters.SidebarPadding}}"
-                Background="{DynamicResource CardBackgroundColor}"
-                BorderThickness="0,0,1,0"
                 Expanded="{Binding #Toggler.IsChecked}">
                 <shadui:Sidebar.ExpandEasing>
                     <shadui:EaseInOutBack BounceIntensity="Strong" />
@@ -119,11 +120,12 @@
         </Grid>
 
         <!--  Auth Overlay Layer  -->
-        <Grid Background="#09090B" IsVisible="{Binding !IsAuthenticated}">
+        <Grid  IsVisible="{Binding !IsAuthenticated}">
             <shadui:Card
                 Width="350"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center">
+                VerticalAlignment="Center"
+                IsVisible="{Binding !IsAppLoading}">
                 <shadui:Card.Header>
                     <StackPanel Spacing="4">
                         <fa:FontAwesomeIcon Value="fa-solid fa-shield-halved" Foreground="{DynamicResource PrimaryColor}" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,8" />
@@ -164,7 +166,7 @@
         </Grid>
 
         <!--  App Loading Overlay Layer  -->
-        <Grid Background="#09090B" IsVisible="{Binding IsAppLoading}">
+        <Grid  IsVisible="{Binding IsAppLoading}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="24">
                 <fa:FontAwesomeIcon Value="fa-solid fa-shield-halved" Foreground="{DynamicResource PrimaryColor}" FontSize="64" HorizontalAlignment="Center" />
                 <TextBlock Classes="h2" Text="Password Vault" HorizontalAlignment="Center" />

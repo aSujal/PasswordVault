@@ -32,6 +32,8 @@ public partial class PasswordListViewModel : ViewModelBase
     private readonly AiSettingsService _aiSettingsService;
     public readonly ToastManager _toastManager;
 
+    public ManageCategoriesViewModel ManageCategoriesVM { get; }
+
     [ObservableProperty]
     private FilterPopupViewModel _filterViewModel;
 
@@ -79,7 +81,8 @@ public partial class PasswordListViewModel : ViewModelBase
         ToastManager toastManager,
         FilterPopupViewModel filterPopupViewModel,
         IAiCategorizationService aiService,
-        AiSettingsService aiSettingsService
+        AiSettingsService aiSettingsService,
+        ManageCategoriesViewModel manageCategoriesViewModel
         )
     {
         _dialogManager = dialogManager;
@@ -93,6 +96,7 @@ public partial class PasswordListViewModel : ViewModelBase
         _aiSettingsService = aiSettingsService;
         _toastManager = toastManager;
         _filterViewModel = filterPopupViewModel;
+        ManageCategoriesVM = manageCategoriesViewModel;
         _authService.Authenticated += OnAuthenticated;
         _addPasswordViewModel.PasswordAddedSuccessfully += async (s, e) => await ApplyFiltersAsync();
         _addPasswordViewModel.PasswordUpdatedSuccessfully += async (s, e) => await ApplyFiltersAsync();

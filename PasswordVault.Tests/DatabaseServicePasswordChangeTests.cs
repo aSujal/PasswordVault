@@ -95,4 +95,32 @@ public class DatabaseServicePasswordChangeTests : IDisposable
         var reloadedUser = (await new DatabaseService(_cryptoService, _tempFolder).GetUserAsync())!;
         Assert.Equal(oldHash, reloadedUser.PasswordHash);
     }
+
+    // FileStorage keeps document bytes in LiteDB's "_files"/"_chunks" collections, which the
+    // generic per-collection copy loop in PrepareVaultRekeyAsync deliberately skips (see the
+    // comment there). This proves the explicit FileStorage re-upload added alongside it
+    // actually carries document bytes through a master-password change intact.
+    [Fact]
+    public async Task ChangeDatabasePasswordAsync_PreservesDocumentFileContents()
+    {
+        var db = new DatabaseService(_cryptoService, _tempFolder);
+        var documentService = new DocumentService(db);
+
+        await db.InitializeDatabaseAsync("old-master-password");
+        var originalBytes = new byte[] { 10, 20, 30, 40, 50 };
+        var document = await documentService.AddDocumentAsync(
+            new VaultDocument { FileName = "id.pdf", ContentType = "application/pdf" },
+            new MemoryStream(originalBytes));
+
+        byte[] newSalt = _cryptoService.GenerateRandomBytes(16);
+        string newHash = _cryptoService.DeriveKeyFromPassword("new-master-password", newSalt);
+        await db.ChangeDatabasePasswordAsync(newHash);
+        db.LockDatabase();
+        await db.SetEncryptionKeyAsync(Convert.FromBase64String(newHash));
+
+        using var reopened = await documentService.OpenDocumentAsync(document.Id);
+        using var ms = new MemoryStream();
+        await reopened.CopyToAsync(ms);
+        Assert.Equal(originalBytes, ms.ToArray());
+    }
 }

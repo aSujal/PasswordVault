@@ -1,0 +1,50 @@
+<!--  Glass variant: an OS acrylic window (see Styles/Glass.axaml), and
+      surfaces that are flat, near-transparent fills separated by hairlines. Inherits Dark
+      (see ThemeService.Glass), so only keys that differ live here.  -->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--  basic colors  -->
+    <Color x:Key="ForegroundColor">#EDEDEF</Color>
+    <Color x:Key="ForegroundLeadColor">#9B9BA1</Color>
+    <Color x:Key="MutedColor">#8E8E94</Color>
+    <Color x:Key="BorderColor">#1AFFFFFF</Color>
+    <Color x:Key="BorderColor60">#14FFFFFF</Color>
+    <Color x:Key="BorderColor30">#0FFFFFFF</Color>
+    <Color x:Key="OutlineColor">#1FFFFFFF</Color>
+    <Color x:Key="GhostColor">#17FFFFFF</Color>
+    <Color x:Key="GhostHoverColor">#0FFFFFFF</Color>
+    <Color x:Key="GhostHoverColor50">#08FFFFFF</Color>
+    <Color x:Key="SelectionColor">#0DFFFFFF</Color>
+
+    <!--  theme colors  -->
+    <Color x:Key="PrimaryColor">#EDEDEF</Color>
+    <Color x:Key="PrimaryColor75">#BFEDEDEF</Color>
+    <Color x:Key="PrimaryColor50">#D9EDEDEF</Color>
+    <Color x:Key="PrimaryColor10">#1AEDEDEF</Color>
+    <Color x:Key="PrimaryForegroundColor">#111113</Color>
+    <Color x:Key="SecondaryColor">#1AFFFFFF</Color>
+    <Color x:Key="SecondaryColor75">#14FFFFFF</Color>
+    <Color x:Key="SecondaryColor50">#24FFFFFF</Color>
+    <Color x:Key="SecondaryForegroundColor">#EDEDEF</Color>
+
+    <!--  popups, toasts and dialogs have no blur behind them, so they stay nearly opaque  -->
+    <Color x:Key="BusyAreaOverlayColor">#1F000000</Color>
+    <Color x:Key="CardBackgroundColor">#F21C1C1F</Color>
+    <Color x:Key="DialogOverlayColor">#000000</Color>
+    <Color x:Key="DialogBackgroundColor">#F719191C</Color>
+    <Color x:Key="TitleBarBackgroundColor">Transparent</Color>
+    <Color x:Key="WindowBackgroundColor">#0C0A0B</Color>
+    <Color x:Key="WindowButtonHoverColor">#14FFFFFF</Color>
+    <Color x:Key="SidebarBackgroundColor">Transparent</Color>
+    <Color x:Key="SwitchBackgroundColor">#29FFFFFF</Color>
+    <Color x:Key="TabItemSelectedColor">#1FFFFFFF</Color>
+    <Color x:Key="TabItemsBackgroundColor">#0DFFFFFF</Color>
+    <Color x:Key="LockScreenBackgroundColor">Transparent</Color>
+
+    <!--  glass-only surfaces, used by Styles/Glass.axaml and MainWindow  -->
+    <Color x:Key="GlassSurfaceColor">#0AFFFFFF</Color>
+    <Color x:Key="GlassSidebarColor">#26000000</Color>
+
+    <CornerRadius x:Key="XlCornerRadius">12</CornerRadius>
+    <BoxShadows x:Key="Shadow">0 16 48 -12 #99000000</BoxShadows>
+</ResourceDictionary>

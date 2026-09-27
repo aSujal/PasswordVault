@@ -36,9 +36,14 @@ public partial class ManageCategoriesViewModel : ViewModelBase
         _toastManager = toastManager;
     }
 
-    public async Task InitializeAsync()
+    [RelayCommand]
+    private async Task Open()
     {
         await LoadCategoriesAsync();
+        _dialogManager.CreateDialog(this)
+            .WithMinWidth(500)
+            .Dismissible()
+            .Show();
     }
 
     private async Task LoadCategoriesAsync()

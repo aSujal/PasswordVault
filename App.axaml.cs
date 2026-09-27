@@ -35,8 +35,7 @@ public partial class App : Application
         ConfigureServices();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var themeWatcher = _serviceProvider.GetRequiredService<ThemeWatcher>();
-            themeWatcher.Initialize();
+            _serviceProvider.GetRequiredService<ThemeService>().ApplySaved();
 
             // Clean up any decrypted document temp files a previous run left behind (crash,
             // forced kill) before anything in this run could open new ones.
@@ -76,7 +75,7 @@ public partial class App : Application
         var services = new ServiceCollection();
         services.AddSingleton<ICryptoService>(_ =>
             new CryptoService(new byte[32]));
-        services.AddSingleton<ThemeWatcher>(_ => new ThemeWatcher(Application.Current!));
+        services.AddSingleton<ThemeService>();
         services.AddSingleton<ShadUI.ToastManager>();
 
         services.AddSingleton<DatabaseService>();

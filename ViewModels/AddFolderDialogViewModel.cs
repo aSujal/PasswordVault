@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -45,7 +46,7 @@ public partial class AddFolderDialogViewModel : ViewModelBase
         ClearAllErrors();
 
         await LoadParentOptionsAsync(excludeId: null);
-        SelectedParent = AvailableParents.FirstOrDefault(f => f.Id == initialParentId);
+        SelectedParent = AvailableParents.FirstOrDefault(f => f.Id == initialParentId) ?? RootOption;
     }
 
     public async Task InitializeForEditAsync(DocumentFolder folder)
@@ -58,17 +59,37 @@ public partial class AddFolderDialogViewModel : ViewModelBase
         SubmitButtonText = "Save";
         ClearAllErrors();
 
-        // A folder can't become its own parent (or descendant - DocumentFolderService rejects
-        // that at save time), so it's excluded from the picker rather than offered and refused.
+        // A folder can't move into itself or its own subtree (DocumentFolderService rejects that
+        // at save time), so those are left out of the picker rather than offered and refused.
         await LoadParentOptionsAsync(excludeId: folder.Id);
-        SelectedParent = AvailableParents.FirstOrDefault(f => f.Id == folder.ParentId);
+        SelectedParent = AvailableParents.FirstOrDefault(f => f.Id == folder.ParentId) ?? RootOption;
     }
+
+    // Stands in for "no parent": the ComboBox can't be cleared once something is picked, so
+    // without this a nested folder could never be moved back to the top level.
+    private static readonly DocumentFolder RootOption = new() { Id = Guid.Empty, Name = "Root", Color = "#9E9E9E" };
+
+    private static Guid? ParentIdOf(DocumentFolder? parent) => parent == RootOption ? null : parent?.Id;
 
     private async Task LoadParentOptionsAsync(Guid? excludeId)
     {
         var all = await _folderService.GetAllFoldersAsync();
+        var excluded = new HashSet<Guid>();
+        if (excludeId.HasValue)
+        {
+            excluded.Add(excludeId.Value);
+            // Folders come back ordered by name, not depth, so sweep until no new descendant turns up.
+            int before;
+            do
+            {
+                before = excluded.Count;
+                foreach (var f in all.Where(f => f.ParentId.HasValue && excluded.Contains(f.ParentId.Value)))
+                    excluded.Add(f.Id);
+            } while (excluded.Count != before);
+        }
+
         AvailableParents = new ObservableCollection<DocumentFolder>(
-            all.Where(f => f.Id != excludeId));
+            all.Where(f => !excluded.Contains(f.Id)).Prepend(RootOption));
     }
 
     [RelayCommand]
@@ -86,7 +107,7 @@ public partial class AddFolderDialogViewModel : ViewModelBase
             {
                 _folderToEdit.Name = Name.Trim();
                 _folderToEdit.Color = SelectedColor;
-                _folderToEdit.ParentId = SelectedParent?.Id;
+                _folderToEdit.ParentId = ParentIdOf(SelectedParent);
                 await _folderService.UpdateFolderAsync(_folderToEdit);
             }
             else
@@ -95,7 +116,7 @@ public partial class AddFolderDialogViewModel : ViewModelBase
                 {
                     Name = Name.Trim(),
                     Color = SelectedColor,
-                    ParentId = SelectedParent?.Id,
+                    ParentId = ParentIdOf(SelectedParent),
                 });
             }
 

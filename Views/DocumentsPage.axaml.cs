@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -48,6 +49,10 @@ public partial class DocumentsPage : UserControl
             }
         }
     }
+
+    // All/Favorites/Attached/Trash are fixed views, not folders - nothing to edit or delete.
+    private void FolderContextMenu_Opening(object? sender, CancelEventArgs e) =>
+        e.Cancel = sender is ContextMenu { DataContext: DocumentFolderNode { IsPseudoNode: true } };
 
     private async void DocumentSearch_TextChanged(object? sender, TextChangedEventArgs e)
     {

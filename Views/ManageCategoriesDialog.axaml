@@ -26,7 +26,7 @@
 				</ItemsControl.ItemsPanel>
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
-						<Border Background="{DynamicResource CardBackground}" CornerRadius="6"
+						<Border Background="{DynamicResource CardBackgroundColor}" CornerRadius="6"
 							Padding="12" BorderThickness="1"
 							BorderBrush="{DynamicResource BorderColor}">
 							<Grid ColumnDefinitions="Auto, *, Auto">

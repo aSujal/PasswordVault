@@ -69,8 +69,8 @@ public partial class DocumentListViewModel : ViewModelBase
     private async Task LoadAllAsync()
     {
         _allFolders = await _folderService.GetAllFoldersAsync();
+        // Rebuilding always assigns a fresh SelectedNode, which re-runs the query.
         await BuildFolderNodesAsync();
-        await ApplyQueryAsync();
     }
 
     private async Task BuildFolderNodesAsync()
@@ -92,11 +92,13 @@ public partial class DocumentListViewModel : ViewModelBase
 
         AppendFolderChildren(nodes, parentId: null, depth: 0, countsByFolder);
 
-        var previouslySelectedFolderId = SelectedNode?.FolderId;
+        // Captured before FolderNodes changes: the ListBox clears its selection when its items do.
+        var previousFolderId = SelectedNode?.FolderId;
+        var previousKind = SelectedNode?.PseudoKind ?? DocumentPseudoKind.All;
         FolderNodes = new ObservableCollection<DocumentFolderNode>(nodes);
-        SelectedNode = previouslySelectedFolderId.HasValue
-            ? FolderNodes.FirstOrDefault(n => n.FolderId == previouslySelectedFolderId) ?? FolderNodes[0]
-            : FolderNodes.FirstOrDefault(n => n.PseudoKind == (SelectedNode?.PseudoKind ?? DocumentPseudoKind.All)) ?? FolderNodes[0];
+        SelectedNode = previousFolderId.HasValue
+            ? FolderNodes.FirstOrDefault(n => n.FolderId == previousFolderId) ?? FolderNodes[0]
+            : FolderNodes.FirstOrDefault(n => n.PseudoKind == previousKind) ?? FolderNodes[0];
 
         BulkMoveOptions = new ObservableCollection<DocumentFolder>(_allFolders);
     }
@@ -163,12 +165,9 @@ public partial class DocumentListViewModel : ViewModelBase
     [RelayCommand]
     private async Task RefreshAsync() => await LoadAllAsync();
 
-    [RelayCommand]
-    private async Task SelectNode(DocumentFolderNode? node)
+    partial void OnSelectedNodeChanged(DocumentFolderNode? value)
     {
-        if (node == null || SelectedNode == node) return;
-        SelectedNode = node;
-        await ApplyQueryAsync();
+        if (value != null) _ = ApplyQueryAsync();
     }
     //todo
     public async Task AddDocumentAsync(string filePath, Guid? folderId)

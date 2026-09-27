@@ -3,8 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using PasswordVault.Services;
 using PasswordVault.Services.Auth;
-using ShadUI;
 using Velopack;
 using Velopack.Sources;
 
@@ -12,10 +12,7 @@ namespace PasswordVault.ViewModels;
 
 public partial class SettingsViewModel : ViewModelBase
 {
-    private readonly ThemeWatcher _watcher;
-
-    // exposes the whole color set to the view
-    [ObservableProperty] private ThemeColors _currentColors;
+    private readonly ThemeService _themeService;
 
     [ObservableProperty] private string _currentVersion = "1.0.0";
     [ObservableProperty] private string _updateStatus = "Check for updates";
@@ -35,17 +32,11 @@ public partial class SettingsViewModel : ViewModelBase
 
     private UpdateInfo? _updateInfo;
 
-    public IRelayCommand SetLightCommand { get; }
-    public IRelayCommand SetDarkCommand { get; }
-    public IRelayCommand SetSystemCommand { get; }
-    public IRelayCommand ManageCategoriesCommand { get; }
-
     public ImportExportViewModel ImportExportVM { get; }
     public BackupSettingsViewModel BackupSettingsVM { get; }
     public AiSettingsViewModel AiSettingsVM { get; }
+    public ManageCategoriesViewModel ManageCategoriesVM { get; }
 
-    private readonly DialogManager _dialogManager;
-    private readonly ManageCategoriesViewModel _manageCategoriesViewModel;
     private readonly IAuthService _authService;
 
     // ── Change Master Password ───────────────────────────────────────
@@ -58,44 +49,26 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty] private bool _hasPasswordChangeResult;
 
     public SettingsViewModel(
-        ThemeWatcher watcher,
-        DialogManager dialogManager,
+        ThemeService themeService,
         ManageCategoriesViewModel manageCategoriesViewModel,
         ImportExportViewModel importExportViewModel,
         BackupSettingsViewModel backupSettingsViewModel,
         AiSettingsViewModel aiSettingsViewModel,
         IAuthService authService)
     {
-        _watcher = watcher;
-        _dialogManager = dialogManager;
-        _manageCategoriesViewModel = manageCategoriesViewModel;
+        _themeService = themeService;
+        ManageCategoriesVM = manageCategoriesViewModel;
         _authService = authService;
         ImportExportVM = importExportViewModel;
         BackupSettingsVM = backupSettingsViewModel;
         AiSettingsVM = aiSettingsViewModel;
 
-        CurrentColors = watcher.ThemeColors;
-
-        _watcher.ThemeChanged += (_, colors) => CurrentColors = colors;
-
-        SetLightCommand = new RelayCommand(() => _watcher.SwitchTheme(ThemeMode.Light));
-        SetDarkCommand = new RelayCommand(() => _watcher.SwitchTheme(ThemeMode.Dark));
-        SetSystemCommand = new RelayCommand(() => _watcher.SwitchTheme(ThemeMode.System));
-
-        ManageCategoriesCommand = new AsyncRelayCommand(OpenManageCategories);
-
         var asm = Assembly.GetExecutingAssembly();
         CurrentVersion = asm.GetName().Version?.ToString(3) ?? "1.0.0";
     }
 
-    private async Task OpenManageCategories()
-    {
-        await _manageCategoriesViewModel.InitializeAsync();
-        _dialogManager.CreateDialog(_manageCategoriesViewModel)
-            .WithMinWidth(500)
-            .Dismissible()
-            .Show();
-    }
+    [RelayCommand]
+    private void SetTheme(AppTheme theme) => _themeService.SetTheme(theme);
 
     [RelayCommand]
     private async Task ChangeMasterPassword()

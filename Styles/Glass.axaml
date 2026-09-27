@@ -1,0 +1,26 @@
+<!--  Glass styling that colors alone can't express. MainWindow carries the "Glass" class while
+      ThemeService.Glass is the active theme variant, so none of this touches Light/Dark.  -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI">
+
+    <!--  the desktop shows through, blurred by the OS, under a neutral dark tint. Lower the tint's
+          alpha for more see-through. ShadUI extends the client area into the decorations by
+          default, which makes Windows draw its flat fallback instead of acrylic; with
+          BorderOnly decorations there's no native title bar to extend into anyway.  -->
+    <Style Selector="shadui|Window.Glass">
+        <Setter Property="ExtendClientAreaToDecorationsHint" Value="False" />
+        <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
+        <Setter Property="Background" Value="#99161618" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
+    </Style>
+
+    <!--  flat surfaces: a whisper of fill and a hairline, no shadows or gradients  -->
+    <Style Selector="shadui|Window.Glass shadui|Card">
+        <Setter Property="Background" Value="{DynamicResource GlassSurfaceColor}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderColor60}" />
+    </Style>
+    <Style Selector="shadui|Window.Glass shadui|DialogHost /template/ Border#DialogContent">
+        <Setter Property="BoxShadow" Value="{DynamicResource Shadow}" />
+    </Style>
+</Styles>

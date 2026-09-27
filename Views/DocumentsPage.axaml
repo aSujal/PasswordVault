@@ -157,50 +157,63 @@
 				Grid.Column="0"
 				Margin="0,0,16,0"
 				Padding="8">
-				<ScrollViewer>
-					<ItemsControl ItemsSource="{Binding FolderNodes}">
-						<ItemsControl.ItemTemplate>
-							<DataTemplate x:DataType="vm:DocumentFolderNode">
-								<Button
-									Margin="0,1"
-									Padding="6,6"
-									HorizontalAlignment="Stretch"
-									HorizontalContentAlignment="Stretch"
-									Command="{Binding DataContext.SelectNodeCommand, ElementName=Root}"
-									CommandParameter="{Binding}">
+				<ListBox
+					Background="Transparent"
+					BorderThickness="0"
+					ItemsSource="{Binding FolderNodes}"
+					SelectedItem="{Binding SelectedNode}">
+					<ListBox.Styles>
+						<!--  ShadUI left-aligns item content, which would pin the count to the name  -->
+						<Style Selector="ListBoxItem">
+							<Setter Property="Padding" Value="8,6" />
+							<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+						</Style>
+					</ListBox.Styles>
+					<ListBox.ItemTemplate>
+						<DataTemplate x:DataType="vm:DocumentFolderNode">
+							<Grid
+								Margin="{Binding Depth, Converter={StaticResource DepthIndentConverter}}"
+								Background="Transparent"
+								ColumnDefinitions="Auto,*,Auto">
+								<Grid.ContextMenu>
+									<ContextMenu Opening="FolderContextMenu_Opening">
+										<MenuItem
+											Command="{Binding DataContext.EditFolderCommand, ElementName=Root}"
+											CommandParameter="{Binding}"
+											Header="Edit Folder..." />
+										<MenuItem
+											Command="{Binding DataContext.ConfirmDeleteFolderCommand, ElementName=Root}"
+											CommandParameter="{Binding}"
+											Header="Delete Folder..." />
+									</ContextMenu>
+								</Grid.ContextMenu>
 
-									<Grid
-										ColumnDefinitions="Auto,*,Auto"
-										Margin="{Binding Depth, Converter={StaticResource DepthIndentConverter}}">
+								<fa:FontAwesomeIcon
+									Grid.Column="0"
+									Width="14"
+									Height="14"
+									Margin="0,0,8,0"
+									Foreground="{Binding Color}"
+									Value="{Binding Icon}" />
 
-										<fa:FontAwesomeIcon
-											Grid.Column="0"
-											Width="14"
-											Height="14"
-											Margin="0,0,8,0"
-											Foreground="{Binding Color}"
-											Value="{Binding Icon}" />
+								<TextBlock
+									Grid.Column="1"
+									VerticalAlignment="Center"
+									Text="{Binding Name}"
+									TextTrimming="CharacterEllipsis" />
 
-										<TextBlock
-											Grid.Column="1"
-											VerticalAlignment="Center"
-											Text="{Binding Name}"
-											TextTrimming="CharacterEllipsis" />
-
-										<!--  //FIx this later */ -->
-
-										<TextBlock
-											Grid.Column="2"
-											VerticalAlignment="Center"
-											FontSize="11"
-											Foreground="{DynamicResource ForegroundLeadColor}"
-											Text="{Binding DocumentCount}" />
-									</Grid>
-								</Button>
-							</DataTemplate>
-						</ItemsControl.ItemTemplate>
-					</ItemsControl>
-				</ScrollViewer>
+								<TextBlock
+									Grid.Column="2"
+									Margin="8,0,0,0"
+									VerticalAlignment="Center"
+									FontSize="12"
+									Foreground="{DynamicResource ForegroundLeadColor}"
+									IsVisible="{Binding DocumentCount}"
+									Text="{Binding DocumentCount}" />
+							</Grid>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
 			</shadui:Card>
 
 			<!--  Document list  -->

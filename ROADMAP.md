@@ -9,6 +9,10 @@
 # Quick TODO
 
 - [x] Duplicate Entry Option
+- [ ] Backup completed notification
+- [ ] Quick drag and drop to add document
+- [ ] Add document dialog
+- [ ] Setting to show / hide TOTP
 
 # Notes 
 

@@ -3,30 +3,33 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:PasswordVault.Converters"
+    xmlns:services="clr-namespace:PasswordVault.Services"
     xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
     RequestedThemeVariant="Default">
 
     <Application.Resources>
-        <ResourceDictionary x:Key="AppResources">
+        <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceInclude x:Key="Light" Source="Themes/Light.axaml" />
                 <ResourceInclude x:Key="Dark" Source="Themes/Dark.axaml" />
+                <ResourceInclude x:Key="{x:Static services:ThemeService.Glass}" Source="Themes/Glass.axaml" />
             </ResourceDictionary.ThemeDictionaries>
+            <converters:JoinConverter x:Key="JoinConverter" Separator=", " />
+            <converters:TotpRingPathConverter x:Key="TotpRingPathConverter" />
+            <converters:TotpUrgentBrushConverter x:Key="TotpUrgentBrushConverter" />
+            <converters:DocumentIconConverter x:Key="DocumentIconConverter" />
+            <converters:DepthIndentConverter x:Key="DepthIndentConverter" />
+            <!--<converters:BooleonConverters x:Key="BooleonConverters" />-->
+            <x:Double x:Key="ControlContentThemeFontSize">12</x:Double>
+            <FontFamily x:Key="FontAwesomeSolid">avares://PasswordVault/Assets/Fonts/Font Awesome 7 Free-Solid-900.otf#Font Awesome 7 Free Solid</FontFamily>
+            <FontFamily x:Key="FontAwesomeRegular">avares://PasswordVault/Assets/Fonts/Font Awesome 7 Free-Regular-400.otf#Font Awesome 7 Free Regular</FontFamily>
+            <FontFamily x:Key="FontAwesomeBrands">avares://PasswordVault/Assets/Fonts/Font Awesome 7 Brands-Regular-400.otf#Font Awesome 7 Brands</FontFamily>
         </ResourceDictionary>
-        <converters:JoinConverter x:Key="JoinConverter" Separator=", " />
-        <converters:TotpRingPathConverter x:Key="TotpRingPathConverter" />
-        <converters:TotpUrgentBrushConverter x:Key="TotpUrgentBrushConverter" />
-        <converters:DocumentIconConverter x:Key="DocumentIconConverter" />
-        <converters:DepthIndentConverter x:Key="DepthIndentConverter" />
-        <!--<converters:BooleonConverters x:Key="BooleonConverters" />-->
-        <x:Double x:Key="ControlContentThemeFontSize">12</x:Double>
-        <FontFamily x:Key="FontAwesomeSolid">avares://PasswordVault/Assets/Fonts/Font Awesome 7 Free-Solid-900.otf#Font Awesome 7 Free Solid</FontFamily>
-        <FontFamily x:Key="FontAwesomeRegular">avares://PasswordVault/Assets/Fonts/Font Awesome 7 Free-Regular-400.otf#Font Awesome 7 Free Regular</FontFamily>
-        <FontFamily x:Key="FontAwesomeBrands">avares://PasswordVault/Assets/Fonts/Font Awesome 7 Brands-Regular-400.otf#Font Awesome 7 Brands</FontFamily>
     </Application.Resources>
 
     <Application.Styles>
         <shadui:ShadTheme />
+        <StyleInclude Source="Styles/Glass.axaml" />
         <!--<StyleInclude Source="avares://ThemeEditor.Controls.ColorPicker/ColorPicker.axaml" />-->
         <!--<FluentTheme/>-->
     </Application.Styles>
