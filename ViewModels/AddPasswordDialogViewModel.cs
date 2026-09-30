@@ -90,13 +90,7 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     private readonly IAuthService _authService;
     private readonly IAiCategorizationService _aiService;
 
-    // AI Suggestion State
     [ObservableProperty] private bool _isAiEnabled;
-    [ObservableProperty] private bool _isSuggestingCategory;
-    [ObservableProperty] private bool _hasAiSuggestion;
-    [ObservableProperty] private string _suggestedCategoryName = string.Empty;
-    [ObservableProperty] private string _suggestedTagsText = string.Empty;
-    private AiSuggestion? _currentSuggestion;
 
     public event EventHandler? PasswordAddedSuccessfully;
     public event EventHandler? PasswordUpdatedSuccessfully;
@@ -158,7 +152,6 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         ClearAllErrors();
 
         IsAiEnabled = _aiService.IsConfigured;
-        DismissSuggestion();
     }
 
     public async void SetPasswordToEdit(Password password)
@@ -286,56 +279,20 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
     [RelayCommand]
     private async Task SuggestCategory()
     {
-        if (IsSuggestingCategory || !_aiService.IsConfigured) return;
-
-        IsSuggestingCategory = true;
-        HasAiSuggestion = false;
-
+        if (string.IsNullOrWhiteSpace(Title)) return;
         try
         {
-            var categoryNames = Categories.Select(c => c.Name).ToList();
-            _currentSuggestion = await _aiService.SuggestCategoryAsync(
-                Title, Url, Username, categoryNames);
-
-            SuggestedCategoryName = _currentSuggestion.SuggestedCategory;
-            SuggestedTagsText = _currentSuggestion.SuggestedTags.Any()
-                ? string.Join(", ", _currentSuggestion.SuggestedTags)
-                : string.Empty;
-
-            HasAiSuggestion = true;
+            var result = await _aiService.CategorizeAsync([(Title, Url)], [.. Categories.Select(c => c.Name)]);
+            var match = Categories.FirstOrDefault(c => c.Name == result[0]);
+            if (match != null)
+                SelectedCategory = match;
+            else
+                _toastManager.CreateToast("No matching category").WithContent("None of your categories fit this entry.").ShowInfo();
         }
         catch (Exception ex)
         {
-            _toastManager.CreateToast("AI Error")
-                .WithContent($"Could not suggest category: {ex.Message}")
-                .ShowError();
+            _toastManager.CreateToast("AI Error").WithContent(ex.Message).ShowError();
         }
-        finally
-        {
-            IsSuggestingCategory = false;
-        }
-    }
-
-    [RelayCommand]
-    private void AcceptSuggestion()
-    {
-        if (!HasAiSuggestion || _currentSuggestion == null) return;
-
-        var category = Categories.FirstOrDefault(c =>
-            c.Name.Equals(_currentSuggestion.SuggestedCategory, StringComparison.OrdinalIgnoreCase));
-
-        if (category != null)
-        {
-            SelectedCategory = category;
-        }
-        DismissSuggestion();
-    }
-
-    [RelayCommand]
-    private void DismissSuggestion()
-    {
-        HasAiSuggestion = false;
-        _currentSuggestion = null;
     }
 
     [RelayCommand]

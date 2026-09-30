@@ -235,150 +235,48 @@
 
         <!--  AI Assistant Tab  -->
         <TabItem Header="AI Assistant">
-          <StackPanel Margin="0,16,0,0" Spacing="24" DataContext="{Binding AiSettingsVM}">
-
-            <!-- Provider Selection -->
-            <shadui:Card Padding="24">
-              <StackPanel Spacing="16">
-                <StackPanel Spacing="4">
-                  <TextBlock Classes="h4" Text="AI Provider" />
-                  <TextBlock Classes="p" Opacity="0.6" Text="Pick an engine for auto-categorization. Local and free-tier options are marked." />
-                </StackPanel>
-
-                <Button Classes="Primary" Command="{Binding QuickSetupOllamaCommand}" HorizontalAlignment="Left">
-                  <StackPanel Orientation="Horizontal" Spacing="8">
-                    <fa:FontAwesomeIcon Value="fa-solid fa-bolt" />
-                    <TextBlock Text="One-Click Setup: Use Free Local AI (Ollama)" />
-                  </StackPanel>
-                </Button>
-
-                <TextBlock Classes="p" FontSize="12" Opacity="0.6" Text="{Binding SelectedProviderDisplayName, StringFormat='Currently using: {0}'}" />
-
-                <ItemsControl ItemsSource="{Binding AvailableProviders}">
-                  <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                      <WrapPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                  </ItemsControl.ItemsPanel>
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="m:ProviderInfo">
-                      <Button
-                        Margin="0,0,8,8"
-                        Classes="Outline"
-                        Command="{Binding $parent[ItemsControl].((vm:AiSettingsViewModel)DataContext).SelectProviderCommand}"
-                        CommandParameter="{Binding Provider}"
-                        ToolTip.Tip="{Binding Tip}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                          <TextBlock Text="{Binding DisplayName}" />
-                          <Border
-                            Padding="6,1"
-                            VerticalAlignment="Center"
-                            Background="MediumSeaGreen"
-                            CornerRadius="4"
-                            IsVisible="{Binding IsFree}">
-                            <TextBlock FontSize="10" FontWeight="Bold" Foreground="White" Text="FREE" />
-                          </Border>
-                        </StackPanel>
-                      </Button>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <TextBlock
-                  Classes="p"
-                  FontSize="12"
-                  IsVisible="{Binding IsAiEnabled}"
-                  Opacity="0.7"
-                  Text="{Binding SelectedProviderTip}"
-                  TextWrapping="Wrap" />
+          <shadui:Card Margin="0,16,0,0" Padding="24" DataContext="{Binding AiSettingsVM}">
+            <StackPanel Spacing="16">
+              <StackPanel Spacing="4">
+                <TextBlock Classes="h4" Text="Auto-Categorization" />
+                <TextBlock Classes="p" Opacity="0.6" Text="{Binding Description}" TextWrapping="Wrap" />
               </StackPanel>
-            </shadui:Card>
 
-            <!-- Ollama Config -->
-            <shadui:Card Padding="24" IsVisible="{Binding IsOllamaSelected}">
-              <StackPanel Spacing="16">
+              <StackPanel Spacing="4">
+                <TextBlock Classes="p" FontSize="12" Opacity="0.6" Text="Provider" />
+                <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="m:ProviderInfo">
+                      <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </StackPanel>
+
+              <StackPanel IsVisible="{Binding IsEnabled}" Spacing="16">
                 <StackPanel Spacing="4">
-                  <TextBlock Classes="h4" Text="Ollama Configuration" />
-                  <TextBlock Classes="p" Opacity="0.6" Text="Local AI runs entirely on your machine. No data leaves your computer." />
+                  <TextBlock Classes="p" FontSize="12" Opacity="0.6" Text="Model" />
+                  <TextBox PlaceholderText="{Binding SelectedProvider.DefaultModel}" Text="{Binding Model}" />
                 </StackPanel>
 
-                <TextBox PlaceholderText="Endpoint (e.g. http://localhost:11434)" Text="{Binding OllamaEndpoint}" />
+                <StackPanel IsVisible="{Binding IsCloud}" Spacing="4">
+                  <TextBlock Classes="p" FontSize="12" Opacity="0.6" Text="API key" />
+                  <TextBox Classes="PasswordReveal" PasswordChar="•" Text="{Binding ApiKey}" />
+                </StackPanel>
 
-                <Grid ColumnDefinitions="*,Auto">
-                  <ComboBox Grid.Column="0" HorizontalAlignment="Stretch" ItemsSource="{Binding AvailableOllamaModels}" PlaceholderText="Select a model or type manually" SelectedItem="{Binding OllamaModelName}" />
-                  <Button Grid.Column="1" Margin="8,0,0,0" Classes="Outline" Command="{Binding RefreshOllamaModelsCommand}" ToolTip.Tip="Refresh installed models">
-                    <fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-arrows-rotate" />
+                <Grid ColumnDefinitions="*,Auto,Auto">
+                  <TextBlock Grid.Column="0" Margin="0,0,12,0" VerticalAlignment="Center" Classes="p" FontSize="12" Opacity="0.6" IsVisible="{Binding !IsStatusError}" Text="{Binding Status}" TextWrapping="Wrap" />
+                  <TextBlock Grid.Column="0" Margin="0,0,12,0" VerticalAlignment="Center" Classes="p" FontSize="12" Foreground="IndianRed" IsVisible="{Binding IsStatusError}" Text="{Binding Status}" TextWrapping="Wrap" />
+                  <Button Grid.Column="1" Margin="0,0,8,0" Classes="Outline" Command="{Binding DownloadModelCommand}" IsVisible="{Binding IsOllama}">
+                    <TextBlock Text="Download Model" />
+                  </Button>
+                  <Button Grid.Column="2" Classes="Outline" Command="{Binding TestCommand}">
+                    <TextBlock Text="Test" />
                   </Button>
                 </Grid>
-                <TextBox IsVisible="{Binding !AvailableOllamaModels.Count}" PlaceholderText="Model name (fallback if dropdown is empty)" Text="{Binding OllamaModelName}" />
               </StackPanel>
-            </shadui:Card>
-
-            <!-- Cloud Config -->
-            <shadui:Card Padding="24" IsVisible="{Binding IsCloudSelected}">
-              <StackPanel Spacing="16">
-                <StackPanel Spacing="4">
-                  <TextBlock Classes="h4" Text="Cloud AI Configuration" />
-                  <TextBlock Classes="p" Opacity="0.6" Text="Enter your API key and preferred model name." />
-                </StackPanel>
-
-                <TextBox Classes="PasswordReveal" PasswordChar="•" PlaceholderText="API Key" Text="{Binding ApiKey}" />
-                <TextBox PlaceholderText="Model name (e.g. gpt-4o-mini, gemini-2.5-flash)" Text="{Binding CloudModelName}" />
-              </StackPanel>
-            </shadui:Card>
-
-            <!-- Privacy & Behavior -->
-            <shadui:Card Padding="24" IsVisible="{Binding IsAiEnabled}">
-              <StackPanel Spacing="16">
-                <StackPanel Spacing="4">
-                  <TextBlock Classes="h4" Text="Privacy &amp; Behavior" />
-                  <TextBlock Classes="p" Opacity="0.6" Text="Select which fields are shared with the AI, and how it should behave." />
-                </StackPanel>
-
-                <!-- Cloud Warning -->
-                <Border Background="Red" Opacity="0.1" CornerRadius="8" IsVisible="{Binding IsCloudSelected}">
-                  <TextBlock Foreground="White" Padding="12" Text="WARNING: Cloud AI sends selected entry data to external servers. Passwords and notes are NEVER sent." TextWrapping="Wrap" />
-                </Border>
-
-                <CheckBox Content="Send Title (Required for good results)" IsChecked="{Binding SendTitle}" />
-                <CheckBox Content="Send URL (Highly recommended)" IsChecked="{Binding SendUrl}" />
-                <CheckBox Content="Send Username" IsChecked="{Binding SendUsername}" />
-                <Separator />
-                <CheckBox Content="Suggest Tags (in addition to category)" IsChecked="{Binding SuggestTags}" />
-              </StackPanel>
-            </shadui:Card>
-
-            <!-- Connection Test & Save -->
-            <shadui:Card Padding="24" IsVisible="{Binding IsAiEnabled}">
-              <StackPanel Spacing="16">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                  <Button Classes="Primary" Command="{Binding SaveAiSettingsCommand}" IsEnabled="{Binding !IsSavingAiSettings}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                      <fa:FontAwesomeIcon Value="fa-solid fa-floppy-disk" />
-                      <TextBlock Text="Save Settings" />
-                    </StackPanel>
-                  </Button>
-
-                  <Button Classes="Outline" Command="{Binding TestAiConnectionCommand}" IsEnabled="{Binding !IsTestingConnection}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                      <fa:FontAwesomeIcon Value="fa-solid fa-wifi" Foreground="{DynamicResource ForegroundColor}" />
-                      <TextBlock Text="Test Connection" />
-                    </StackPanel>
-                  </Button>
-                </StackPanel>
-
-                <!-- Status output -->
-                <Border Padding="12" CornerRadius="8" Background="{DynamicResource OutlineColor}" IsVisible="{Binding HasConnectionResult}">
-                  <StackPanel Orientation="Horizontal" Spacing="8">
-                    <fa:FontAwesomeIcon IsVisible="{Binding IsConnectionSuccess}" Value="fa-solid fa-check-circle" Foreground="MediumSeaGreen" />
-                    <fa:FontAwesomeIcon IsVisible="{Binding !IsConnectionSuccess}" Value="fa-solid fa-circle-xmark" Foreground="IndianRed" />
-                    <TextBlock Text="{Binding ConnectionStatus}" TextWrapping="Wrap" />
-                  </StackPanel>
-                </Border>
-              </StackPanel>
-            </shadui:Card>
-
-          </StackPanel>
+            </StackPanel>
+          </shadui:Card>
         </TabItem>
       </TabControl>
     </StackPanel>

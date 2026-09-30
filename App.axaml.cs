@@ -88,11 +88,8 @@ public partial class App : Application
         services.AddSingleton<PasswordGenerator>();
         services.AddSingleton<ICategoryService, CategoryService>();
         services.AddSingleton<IImportExportService, ImportExportService>();
-        services.AddSingleton<AiSettingsService, AiSettingsService>();
-        services.AddHttpClient("Ollama", c => c.Timeout = TimeSpan.FromSeconds(300));
-        services.AddHttpClient("CloudAi", c => c.Timeout = TimeSpan.FromSeconds(60));
-        services.AddSingleton<OllamaProvider>();
-        services.AddSingleton<CloudAiProvider>();
+        // Generous timeout: a local model may need to load into memory before its first reply
+        services.AddHttpClient("Ai", c => c.Timeout = TimeSpan.FromMinutes(5));
         services.AddSingleton<IAiCategorizationService, AiCategorizationService>();
 
         services.AddSingleton<Helper.SecureTempFileManager>();

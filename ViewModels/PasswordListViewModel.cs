@@ -29,7 +29,6 @@ public partial class PasswordListViewModel : ViewModelBase
     private readonly ICryptoService _cryptoService;
     private readonly ICategoryService _categoryService;
     private readonly IAiCategorizationService _aiService;
-    private readonly AiSettingsService _aiSettingsService;
     public readonly ToastManager _toastManager;
 
     public ManageCategoriesViewModel ManageCategoriesVM { get; }
@@ -62,7 +61,7 @@ public partial class PasswordListViewModel : ViewModelBase
     private bool _isAllSelected;
 
     // AI Categorization State
-    [ObservableProperty] private bool _isAiEnabled;
+    public bool IsAiEnabled => _aiService.IsConfigured;
     [ObservableProperty] private bool _isCategorizingPasswords;
     [ObservableProperty] private int _categorizationProgress;
 
@@ -81,7 +80,6 @@ public partial class PasswordListViewModel : ViewModelBase
         ToastManager toastManager,
         FilterPopupViewModel filterPopupViewModel,
         IAiCategorizationService aiService,
-        AiSettingsService aiSettingsService,
         ManageCategoriesViewModel manageCategoriesViewModel
         )
     {
@@ -93,7 +91,7 @@ public partial class PasswordListViewModel : ViewModelBase
         _cryptoService = cryptoService;
         _categoryService = categoryService;
         _aiService = aiService;
-        _aiSettingsService = aiSettingsService;
+        _aiService.SettingsChanged += (s, e) => OnPropertyChanged(nameof(IsAiEnabled));
         _toastManager = toastManager;
         _filterViewModel = filterPopupViewModel;
         ManageCategoriesVM = manageCategoriesViewModel;
@@ -127,7 +125,6 @@ public partial class PasswordListViewModel : ViewModelBase
 
     public void OnAuthenticated(object? sender, EventArgs e)
     {
-        IsAiEnabled = _aiService.IsConfigured;
         LoadInitialPasswordsAsync();
     }
 
@@ -582,59 +579,28 @@ public partial class PasswordListViewModel : ViewModelBase
     [RelayCommand]
     private async Task AutoCategorizeSelected()
     {
-        if (IsCategorizingPasswords || !_aiService.IsConfigured) return;
-
         var targetPasswords = Passwords.Where(p => !IsSelectionMode || p.IsSelected).ToList();
         if (targetPasswords.Count == 0) return;
 
-        var aiSettings = await _aiSettingsService.LoadAsync();
-
-        // Privacy warning for cloud providers
-        if (aiSettings.Provider != AiProvider.Ollama && !aiSettings.HasUserAcceptedCloudPrivacyWarning)
-        {
-            _dialogManager.CreateDialog("Privacy Warning",
-                "You are using a Cloud AI provider. Title and URL of the selected entries will be sent to the AI. Passwords and Notes are NEVER sent.\n\nDo you want to continue?")
-                .WithPrimaryButton("Continue", async () =>
-                {
-                    aiSettings.HasUserAcceptedCloudPrivacyWarning = true;
-                    await _aiSettingsService.SaveAsync(aiSettings);
-                    await PerformCategorization(targetPasswords);
-                })
-                .WithCancelButton("Cancel")
-                .Show();
-
-            return;
-        }
-
-        await PerformCategorization(targetPasswords);
-    }
-
-    private async Task PerformCategorization(List<Password> targetPasswords)
-    {
         IsCategorizingPasswords = true;
         CategorizationProgress = 0;
         try
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
-            var categoryNames = categories.Select(c => c.Name).ToList();
-
-            var results = await _aiService.BulkSuggestAsync(
-                targetPasswords,
-                categoryNames,
+            var results = await _aiService.CategorizeAsync(
+                [.. targetPasswords.Select(p => (p.Title, p.Url))],
+                [.. categories.Select(c => c.Name)],
                 progress => CategorizationProgress = progress);
 
             int updatedCount = 0;
-            foreach (var (pw, suggestion) in results)
+            for (int i = 0; i < targetPasswords.Count; i++)
             {
-                var match = categories.FirstOrDefault(c =>
-                    c.Name.Equals(suggestion.SuggestedCategory, StringComparison.OrdinalIgnoreCase));
+                var match = categories.FirstOrDefault(c => c.Name == results[i]);
+                if (match == null || targetPasswords[i].Category?.Id == match.Id) continue;
 
-                if (match != null && (pw.Category == null || pw.Category.Id != match.Id))
-                {
-                    pw.Category = match;
-                    await _passwordService.UpdatePasswordAsync(pw);
-                    updatedCount++;
-                }
+                targetPasswords[i].Category = match;
+                await _passwordService.UpdatePasswordAsync(targetPasswords[i]);
+                updatedCount++;
             }
 
             if (IsSelectionMode)
@@ -646,7 +612,7 @@ public partial class PasswordListViewModel : ViewModelBase
             await RefreshAsync();
 
             _toastManager.CreateToast("AI Categorization Complete")
-                .WithContent($"Updated categories for {updatedCount} entries.")
+                .WithContent($"Updated categories for {updatedCount} of {targetPasswords.Count} entries.")
                 .ShowSuccess();
         }
         catch (Exception ex)
@@ -658,7 +624,6 @@ public partial class PasswordListViewModel : ViewModelBase
         finally
         {
             IsCategorizingPasswords = false;
-            CategorizationProgress = 0;
         }
     }
 }
