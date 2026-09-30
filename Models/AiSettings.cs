@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace PasswordVault.Models;
 
@@ -10,26 +11,30 @@ public enum AiProvider
     Gemini = 3,
     Anthropic = 4,
     Groq = 5,
-    Mistral = 6,
-    OpenRouter = 7
+    Mistral = 6
 }
 
-
-public record ProviderInfo(AiProvider Provider, string DisplayName, string DefaultModel, bool IsFree, string Tip);
+/// <summary>
+/// Every provider is called through its OpenAI-compatible chat completions endpoint.
+/// </summary>
+public record ProviderInfo(AiProvider Provider, string Name, string Endpoint, string DefaultModel);
 
 public static class ProviderCatalog
 {
+    public const string OllamaHost = "http://localhost:11434";
+
     public static readonly ProviderInfo[] All =
     [
-        new(AiProvider.Ollama, "Ollama (Local)", "llama3.2:3b", true, "100% free, runs on your machine, nothing leaves your PC"),
-        new(AiProvider.Groq, "Groq", "openai/gpt-oss-120b", false, "Free tier with very fast responses"),
-        new(AiProvider.Gemini, "Google Gemini", "gemini-2.5-flash", false, "Generous free tier"),
-        new(AiProvider.OpenAI, "OpenAI", "gpt-4o-mini", false, "Paid, pay-as-you-go"),
-        new(AiProvider.Anthropic, "Anthropic", "claude-haiku-4-5", false, "Paid, pay-as-you-go"),
-        new(AiProvider.Mistral, "Mistral", "mistral-small-latest", false, "Free tier available for testing"),
+        new(AiProvider.None, "Off", "", ""),
+        new(AiProvider.Ollama, "Ollama (local)", $"{OllamaHost}/v1/chat/completions", "qwen3.5:4b"),
+        new(AiProvider.Gemini, "Google Gemini", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "gemini-2.5-flash-lite"),
+        new(AiProvider.Groq, "Groq", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-20b"),
+        new(AiProvider.OpenAI, "OpenAI", "https://api.openai.com/v1/chat/completions", "gpt-5-nano"),
+        new(AiProvider.Anthropic, "Anthropic", "https://api.anthropic.com/v1/chat/completions", "claude-haiku-4-5"),
+        new(AiProvider.Mistral, "Mistral", "https://api.mistral.ai/v1/chat/completions", "mistral-small-latest"),
     ];
 
-    public static ProviderInfo? Get(AiProvider provider) => Array.Find(All, p => p.Provider == provider);
+    public static ProviderInfo Get(AiProvider provider) => Array.Find(All, p => p.Provider == provider) ?? All[0];
 }
 
 /// <summary>
@@ -38,16 +43,9 @@ public static class ProviderCatalog
 public class AiSettings
 {
     public AiProvider Provider { get; set; } = AiProvider.None;
-    public string OllamaEndpoint { get; set; } = "http://localhost:11434";
-    public string OllamaModelName { get; set; } = "llama3.2:3b";
+    public string Model { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
-    public string CloudModelName { get; set; } = string.Empty;
-    public bool HasUserAcceptedCloudPrivacyWarning { get; set; } = false;
-    public bool SendTitle { get; set; } = true;
-    public bool SendUrl { get; set; } = true;
-    public bool SendUsername { get; set; } = false;
 
-
-    public bool AutoSuggestOnNewEntry { get; set; } = false;
-    public bool SuggestTags { get; set; } = true;
+    [JsonIgnore]
+    public string EffectiveModel => string.IsNullOrWhiteSpace(Model) ? ProviderCatalog.Get(Provider).DefaultModel : Model.Trim();
 }
