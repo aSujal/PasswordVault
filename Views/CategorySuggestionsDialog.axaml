@@ -1,0 +1,45 @@
+<UserControl
+	x:Class="PasswordVault.Views.CategorySuggestionsDialog"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="using:PasswordVault.ViewModels"
+	d:DesignHeight="450"
+	d:DesignWidth="560"
+	x:DataType="vm:CategorySuggestionsViewModel"
+	mc:Ignorable="d">
+	<StackPanel Width="560" Margin="24" Spacing="16">
+		<StackPanel Spacing="4">
+			<TextBlock Classes="h4" Text="Review Suggested Categories" />
+			<TextBlock Classes="p" Opacity="0.6" Text="{Binding Summary}" TextWrapping="Wrap" />
+		</StackPanel>
+
+		<ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
+			<ItemsControl ItemsSource="{Binding Suggestions}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate x:DataType="vm:CategorySuggestion">
+						<Grid Margin="0,4" ColumnDefinitions="Auto,*,Auto">
+							<CheckBox Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding IsSelected}" />
+							<StackPanel Grid.Column="1" Margin="8,0" VerticalAlignment="Center">
+								<TextBlock FontWeight="SemiBold" Text="{Binding Password.Title}" TextTrimming="CharacterEllipsis" />
+								<TextBlock FontSize="12" Opacity="0.6" Text="{Binding Password.Url}" TextTrimming="CharacterEllipsis" />
+							</StackPanel>
+							<StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal" Spacing="6">
+								<TextBlock Opacity="0.6" Text="{Binding CurrentCategory}" />
+								<TextBlock Opacity="0.6" Text="→" />
+								<TextBlock FontWeight="SemiBold" Text="{Binding Category}" />
+								<TextBlock VerticalAlignment="Center" FontSize="11" IsVisible="{Binding IsNew}" Opacity="0.6" Text="new" />
+							</StackPanel>
+						</Grid>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+
+		<StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+			<Button Classes="Outline" Command="{Binding CancelCommand}">Cancel</Button>
+			<Button Classes="Primary" Command="{Binding ApplyCommand}">Apply</Button>
+		</StackPanel>
+	</StackPanel>
+</UserControl>

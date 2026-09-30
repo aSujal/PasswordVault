@@ -586,21 +586,59 @@ public partial class PasswordListViewModel : ViewModelBase
         CategorizationProgress = 0;
         try
         {
-            var categories = await _categoryService.GetAllCategoriesAsync();
+            var categories = (await _categoryService.GetAllCategoriesAsync()).ToList();
             var results = await _aiService.CategorizeAsync(
                 [.. targetPasswords.Select(p => (p.Title, p.Url))],
                 [.. categories.Select(c => c.Name)],
                 progress => CategorizationProgress = progress);
 
-            int updatedCount = 0;
-            for (int i = 0; i < targetPasswords.Count; i++)
-            {
-                var match = categories.FirstOrDefault(c => c.Name == results[i]);
-                if (match == null || targetPasswords[i].Category?.Id == match.Id) continue;
+            var suggestions = targetPasswords.Zip(results)
+                .Where(x => x.Second != null && !x.Second.Equals(x.First.Category?.Name, StringComparison.OrdinalIgnoreCase))
+                .Select(x => new CategorySuggestion(x.First, x.Second!,
+                    isNew: !categories.Any(c => c.Name.Equals(x.Second, StringComparison.OrdinalIgnoreCase))))
+                .ToList();
 
-                targetPasswords[i].Category = match;
-                await _passwordService.UpdatePasswordAsync(targetPasswords[i]);
-                updatedCount++;
+            if (suggestions.Count == 0)
+            {
+                _toastManager.CreateToast("Nothing to change")
+                    .WithContent("The AI agrees with the current categories.")
+                    .ShowInfo();
+                return;
+            }
+
+            _dialogManager.CreateDialog(new CategorySuggestionsViewModel(_dialogManager, suggestions))
+                .WithMinWidth(600)
+                .WithSuccessCallback(async () => await ApplyCategorySuggestionsAsync([.. suggestions.Where(s => s.IsSelected)], categories))
+                .Dismissible()
+                .Show();
+        }
+        catch (Exception ex)
+        {
+            _toastManager.CreateToast("AI Categorization Error")
+                .WithContent(ex.Message)
+                .ShowError();
+        }
+        finally
+        {
+            IsCategorizingPasswords = false;
+        }
+    }
+
+    private async Task ApplyCategorySuggestionsAsync(List<CategorySuggestion> accepted, List<Category> categories)
+    {
+        try
+        {
+            foreach (var suggestion in accepted)
+            {
+                var category = categories.FirstOrDefault(c => c.Name.Equals(suggestion.Category, StringComparison.OrdinalIgnoreCase));
+                if (category == null)
+                {
+                    category = await _categoryService.AddCategoryAsync(new Category { Name = suggestion.Category });
+                    categories.Add(category);
+                }
+
+                suggestion.Password.Category = category;
+                await _passwordService.UpdatePasswordAsync(suggestion.Password);
             }
 
             if (IsSelectionMode)
@@ -612,7 +650,7 @@ public partial class PasswordListViewModel : ViewModelBase
             await RefreshAsync();
 
             _toastManager.CreateToast("AI Categorization Complete")
-                .WithContent($"Updated categories for {updatedCount} of {targetPasswords.Count} entries.")
+                .WithContent($"Updated categories for {accepted.Count} entries.")
                 .ShowSuccess();
         }
         catch (Exception ex)
@@ -620,10 +658,6 @@ public partial class PasswordListViewModel : ViewModelBase
             _toastManager.CreateToast("AI Categorization Error")
                 .WithContent(ex.Message)
                 .ShowError();
-        }
-        finally
-        {
-            IsCategorizingPasswords = false;
         }
     }
 }

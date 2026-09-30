@@ -22,6 +22,7 @@ public static class DialogRegistrationExtensions
         dialogService.Register<EditDocumentDialog, EditDocumentDialogViewModel>();
         dialogService.Register<AddFolderDialog, AddFolderDialogViewModel>();
         dialogService.Register<DocumentPreviewDialog, DocumentPreviewViewModel>();
+        dialogService.Register<CategorySuggestionsDialog, CategorySuggestionsViewModel>();
 
         return service;
     }
