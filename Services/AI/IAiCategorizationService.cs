@@ -17,7 +17,8 @@ public interface IAiCategorizationService
     void SaveSettings(AiSettings settings);
 
     /// <summary>
-    /// Returns the best matching category name for each entry, or null where none fits.
+    /// Returns a category name for each entry: an existing one where it fits, otherwise a newly
+    /// proposed name (not created here), or null if the model couldn't tell what the entry is.
     /// Only titles and URLs are sent to the provider.
     /// </summary>
     Task<string?[]> CategorizeAsync(

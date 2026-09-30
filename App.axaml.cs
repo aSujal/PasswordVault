@@ -122,6 +122,7 @@ public partial class App : Application
         services.AddSingleton<SettingsPage>();
         services.AddSingleton<SyncPage>();
         services.AddTransient<ImportMappingDialog>();
+        services.AddTransient<CategorySuggestionsDialog>();
         services.AddSingleton<DocumentsPage>();
         services.AddSingleton<EditDocumentDialog>();
         services.AddSingleton<AddFolderDialog>();

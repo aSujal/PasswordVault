@@ -204,8 +204,9 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         var categories = await _categoryService.GetAllCategoriesAsync();
         Categories = new ObservableCollection<Category>(categories);
 
-        // Set default category if available
-        SelectedCategory = Categories.FirstOrDefault(c => c.Name == "Uncategorized") ?? Categories.FirstOrDefault();
+        // Keep the current choice across reloads; CategoriesChanged reloads can land after a new category is selected
+        SelectedCategory = Categories.FirstOrDefault(c => c.Id == SelectedCategory?.Id)
+            ?? Categories.FirstOrDefault(c => c.Name == "Uncategorized") ?? Categories.FirstOrDefault();
     }
 
     private void EvaluatePasswordStrength()
@@ -282,16 +283,36 @@ public partial class AddPasswordDialogViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(Title)) return;
         try
         {
-            var result = await _aiService.CategorizeAsync([(Title, Url)], [.. Categories.Select(c => c.Name)]);
-            var match = Categories.FirstOrDefault(c => c.Name == result[0]);
-            if (match != null)
+            var suggested = (await _aiService.CategorizeAsync([(Title, Url)], [.. Categories.Select(c => c.Name)]))[0];
+            var match = Categories.FirstOrDefault(c => c.Name.Equals(suggested, StringComparison.OrdinalIgnoreCase));
+
+            if (suggested == null)
+                _toastManager.CreateToast("No suggestion").WithContent("The AI couldn't tell what this entry is.").ShowInfo();
+            else if (match != null)
                 SelectedCategory = match;
             else
-                _toastManager.CreateToast("No matching category").WithContent("None of your categories fit this entry.").ShowInfo();
+                _dialogManager.CreateDialog("New Category Suggested", $"None of your categories fit, so the AI suggests a new one: \"{suggested}\". Create it for this entry?")
+                    .WithPrimaryButton("Create", async () => await CreateSuggestedCategoryAsync(suggested))
+                    .WithCancelButton("Cancel")
+                    .Show();
         }
         catch (Exception ex)
         {
             _toastManager.CreateToast("AI Error").WithContent(ex.Message).ShowError();
+        }
+    }
+
+    private async Task CreateSuggestedCategoryAsync(string name)
+    {
+        try
+        {
+            var created = await _categoryService.AddCategoryAsync(new Category { Name = name });
+            await LoadCategoriesAsync();
+            SelectedCategory = Categories.FirstOrDefault(c => c.Id == created.Id);
+        }
+        catch (Exception ex)
+        {
+            _toastManager.CreateToast("Failed to create category").WithContent(ex.Message).ShowError();
         }
     }
 

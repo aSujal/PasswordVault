@@ -84,7 +84,11 @@ public class AiCategorizationService : IAiCategorizationService
             for (int i = 0; i < batch.Count; i++)
             {
                 var pick = picks.GetValueOrDefault((i + 1).ToString())?.Trim();
-                results[start + i] = choices.FirstOrDefault(c => c.Equals(pick, StringComparison.OrdinalIgnoreCase));
+                if (string.IsNullOrEmpty(pick) || pick.Equals("Uncategorized", StringComparison.OrdinalIgnoreCase)) continue;
+
+                var existing = choices.FirstOrDefault(c => c.Equals(pick, StringComparison.OrdinalIgnoreCase));
+                if (existing == null) choices.Add(pick); // Later batches reuse the new name instead of inventing a variant
+                results[start + i] = existing ?? pick;
             }
             onProgress?.Invoke((start + batch.Count) * 100 / entries.Count);
         }
@@ -94,8 +98,8 @@ public class AiCategorizationService : IAiCategorizationService
     private static string BuildPrompt(List<(string Title, string? Url)> entries, List<string> categories)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("Assign each password manager entry to the best matching category.");
-        sb.AppendLine($"Categories: {string.Join(", ", categories.Select(c => $"\"{c}\""))}");
+        sb.AppendLine("Assign each password manager entry to a category.");
+        sb.AppendLine($"Existing categories: {string.Join(", ", categories.Select(c => $"\"{c}\""))}");
         sb.AppendLine("Entries:");
         for (int i = 0; i < entries.Count; i++)
         {
@@ -103,14 +107,17 @@ public class AiCategorizationService : IAiCategorizationService
             sb.AppendLine(string.IsNullOrWhiteSpace(url) ? $"{i + 1}. {title}" : $"{i + 1}. {title} ({url})");
         }
         sb.AppendLine();
-        sb.Append("Reply with only a JSON object mapping each entry number to a category name copied exactly from the list, ");
-        sb.Append("or null if none fits. Example: {\"1\": \"").Append(categories.FirstOrDefault() ?? "Email").Append("\", \"2\": null}");
+        sb.AppendLine("Use an existing category whenever one fits, copying its name exactly. If none fits, invent a short new category " +
+                      "name (1-2 words, Title Case) and reuse it for similar entries. Use null only if you can't tell what the entry is.");
+        sb.Append("Reply with only a JSON object mapping each entry number to a category name. Example: {\"1\": \"")
+          .Append(categories.FirstOrDefault() ?? "Email").Append("\", \"2\": null}");
         return sb.ToString();
     }
 
     private async Task<Dictionary<string, string?>> AskAsync(string prompt, CancellationToken ct)
     {
         var provider = ProviderCatalog.Get(Settings.Provider);
+        var isLocal = Settings.Provider == AiProvider.Ollama;
         using var request = new HttpRequestMessage(HttpMethod.Post, provider.Endpoint)
         {
             Content = JsonContent.Create(new
@@ -118,8 +125,10 @@ public class AiCategorizationService : IAiCategorizationService
                 model = Settings.EffectiveModel,
                 messages = new[] { new { role = "user", content = prompt } },
                 response_format = new { type = "json_object" },
-                // Local models "think" by default, which makes each reply ~20x slower for no gain here
-                reasoning_effort = Settings.Provider == AiProvider.Ollama ? "none" : null
+                // Small local models drift off-format and misspell invented names when sampled, and "thinking"
+                // makes each reply ~20x slower. Cloud reasoning models (e.g. gpt-5) reject both settings.
+                temperature = isLocal ? 0 : (double?)null,
+                reasoning_effort = isLocal ? "none" : null
             }, options: OmitNulls)
         };
         if (!string.IsNullOrWhiteSpace(Settings.ApiKey))
