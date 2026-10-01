@@ -443,6 +443,30 @@ public partial class PasswordListViewModel : ViewModelBase
         }
     }
 
+    public Task<IEnumerable<Category>> GetCategoriesAsync() => _categoryService.GetAllCategoriesAsync();
+
+    public async Task SetCategoryAsync(Password password, Category category)
+    {
+        var previous = password.Category;
+        password.Category = category;
+        try
+        {
+            await _passwordService.UpdatePasswordAsync(password);
+            var index = Passwords.IndexOf(password);
+            if (index != -1)
+            {
+                Passwords[index] = Passwords[index];
+            }
+        }
+        catch (Exception ex)
+        {
+            password.Category = previous;
+            _toastManager.CreateToast("Categorize Failed")
+                .WithContent($"Failed to update category: {ex.Message}")
+                .ShowError();
+        }
+    }
+
     public async Task<string> GetPasswordAsync(Guid? passwordId)
     {
         if (passwordId == null) return string.Empty;

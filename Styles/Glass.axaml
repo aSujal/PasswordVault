@@ -11,7 +11,7 @@
     <Style Selector="shadui|Window.Glass">
         <Setter Property="ExtendClientAreaToDecorationsHint" Value="False" />
         <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
-        <Setter Property="Background" Value="#99161618" />
+        <Setter Property="Background" Value="#66161618" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
     </Style>
 
@@ -19,6 +19,12 @@
     <Style Selector="shadui|Window.Glass shadui|Card">
         <Setter Property="Background" Value="{DynamicResource GlassSurfaceColor}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderColor60}" />
+    </Style>
+    <!--  ...except inside flyouts: a popup is its own window with nothing blurred behind it, so
+          a see-through card there shows the page underneath straight through the text  -->
+    <Style Selector="shadui|Window.Glass FlyoutPresenter shadui|Card">
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundColor}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
     </Style>
     <Style Selector="shadui|Window.Glass shadui|DialogHost /template/ Border#DialogContent">
         <Setter Property="BoxShadow" Value="{DynamicResource Shadow}" />

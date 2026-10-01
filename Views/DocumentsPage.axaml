@@ -168,6 +168,10 @@
 							<Setter Property="Padding" Value="8,6" />
 							<Setter Property="HorizontalContentAlignment" Value="Stretch" />
 						</Style>
+						<!--  the selected row's highlight is enough; ShadUI's check mark would crowd the count  -->
+						<Style Selector="ListBoxItem:selected /template/ PathIcon#CheckSelected">
+							<Setter Property="IsVisible" Value="False" />
+						</Style>
 					</ListBox.Styles>
 					<ListBox.ItemTemplate>
 						<DataTemplate x:DataType="vm:DocumentFolderNode">
@@ -255,10 +259,14 @@
 
 										<StackPanel Grid.Column="2" VerticalAlignment="Center">
 											<Button
+												Padding="0"
 												HorizontalAlignment="Left"
+												Background="Transparent"
 												Classes="Ghost"
 												Command="{Binding DataContext.PreviewDocumentCommand, ElementName=Root}"
-												CommandParameter="{Binding}">
+												CommandParameter="{Binding}"
+												Cursor="Hand"
+												shadui:ButtonAssist.HoverBackground="Transparent">
 												<TextBlock FontSize="13" Text="{Binding FileName}" TextTrimming="CharacterEllipsis" />
 											</Button>
 											<StackPanel Orientation="Horizontal" Spacing="8">

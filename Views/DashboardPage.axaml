@@ -1,154 +1,305 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:vm="using:PasswordVault.ViewModels"
-			 xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
-			 xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="PasswordVault.Views.DashboardPage"
-			 x:DataType="vm:DashboardViewModel">
-	<Grid RowDefinitions="Auto,*" Margin="48,24" MaxWidth="1536">
-		<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,24"> 
-			<TextBlock Text="Dashboard" Classes="h2"/>
-			<Button Classes="Icon" Command="{Binding LoadDashboardDataCommand}" ToolTip.Tip="Refresh">
-					<fa:FontAwesomeIcon
-						Width="16"
-						Height="16"
-						Foreground="{DynamicResource ForegroundColor}"
-						Value="fa-solid fa-arrows-rotate" />
+<UserControl
+	x:Class="PasswordVault.Views.DashboardPage"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:fa="clr-namespace:PasswordVault.CustomIcons"
+	xmlns:m="using:PasswordVault.Models"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+	xmlns:vm="using:PasswordVault.ViewModels"
+	d:DesignHeight="900"
+	d:DesignWidth="1300"
+	x:DataType="vm:DashboardViewModel"
+	mc:Ignorable="d">
+
+	<UserControl.Styles>
+		<Style Selector="shadui|Card">
+			<Setter Property="Padding" Value="20" />
+		</Style>
+		<!--  small muted card title  -->
+		<Style Selector="TextBlock.label">
+			<Setter Property="FontSize" Value="13" />
+			<Setter Property="Foreground" Value="{DynamicResource ForegroundLeadColor}" />
+		</Style>
+		<!--  the one big number on a stat card  -->
+		<Style Selector="TextBlock.figure">
+			<Setter Property="FontSize" Value="44" />
+			<Setter Property="FontWeight" Value="Light" />
+			<Setter Property="LineHeight" Value="48" />
+		</Style>
+		<Style Selector="TextBlock.caption">
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="Foreground" Value="{DynamicResource ForegroundLeadColor}" />
+		</Style>
+		<Style Selector="fa|FontAwesomeIcon.corner">
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="Foreground" Value="{DynamicResource ForegroundLeadColor}" />
+		</Style>
+		<Style Selector="ProgressBar.thin">
+			<Setter Property="MinHeight" Value="4" />
+			<Setter Property="Height" Value="4" />
+			<Setter Property="Maximum" Value="1" />
+			<Setter Property="Background" Value="{DynamicResource BorderColor}" />
+		</Style>
+	</UserControl.Styles>
+
+	<Grid
+		MaxWidth="1536"
+		Margin="40,16"
+		RowDefinitions="Auto,*">
+		<DockPanel Margin="0,0,0,16">
+			<Button
+				VerticalAlignment="Center"
+				Classes="Icon"
+				Command="{Binding LoadDashboardDataCommand}"
+				DockPanel.Dock="Right"
+				ToolTip.Tip="Refresh">
+				<fa:FontAwesomeIcon Foreground="{DynamicResource ForegroundColor}" Value="fa-solid fa-arrows-rotate" />
 			</Button>
-		</StackPanel>
-
-		<ScrollViewer Grid.Row="1">
-			<StackPanel Spacing="24">
-				<!-- Stats Cards -->
-				<Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="16">
-					<!-- Total Passwords -->
-					<shadui:Card Grid.Column="0" Padding="20">
-						<Grid ColumnDefinitions="Auto,*">
-							<Border Grid.Column="0" Width="48" Height="48" CornerRadius="24" Background="#1A3B82F6" Margin="0,0,16,0">
-								<fa:FontAwesomeIcon Value="fa-solid fa-key" Foreground="#3B82F6" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-							</Border>
-							<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-								<TextBlock Text="Total Passwords" FontSize="13" Foreground="{DynamicResource ForegroundLeadColor}" FontWeight="SemiBold"/>
-								<TextBlock Text="{Binding TotalPasswords}" Classes="h2" Margin="0,-4,0,0"/>
-							</StackPanel>
-						</Grid>
-					</shadui:Card>
-
-					<!-- Favorites -->
-					<shadui:Card Grid.Column="1" Padding="20">
-						<Grid ColumnDefinitions="Auto,*">
-							<Border Grid.Column="0" Width="48" Height="48" CornerRadius="24" Background="#1AF59E0B" Margin="0,0,16,0">
-								<fa:FontAwesomeIcon Value="fa-solid fa-star" Foreground="#F59E0B" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-							</Border>
-							<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-								<TextBlock Text="Favorites" FontSize="13" Foreground="{DynamicResource ForegroundLeadColor}" FontWeight="SemiBold"/>
-								<TextBlock Text="{Binding FavoritePasswords}" Classes="h2" Margin="0,-4,0,0"/>
-							</StackPanel>
-						</Grid>
-					</shadui:Card>
-
-					<!-- Weak Passwords -->
-					<shadui:Card Grid.Column="2" Padding="20">
-						<Grid ColumnDefinitions="Auto,*">
-							<Border Grid.Column="0" Width="48" Height="48" CornerRadius="24" Background="#1AEF4444" Margin="0,0,16,0">
-								<fa:FontAwesomeIcon Value="fa-solid fa-triangle-exclamation" Foreground="#EF4444" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-							</Border>
-							<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-								<TextBlock Text="Weak Passwords" FontSize="13" Foreground="{DynamicResource ForegroundLeadColor}" FontWeight="SemiBold"/>
-								<TextBlock Text="{Binding WeakPasswords}" Classes="h2" Margin="0,-4,0,0"/>
-							</StackPanel>
-						</Grid>
-					</shadui:Card>
-
-					<!-- Categories -->
-					<shadui:Card Grid.Column="3" Padding="20">
-						<Grid ColumnDefinitions="Auto,*">
-							<Border Grid.Column="0" Width="48" Height="48" CornerRadius="24" Background="#1A10B981" Margin="0,0,16,0">
-								<fa:FontAwesomeIcon Value="fa-solid fa-folder-open" Foreground="#10B981" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-							</Border>
-							<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-								<TextBlock Text="Categories" FontSize="13" Foreground="{DynamicResource ForegroundLeadColor}" FontWeight="SemiBold"/>
-								<TextBlock Text="{Binding TotalCategories}" Classes="h2" Margin="0,-4,0,0"/>
-							</StackPanel>
-						</Grid>
-					</shadui:Card>
-				</Grid>
-
-				<!-- Recent Passwords and Category Stats -->
-				<Grid ColumnDefinitions="2*,*" ColumnSpacing="16">
-					<!-- Recent Passwords -->
-					<shadui:Card Grid.Column="0" Padding="20">
-						<StackPanel Spacing="16">
-							<TextBlock Text="Recent Passwords" Classes="h3"/>
-							<ItemsControl ItemsSource="{Binding RecentPasswords}">
-								<ItemsControl.ItemTemplate>
-									<DataTemplate>
-										<Border BorderBrush="{DynamicResource BorderColor}"
-												BorderThickness="0,0,0,1"
-												Padding="0,8">
-											<Grid ColumnDefinitions="Auto,*,Auto">
-												<fa:FontAwesomeIcon Grid.Column="0"
-														Value="{Binding Category.Icon}"
-														Foreground="{Binding Category.Color}"
-														FontSize="20"
-														Margin="0,0,12,0"/>
-												<StackPanel Grid.Column="1">
-													<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-													<TextBlock Text="{Binding Username}"
-															   FontSize="12"
-															   Foreground="{DynamicResource ForegroundLeadColor}"/>
-												</StackPanel>
-												<TextBlock Grid.Column="2"
-														   Text="{Binding CreatedAt, StringFormat='{}{0:MMM d}'}"
-														   FontSize="11"
-														   Foreground="{DynamicResource ForegroundLeadColor}"
-														   VerticalAlignment="Center"/>
-											</Grid>
-										</Border>
-									</DataTemplate>
-								</ItemsControl.ItemTemplate>
-							</ItemsControl>
-						</StackPanel>
-					</shadui:Card>
-
-					<!-- Category Distribution -->
-					<shadui:Card Grid.Column="1" Padding="20">
-						<StackPanel Spacing="16">
-							<TextBlock Text="Categories" Classes="h3"/>
-							<ItemsControl ItemsSource="{Binding CategoryStats}">
-								<ItemsControl.ItemTemplate>
-									<DataTemplate>
-										<Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
-											<fa:FontAwesomeIcon Grid.Column="0"
-													Value="{Binding Category.Icon}"
-													Foreground="{Binding Category.Color}"
-													FontSize="18"
-													Margin="0,0,8,0"/>
-											<TextBlock Grid.Column="1"
-													   Text="{Binding Category.Name}"
-													   VerticalAlignment="Center"/>
-											<Border Grid.Column="2"
-													Background="{Binding Category.Color}"
-													CornerRadius="10"
-													Padding="8,4"
-													MinWidth="30">
-												<TextBlock Text="{Binding PasswordCount}"
-													Foreground="White"
-													HorizontalAlignment="Center"
-													FontWeight="SemiBold"
-													FontSize="12"/>
-											</Border>
-										</Grid>
-									</DataTemplate>
-								</ItemsControl.ItemTemplate>
-							</ItemsControl>
-						</StackPanel>
-					</shadui:Card>
-				</Grid>
+			<StackPanel Spacing="2">
+				<TextBlock Classes="label" Text="{Binding Today}" />
+				<TextBlock Classes="h2" Text="Dashboard" />
 			</StackPanel>
+		</DockPanel>
+
+		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+			<Grid
+				ColumnDefinitions="*,*,*,*"
+				ColumnSpacing="16"
+				RowDefinitions="Auto,Auto,Auto"
+				RowSpacing="16">
+
+				<!--  Vault health  -->
+				<shadui:Card
+					Grid.Row="0"
+					Grid.RowSpan="2"
+					Grid.Column="0"
+					Grid.ColumnSpan="2">
+					<Grid RowDefinitions="Auto,*">
+						<TextBlock Classes="label" Text="Vault health" />
+						<fa:FontAwesomeIcon HorizontalAlignment="Right" VerticalAlignment="Top" Classes="corner" Value="fa-solid fa-shield" />
+
+						<Grid
+							Grid.Row="1"
+							Margin="0,20,0,0"
+							VerticalAlignment="Center"
+							ColumnDefinitions="Auto,*"
+							ColumnSpacing="36">
+							<Panel Width="160" Height="160">
+								<Ellipse
+									Stroke="{DynamicResource BorderColor}"
+									StrokeThickness="10" />
+								<Arc
+									Margin="5"
+									StartAngle="-90"
+									Stroke="{Binding HealthColor}"
+									StrokeLineCap="Round"
+									StrokeThickness="10"
+									SweepAngle="{Binding HealthSweep}" />
+								<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+									<TextBlock
+										HorizontalAlignment="Center"
+										FontSize="44"
+										FontWeight="Light"
+										Text="{Binding HealthScore, StringFormat='{}{0}%'}" />
+									<TextBlock
+										HorizontalAlignment="Center"
+										Classes="caption"
+										Text="strong &amp; unique" />
+								</StackPanel>
+							</Panel>
+
+							<StackPanel
+								Grid.Column="1"
+								VerticalAlignment="Center"
+								Spacing="14">
+								<TextBlock
+									FontSize="20"
+									FontWeight="SemiBold"
+									Text="{Binding HealthLabel}" />
+								<Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+									<TextBlock Classes="caption" FontSize="13" Text="Strong and unique" />
+									<TextBlock Grid.Column="1" FontSize="13" Text="{Binding HealthyPasswords}" />
+									<TextBlock Grid.Row="1" Classes="caption" FontSize="13" Text="Weak" />
+									<TextBlock Grid.Row="1" Grid.Column="1" FontSize="13" Text="{Binding WeakPasswords}" />
+									<TextBlock Grid.Row="2" Classes="caption" FontSize="13" Text="Reused" />
+									<TextBlock Grid.Row="2" Grid.Column="1" FontSize="13" Text="{Binding ReusedPasswords}" />
+								</Grid>
+							</StackPanel>
+						</Grid>
+					</Grid>
+				</shadui:Card>
+
+				<!--  Passwords  -->
+				<shadui:Card Grid.Row="0" Grid.Column="2">
+					<Panel>
+						<fa:FontAwesomeIcon HorizontalAlignment="Right" VerticalAlignment="Top" Classes="corner" Value="fa-solid fa-key" />
+						<StackPanel Spacing="10">
+							<TextBlock Classes="label" Text="Passwords" />
+							<TextBlock Classes="figure" Text="{Binding TotalPasswords}" />
+							<TextBlock Classes="caption" Text="{Binding FavoritePasswords, StringFormat='{}{0} favorites'}" />
+						</StackPanel>
+					</Panel>
+				</shadui:Card>
+
+				<!--  Two-factor coverage  -->
+				<shadui:Card
+					Grid.Row="0"
+					Grid.RowSpan="2"
+					Grid.Column="3">
+					<Grid RowDefinitions="Auto,*,Auto">
+						<fa:FontAwesomeIcon HorizontalAlignment="Right" VerticalAlignment="Top" Classes="corner" Value="fa-solid fa-user-shield" />
+						<StackPanel Spacing="10">
+							<TextBlock Classes="label" Text="Two-factor" />
+							<StackPanel Orientation="Horizontal" Spacing="6">
+								<TextBlock Classes="figure" Text="{Binding TwoFactorCount}" />
+								<TextBlock
+									Margin="0,0,0,8"
+									VerticalAlignment="Bottom"
+									Classes="caption"
+									FontSize="14"
+									Text="{Binding TotalPasswords, StringFormat='/ {0}'}" />
+							</StackPanel>
+							<TextBlock Classes="caption" Text="{Binding TwoFactorPercent, StringFormat='{}{0}% of accounts use a one-time code'}" TextWrapping="Wrap" />
+						</StackPanel>
+						<ItemsControl Grid.Row="2" Margin="0,24,0,0" ItemsSource="{Binding TwoFactorDots}">
+							<ItemsControl.ItemsPanel>
+								<ItemsPanelTemplate>
+									<UniformGrid Columns="8" Rows="3" />
+								</ItemsPanelTemplate>
+							</ItemsControl.ItemsPanel>
+							<ItemsControl.ItemTemplate>
+								<DataTemplate x:DataType="x:Double">
+									<Ellipse
+										Width="10"
+										Height="10"
+										Margin="0,5"
+										Fill="{DynamicResource ForegroundColor}"
+										Opacity="{Binding}" />
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</Grid>
+				</shadui:Card>
+
+				<!--  Documents  -->
+				<shadui:Card Grid.Row="1" Grid.Column="2">
+					<Panel>
+						<fa:FontAwesomeIcon HorizontalAlignment="Right" VerticalAlignment="Top" Classes="corner" Value="fa-solid fa-folder-open" />
+						<StackPanel Spacing="10">
+							<TextBlock Classes="label" Text="Documents" />
+							<TextBlock Classes="figure" Text="{Binding DocumentCount}" />
+							<TextBlock Classes="caption" Text="{Binding FolderCount, StringFormat='in {0} folders'}" />
+						</StackPanel>
+					</Panel>
+				</shadui:Card>
+
+				<!--  Strength breakdown  -->
+				<shadui:Card Grid.Row="2" Grid.Column="0">
+					<StackPanel Spacing="14">
+						<TextBlock Classes="label" Text="Password strength" />
+						<ItemsControl ItemsSource="{Binding StrengthBuckets}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate x:DataType="vm:StrengthBucket">
+									<StackPanel Margin="0,0,0,10" Spacing="6">
+										<DockPanel>
+											<TextBlock
+												DockPanel.Dock="Right"
+												FontSize="13"
+												Text="{Binding Count}" />
+											<TextBlock FontSize="13" Text="{Binding Label}" />
+										</DockPanel>
+										<ProgressBar
+											Classes="thin"
+											Foreground="{Binding Color}"
+											Value="{Binding Fraction}" />
+									</StackPanel>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</StackPanel>
+				</shadui:Card>
+
+				<!--  Categories  -->
+				<shadui:Card Grid.Row="2" Grid.Column="1">
+					<StackPanel Spacing="14">
+						<TextBlock Classes="label" Text="Categories" />
+						<ItemsControl ItemsSource="{Binding CategoryStats}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate x:DataType="vm:CategoryStats">
+									<StackPanel Margin="0,0,0,10" Spacing="6">
+										<DockPanel>
+											<TextBlock
+												DockPanel.Dock="Right"
+												FontSize="13"
+												Text="{Binding PasswordCount}" />
+											<StackPanel Orientation="Horizontal" Spacing="8">
+												<fa:FontAwesomeIcon
+													FontSize="12"
+													Foreground="{Binding Category.Color}"
+													Value="{Binding Category.Icon}" />
+												<TextBlock FontSize="13" Text="{Binding Category.Name}" />
+											</StackPanel>
+										</DockPanel>
+										<ProgressBar
+											Classes="thin"
+											Foreground="{Binding Category.Color}"
+											Value="{Binding Fraction}" />
+									</StackPanel>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</StackPanel>
+				</shadui:Card>
+
+				<!--  Recently added  -->
+				<shadui:Card
+					Grid.Row="2"
+					Grid.Column="2"
+					Grid.ColumnSpan="2">
+					<StackPanel Spacing="10">
+						<TextBlock Classes="label" Text="Recently added" />
+						<ItemsControl ItemsSource="{Binding RecentPasswords}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate x:DataType="m:Password">
+									<Grid
+										Margin="0,4"
+										ColumnDefinitions="Auto,*,Auto"
+										ColumnSpacing="14">
+										<Border
+											Width="36"
+											Height="36"
+											Background="{DynamicResource GhostColor}"
+											CornerRadius="10">
+											<fa:FontAwesomeIcon
+												FontSize="16"
+												Foreground="{Binding Category.Color}"
+												Value="{Binding Category.Icon}" />
+										</Border>
+										<StackPanel Grid.Column="1" VerticalAlignment="Center">
+											<TextBlock
+												FontSize="13"
+												FontWeight="SemiBold"
+												Text="{Binding Title}"
+												TextTrimming="CharacterEllipsis" />
+											<TextBlock
+												Classes="caption"
+												Text="{Binding Username}"
+												TextTrimming="CharacterEllipsis" />
+										</StackPanel>
+										<TextBlock
+											Grid.Column="2"
+											VerticalAlignment="Center"
+											Classes="caption"
+											Text="{Binding CreatedAt, StringFormat='{}{0:MMM d}'}" />
+									</Grid>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</StackPanel>
+				</shadui:Card>
+			</Grid>
 		</ScrollViewer>
 	</Grid>
 </UserControl>

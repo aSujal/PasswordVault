@@ -1,3 +1,7 @@
+using Avalonia.Controls.Primitives;
+using Avalonia.Media;
+using PasswordVault.CustomIcons;
+using PasswordVault.Models;
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Avalonia.Markup.Xaml;
@@ -153,6 +157,31 @@ public partial class PasswordsPage : UserControl
                                   .WithDelay(2)
                                   .ShowError();
             }
+        }
+    }
+
+    private async void CategoryChip_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        try
+        {
+            if (sender is not Button { DataContext: Password password } button || DataContext is not PasswordListViewModel viewModel) return;
+
+            var flyout = new MenuFlyout { Placement = PlacementMode.BottomEdgeAlignedLeft };
+            foreach (var category in await viewModel.GetCategoriesAsync())
+            {
+                var item = new MenuItem
+                {
+                    Header = category.Name,
+                    Icon = new FontAwesomeIcon { Value = category.Icon, Width = 16, Height = 16, Foreground = new SolidColorBrush(Color.Parse(category.Color)) },
+                };
+                item.Click += async (_, _) => await viewModel.SetCategoryAsync(password, category);
+                flyout.Items.Add(item);
+            }
+            flyout.ShowAt(button);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error opening category picker: {ex.Message}");
         }
     }
 
