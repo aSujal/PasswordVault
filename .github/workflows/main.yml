@@ -26,9 +26,6 @@ jobs:
       - name: Install Velopack CLI
         run: dotnet tool install -g vpk
 
-      - name: Compile
-        run: dotnet publish PasswordVault.csproj -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -o ./publish
-
       - name: Download Previous Releases
         run: vpk download github --repoUrl "https://github.com/aSujal/PasswordVault" --outputDir ./releases
         continue-on-error: true
@@ -40,6 +37,9 @@ jobs:
           TAG_NAME="${{ github.ref_name }}"
           CLEAN_VERSION="${TAG_NAME#v}"
           echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Compile
+        run: dotnet publish PasswordVault.csproj -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:Version=${{ steps.get_version.outputs.version }} -o ./publish
 
       - name: Build Velopack Package
         run: |

@@ -12,9 +12,11 @@ namespace PasswordVault.ViewModels;
 
 public partial class SettingsViewModel : ViewModelBase
 {
+    private const string RepoUrl = "https://github.com/aSujal/PasswordVault";
+
     private readonly ThemeService _themeService;
 
-    [ObservableProperty] private string _currentVersion = "1.0.0";
+    [ObservableProperty] private string _currentVersion = string.Empty;
     [ObservableProperty] private string _updateStatus = "Check for updates";
     [ObservableProperty] private bool _isChecking;
 
@@ -63,8 +65,26 @@ public partial class SettingsViewModel : ViewModelBase
         BackupSettingsVM = backupSettingsViewModel;
         AiSettingsVM = aiSettingsViewModel;
 
-        var asm = Assembly.GetExecutingAssembly();
-        CurrentVersion = asm.GetName().Version?.ToString(3) ?? "1.0.0";
+        CurrentVersion = ResolveCurrentVersion();
+    }
+
+    // Velopack knows the installed release version; the assembly version only
+    // matches it when the build was stamped with -p:Version, so it is the fallback.
+    private static string ResolveCurrentVersion()
+    {
+        try
+        {
+            var installed = new UpdateManager(new GithubSource(RepoUrl, accessToken: null, prerelease: false)).CurrentVersion;
+            if (installed != null) return installed.ToString();
+        }
+        catch
+        {
+            // Not running from a Velopack install (e.g. dotnet run).
+        }
+
+        var informational = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        return informational?.Split('+')[0] ?? "dev";
     }
 
     [RelayCommand]
@@ -139,7 +159,7 @@ public partial class SettingsViewModel : ViewModelBase
 
         try
         {
-            var source = new GithubSource("https://github.com/aSujal/PasswordVault", accessToken: null, prerelease: false);
+            var source = new GithubSource(RepoUrl, accessToken: null, prerelease: false);
             var mgr = new UpdateManager(source);
 
             _updateInfo = await mgr.CheckForUpdatesAsync();
@@ -180,7 +200,7 @@ public partial class SettingsViewModel : ViewModelBase
 
         try
         {
-            var source = new GithubSource("https://github.com/aSujal/PasswordVault", accessToken: null, prerelease: false);
+            var source = new GithubSource(RepoUrl, accessToken: null, prerelease: false);
             var mgr = new UpdateManager(source);
 
             await mgr.DownloadUpdatesAsync(_updateInfo, (progress) =>
@@ -210,7 +230,7 @@ public partial class SettingsViewModel : ViewModelBase
 
         try
         {
-            var source = new GithubSource("https://github.com/aSujal/PasswordVault", accessToken: null, prerelease: false);
+            var source = new GithubSource(RepoUrl, accessToken: null, prerelease: false);
             var mgr = new UpdateManager(source);
             mgr.ApplyUpdatesAndRestart(_updateInfo.TargetFullRelease);
         }
